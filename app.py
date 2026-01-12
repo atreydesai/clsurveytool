@@ -203,42 +203,49 @@ def get_jsonl_content() -> str:
 
 
 def load_pending() -> dict:
-    """Load pending and in-progress entries from JSON file."""
+    """Load pending entries from JSON file."""
     if os.path.exists(PENDING_FILE):
         try:
             with open(PENDING_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Migration/Fallback for old format
-                if 'entries' in data and 'pending' not in data:
-                    return {
+                # Migration: if 'in_progress' exists, merge it back to 'pending' if desired, 
+                # or just ignore separate lists. User wants ONE pending list.
+                # Let's ensure we read 'entries' properly.
+                if 'entries' in data: # Old format
+                     return {
                         'pending': data['entries'],
-                        'in_progress': [],
                         'bibtex': data.get('bibtex', ''),
-                        'selected_idx': data.get('selected_idx'),
-                        'selected_type': 'pending'
+                        'selected_idx': data.get('selected_idx')
                     }
-                return data
+                # Current format
+                pending = data.get('pending', [])
+                in_progress = data.get('in_progress', [])
+                # Merge them if they were separate, or just return pending if we already merged.
+                # To be safe and respect "undo in progress tab", we treat everything as pending.
+                all_pending = pending + in_progress
+                
+                return {
+                    'pending': all_pending,
+                    'bibtex': data.get('bibtex', ''),
+                    'selected_idx': data.get('selected_idx')
+                }
         except (json.JSONDecodeError, IOError):
             pass
     return {
         'pending': [],
-        'in_progress': [],
         'bibtex': '',
-        'selected_idx': None,
-        'selected_type': 'pending'
+        'selected_idx': None
     }
 
 
-def save_pending(pending: list, in_progress: list, bibtex: str, selected_idx, selected_type: str):
-    """Save pending and in-progress entries to JSON file."""
+def save_pending(pending: list, bibtex: str, selected_idx):
+    """Save pending entries to JSON file."""
     try:
         with open(PENDING_FILE, 'w', encoding='utf-8') as f:
             json.dump({
                 'pending': pending,
-                'in_progress': in_progress,
                 'bibtex': bibtex,
-                'selected_idx': selected_idx,
-                'selected_type': selected_type
+                'selected_idx': selected_idx
             }, f, ensure_ascii=False, indent=2)
     except IOError as e:
         st.error(f"Error saving pending entries: {e}")
@@ -308,44 +315,62 @@ def clear_form_state():
 
 def apply_pending_ai_updates():
     """Apply pending AI updates to the current entry."""
-    if 'pending_ai_updates' in st.session_state and st.session_state.get('selected_entry_idx') is not None:
+    if 'pending_ai_updates' in st.session_state:
         updates = st.session_state.pending_ai_updates
-        idx = st.session_state.selected_entry_idx
-        etype = st.session_state.selected_entry_type
         
-        entry = None
-        if etype == 'pending':
+        # Determine target entry
+        target_entry = None
+        save_callback = None
+        
+        if st.session_state.get('selected_entry_idx') is not None:
+            idx = st.session_state.selected_entry_idx
             if idx < len(st.session_state.pending_entries):
-                entry = st.session_state.pending_entries[idx]
-        elif etype == 'in_progress':
-            if idx < len(st.session_state.in_progress_entries):
-                entry = st.session_state.in_progress_entries[idx]
-        
-        if entry:
-            # Apply updates
-            entry['linguistic_features'] = updates.get('linguistic_features', [])
-            entry['species_categories'] = [c for c in updates.get('species_categories', []) if c in SPECIES_CATEGORIES]
-            entry['computational_stages'] = [s for s in updates.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
+                target_entry = st.session_state.pending_entries[idx]
+                def save_cb():
+                    save_pending(
+                        st.session_state.pending_entries, 
+                        st.session_state.last_bibtex, 
+                        st.session_state.selected_entry_idx
+                    )
+                save_callback = save_cb
+                
+        elif st.session_state.get('editing_saved_idx') is not None:
+            # Need to fetch from file again or trust we are in a rerun context where we can't easily fetch reference?
+            # Actually, we need to load the full list to update the specific index.
+            # Ideally, valid state management would mean we update the file IMMEDIATELY.
+            # But here we are applying updates to memory first?
+            # For saved entries, we modify the record and call update_entry.
+            # We need the record relative to the file index.
+            idx = st.session_state.editing_saved_idx
+            # We need to load all records, update one, and save back.
+            all_records = []
+            if os.path.exists(DATA_FILE):
+                 try:
+                     with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            if line.strip(): all_records.append(json.loads(line))
+                 except: pass
             
-            # Specialized species: AI returns list, or string. Handle both.
+            if idx < len(all_records):
+                target_entry = all_records[idx]
+                def save_cb():
+                    update_entry(idx, target_entry)
+                save_callback = save_cb
+        
+        if target_entry:
+            # Apply updates
+            target_entry['linguistic_features'] = updates.get('linguistic_features', [])
+            target_entry['species_categories'] = [c for c in updates.get('species_categories', []) if c in SPECIES_CATEGORIES]
+            target_entry['computational_stages'] = [s for s in updates.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
+            
+            # Specialized species
             spec = updates.get('specialized_species', [])
             if isinstance(spec, str): spec = [spec]
-            entry['specialized_species'] = spec
+            target_entry['specialized_species'] = spec
 
-            # Move to In Progress if pending
-            if etype == 'pending':
-                st.session_state.pending_entries.pop(idx)
-                st.session_state.in_progress_entries.append(entry)
-                st.session_state.selected_entry_type = 'in_progress'
-                st.session_state.selected_entry_idx = len(st.session_state.in_progress_entries) - 1
-            
-            save_pending(
-                st.session_state.pending_entries, 
-                st.session_state.in_progress_entries, 
-                st.session_state.last_bibtex, 
-                st.session_state.selected_entry_idx,
-                st.session_state.selected_entry_type
-            )
+            # Auto-save immediately
+            if save_callback:
+                save_callback()
         
         # Clear the pending updates
         del st.session_state.pending_ai_updates
@@ -845,10 +870,12 @@ def init_session_state():
     if 'pending_entries' not in st.session_state:
         data = load_pending()
         st.session_state.pending_entries = data.get('pending', [])
-        st.session_state.in_progress_entries = data.get('in_progress', [])
         st.session_state.last_bibtex = data.get('bibtex', '')
         st.session_state.selected_entry_idx = data.get('selected_idx')
-        st.session_state.selected_entry_type = data.get('selected_type', 'pending')
+        # Ensure index is valid
+        if st.session_state.selected_entry_idx is not None:
+             if st.session_state.selected_entry_idx >= len(st.session_state.pending_entries):
+                 st.session_state.selected_entry_idx = None
         
     # Maintain compatibility alias if needed, or remove 'parsed_entries' usage
     # We will replace 'parsed_entries' with explicit 'pending_entries' usage.
@@ -927,7 +954,7 @@ def render_data_entry_page():
     saved_titles = set(saved_df['title'].tolist()) if not saved_df.empty else set()
     
     # === BibTeX Import Section ===
-    with st.expander("BibTeX Import", expanded=not st.session_state.pending_entries and not st.session_state.in_progress_entries):
+    with st.expander("BibTeX Import", expanded=not st.session_state.pending_entries):
         bibtex_input = st.text_area(
             "Paste your entire .bib file here:",
             height=200,
@@ -940,12 +967,19 @@ def render_data_entry_page():
             if st.button("Parse BibTeX", use_container_width=True):
                 if bibtex_input:
                     entries = parse_bibtex(bibtex_input)
+                    # Append new entries to existing pending? Or replace?
+                    # Usually parsing means importing new stuff. Let's append if there are existing ones?
+                    # Or replace? User behavior usually implies load distinct file.
+                    # But for safety, let's append if list not empty to avoid data loss, or just replace if user intends.
+                    # Given simple flow: Replace for now, user can clear first if they want.
+                    # Actually, better to Append if there are pending entries?
+                    # Let's simple Replace for typical use case (one big bib file).
+                    # User expects "Clear" to clear.
                     st.session_state.pending_entries = entries
                     st.session_state.last_bibtex = bibtex_input
                     # Reset
                     st.session_state.selected_entry_idx = None
-                    st.session_state.selected_entry_type = 'pending'
-                    save_pending(entries, st.session_state.in_progress_entries, bibtex_input, None, 'pending')
+                    save_pending(entries, bibtex_input, None)
                     if entries:
                         st.success(f"Parsed {len(entries)} entries.")
                     else:
@@ -959,7 +993,7 @@ def render_data_entry_page():
                 st.session_state.pending_entries = []
                 st.session_state.last_bibtex = ''
                 st.session_state.selected_entry_idx = None
-                save_pending([], st.session_state.in_progress_entries, '', None, 'pending')
+                save_pending([], '', None)
                 st.rerun()
         
         if st.session_state.pending_entries:
@@ -972,12 +1006,10 @@ def render_data_entry_page():
     
     # Tabs
     n_pending = len(st.session_state.pending_entries)
-    n_progress = len(st.session_state.in_progress_entries)
     n_saved = len(saved_df)
     
-    tab_pending, tab_progress, tab_saved = st.tabs([
+    tab_pending, tab_saved = st.tabs([
         f"Pending ({n_pending})", 
-        f"In Progress ({n_progress})",
         f"Saved ({n_saved})"
     ])
     
@@ -987,52 +1019,32 @@ def render_data_entry_page():
             st.info("No pending entries. Paste a .bib file above.")
         else:
             with st.container(height=300):
+                # Use same layout as Saved tab: Title/Year/Edit Button
                 for idx, entry in enumerate(st.session_state.pending_entries):
-                    title = entry.get('title', 'Untitled')[:70]
+                    col1, col2 = st.columns([6, 1])
+                    
+                    # Entry Metadata - Compact
+                    title = entry.get('title', 'Untitled')[:60]
                     year = entry.get('year', '?')
+                    journal = entry.get('journal', 'N/A')
                     
-                    is_selected = (st.session_state.selected_entry_idx == idx and 
-                                   st.session_state.selected_entry_type == 'pending')
+                    is_editing = (st.session_state.selected_entry_idx == idx)
                     
-                    if st.button(f"{title} ({year})", key=f"p_entry_{idx}", use_container_width=True, 
-                                 type="primary" if is_selected else "secondary"):
-                        st.session_state.selected_entry_idx = idx
-                        st.session_state.selected_entry_type = 'pending'
-                        st.session_state.ai_result = None
-                        clear_form_state()
-                        save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, idx, 'pending')
-                        st.rerun()
-
-    # --- IN PROGRESS TAB ---
-    with tab_progress:
-        if not st.session_state.in_progress_entries:
-            st.info("No entries in progress.")
-        else:
-            with st.container(height=300):
-                for idx, entry in enumerate(st.session_state.in_progress_entries):
-                    title = entry.get('title', 'Untitled')[:70]
-                    year = entry.get('year', '?')
-                    
-                    is_selected = (st.session_state.selected_entry_idx == idx and 
-                                   st.session_state.selected_entry_type == 'in_progress')
-                    
-                    col1, col2 = st.columns([5, 1])
                     with col1:
-                        if st.button(f"{title} ({year})", key=f"ip_entry_{idx}", use_container_width=True, 
-                                     type="primary" if is_selected else "secondary"):
-                            st.session_state.selected_entry_idx = idx
-                            st.session_state.selected_entry_type = 'in_progress'
-                            st.session_state.ai_result = None
-                            clear_form_state()
-                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, idx, 'in_progress')
-                            st.rerun()
+                        # Single line if possible
+                        st.markdown(f"**{title}** ({year}) — _{journal}_")
+                    
                     with col2:
-                        if st.button("🗑️", key=f"del_ip_{idx}"):
-                            st.session_state.in_progress_entries.pop(idx)
-                            if is_selected:
-                                st.session_state.selected_entry_idx = None
-                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx, st.session_state.selected_entry_type)
-                            st.rerun()
+                       # Edit button
+                       if is_editing:
+                           st.button("Editing", key=f"p_editing_{idx}", disabled=True, use_container_width=True)
+                       else:
+                           if st.button("Edit", key=f"p_edit_{idx}", type="secondary", use_container_width=True):
+                               st.session_state.selected_entry_idx = idx
+                               st.session_state.ai_result = None
+                               clear_form_state()
+                               save_pending(st.session_state.pending_entries, st.session_state.last_bibtex, idx)
+                               st.rerun()
     
     with tab_saved:
         if saved_df.empty:
@@ -1078,43 +1090,69 @@ def render_data_entry_page():
     st.divider()
     
     # === Editor Section ===
+    # === Editor Section ===
+    editor_mode = None
+    editor_idx = None
+    
     if st.session_state.selected_entry_idx is not None:
-        idx = st.session_state.selected_entry_idx
-        entry_type = st.session_state.selected_entry_type
+        editor_mode = 'pending'
+        editor_idx = st.session_state.selected_entry_idx
+        # Ensure index valid
+        if editor_idx >= len(st.session_state.pending_entries):
+             st.session_state.selected_entry_idx = None
+             st.rerun()
+             return
+        current_entry = st.session_state.pending_entries[editor_idx]
         
-        # Determine source list
-        if entry_type == 'pending':
-            current_entry = st.session_state.pending_entries[idx]
-        elif entry_type == 'in_progress':
-            current_entry = st.session_state.in_progress_entries[idx]
-        elif entry_type == 'saved':
-            # For saved entries, we just view/delete in tab. 
-            # To edit, we clicked "Edit" which should have moved it or logic handled elsewhere.
-            # But currently `tab_saved` uses `editing_saved_idx`.
-            # Let's handle saved editing separately or unify.
-            # For now, focus on Pending/In Progress.
-            st.info("Select a pending or in-progress entry to edit.")
-            return
-
-        st.divider()
+    elif st.session_state.editing_saved_idx is not None:
+        editor_mode = 'saved'
+        editor_idx = st.session_state.editing_saved_idx
+        # Load from file to get mutable dict
+        # We need to find the record in file. Since index matches saved_df, and saved_df matches file order (usually).
+        # We need to be careful if user sorted/filtered.
+        # But saved_df in tab_saved logic above was loaded from load_data().
+        # load_data() reads file line by line. Index should align if no sorting/filtering happened in between?
+        # Actually filter was applied on view df!
+        # But `original_idx` was passed from iterrows(). So likely safe.
+        
+        # We must load ALL records to get the specific one by index.
+        all_records = []
+        if os.path.exists(DATA_FILE):
+             with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        try:
+                            all_records.append(json.loads(line))
+                        except: pass
+        
+        if editor_idx < len(all_records):
+            current_entry = all_records[editor_idx]
+            # Ensure affiliations migration
+            if 'affiliations' not in current_entry:
+                old_aff = {}
+                if current_entry.get('university'): old_aff['university'] = current_entry['university']
+                if current_entry.get('country'): old_aff['country'] = current_entry['country']
+                if current_entry.get('discipline'): old_aff['discipline'] = current_entry['discipline']
+                current_entry['affiliations'] = [old_aff] if old_aff else []
+        else:
+             st.session_state.editing_saved_idx = None
+             st.rerun()
+             return
+    
+    if editor_mode:
         st.subheader(f"Editing: {current_entry.get('title', 'Untitled')}")
         
         # Helper to handle updates
         def auto_save():
-            # If pending, move to in-progress
-            if st.session_state.selected_entry_type == 'pending':
-                st.session_state.pending_entries.pop(idx)
-                st.session_state.in_progress_entries.append(current_entry)
-                st.session_state.selected_entry_type = 'in_progress'
-                st.session_state.selected_entry_idx = len(st.session_state.in_progress_entries) - 1
-            
-            save_pending(
-                st.session_state.pending_entries, 
-                st.session_state.in_progress_entries, 
-                st.session_state.last_bibtex, 
-                st.session_state.selected_entry_idx,
-                st.session_state.selected_entry_type
-            )
+            if editor_mode == 'pending':
+                save_pending(
+                    st.session_state.pending_entries, 
+                    st.session_state.last_bibtex, 
+                    st.session_state.selected_entry_idx
+                )
+            elif editor_mode == 'saved':
+                # Update specific record in file
+                update_entry(editor_idx, current_entry)
         
         # --- Metadata ---
         col1, col2 = st.columns([3, 1])
@@ -1238,22 +1276,31 @@ def render_data_entry_page():
                     st.warning("Add Analysis Notes first.")
 
         with col_final:
-            if st.button("Commit to Dataset", type="primary", use_container_width=True):
-                # Save to research_data.jsonl
+            label = "Commit to Dataset" if editor_mode == 'pending' else "Save Changes"
+            if st.button(label, type="primary", use_container_width=True):
                 # Ensure we have minimum fields
                 if not current_entry.get('title') or not current_entry.get('year'):
                     st.error("Title and Year required.")
                 else:
-                    # Final clean: remove empty values
-                    current_entry['created_at'] = datetime.now().isoformat()
-                    if save_entry(current_entry):
-                        st.success("Entry committed!")
-                        # Remove from In Progress
-                        if entry_type == 'in_progress':
-                            st.session_state.in_progress_entries.pop(idx)
+                    if editor_mode == 'pending':
+                        current_entry['created_at'] = datetime.now().isoformat()
+                        if save_entry(current_entry):
+                            st.success("Entry committed!")
+                            # Remove from pending
+                            st.session_state.pending_entries.pop(editor_idx)
                             st.session_state.selected_entry_idx = None
-                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, None, 'pending')
-                        st.rerun()
+                            save_pending(st.session_state.pending_entries, st.session_state.last_bibtex, None)
+                            st.rerun()
+                    else:
+                        # For saved, we just confirm (auto-save arguably already did it, but this explicitly closes editor)
+                        # We use 'update_entry' which replaces the line.
+                        if update_entry(editor_idx, current_entry):
+                            st.success("Changes saved!")
+                            st.session_state.editing_saved_idx = None
+                            st.rerun()
+                    # Final clean: remove empty values
+                    # Handled above
+                    pass
 
         # --- Classification Widgets (Auto-save) ---
         st.markdown("**Classification**")
@@ -1308,8 +1355,8 @@ def render_data_entry_page():
             current_entry['computational_stages'] = new_stages
             auto_save()
 
-    elif st.session_state.in_progress_entries or st.session_state.pending_entries:
-         st.info("Select an entry above to start editing.")
+    elif st.session_state.pending_entries:
+         st.info("Select a pending entry to edit.")
     
     st.divider()
 
