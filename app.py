@@ -287,6 +287,34 @@ def clear_form_state():
             del st.session_state[key]
 
 
+def apply_pending_ai_updates():
+    """Apply pending AI updates to widget state if they exist."""
+    if 'pending_ai_updates' in st.session_state:
+        updates = st.session_state.pending_ai_updates
+        
+        # Update session state keys for widgets
+        # Since this runs before widgets are rendered, it is safe.
+        
+        # Linguistic features
+        new_features = updates.get('linguistic_features', [])
+        for i, feature in enumerate(LINGUISTIC_FEATURES):
+            st.session_state[f"feat_{i}"] = feature in new_features
+            
+        # Species categories
+        cats = [c for c in updates.get('species_categories', []) if c in SPECIES_CATEGORIES]
+        st.session_state["species_cat_ms"] = cats
+        
+        # Specialized species
+        st.session_state["spec_species_input"] = updates.get('specialized_species', '')
+        
+        # Computational stages
+        stages = [s for s in updates.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
+        st.session_state["comp_stages_ms"] = stages
+        
+        # Clear the pending updates
+        del st.session_state.pending_ai_updates
+
+
 def log_ai_interaction(notes: str, response_content: str, success: bool, error: str = None, metadata: dict = None):
     """Log AI interaction to a file."""
     
@@ -848,7 +876,10 @@ def render_sidebar():
 
 def render_data_entry_page():
     """Render Page 1: Data Entry & Annotation."""
-    st.header("Data Entry & Annotation")
+    # Apply any pending AI updates before rendering widgets
+    apply_pending_ai_updates()
+
+    st.title("Data Entry & Annotation")
     
     # Load saved entries
     saved_df = load_data()
@@ -1104,18 +1135,11 @@ def render_data_entry_page():
                             st.session_state.ai_result = result
                             status.update(label="Analysis complete!", state="complete", expanded=False)
                             
-                            # Manually update widget states
-                            new_features = result.get('linguistic_features', [])
-                            for i, feature in enumerate(LINGUISTIC_FEATURES):
-                                st.session_state[f"feat_{i}"] = feature in new_features
+                            st.session_state.ai_result = result
+                            status.update(label="Analysis complete!", state="complete", expanded=False)
                             
-                            st.session_state["species_cat_ms"] = [c for c in result.get('species_categories', []) if c in SPECIES_CATEGORIES]
-                            # st.text_input "value" argument takes precedence on rerun if key not in session state? 
-                            # No, if key in session state, it persists. We must update the key.
-                            # But wait, st.text_input with 'value' AND 'key'...
-                            # If we update session state[key], it updates the widget.
-                            st.session_state["spec_species_input"] = result.get('specialized_species', '')
-                            st.session_state["comp_stages_ms"] = [s for s in result.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
+                            # Store updates in a pending state to avoid "modify after instantiate" error
+                            st.session_state.pending_ai_updates = result
 
                             st.success("Done. Re-submit to apply.")
                             st.rerun()

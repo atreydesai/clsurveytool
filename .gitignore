@@ -26,3 +26,4 @@ Thumbs.db
 # Data files (local only)
 pending_entries.json
 research_data.jsonl
+ai_logs.txt
