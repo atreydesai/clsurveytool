@@ -1,20 +1,12 @@
 # CL Survey Tool
 
-A comprehensive Streamlit application for annotating, managing, and analyzing Computational Linguistics research papers.
+A Streamlit application for annotating, managing, and analyzing our computational animal linguistics research papers.
 
 ## Features
 
 - **BibTeX Import**: Bulk import papers directly from `.bib` files.
-- **AI-Assisted Annotation**: Automatically extract linguistic features, species, and computational stages from analysis notes using OpenAI.
-- **Workflow Management**:
-  - **Pending**: Import and organize raw citations.
-  - **Auto-Save**: All edits (titles, year, notes, classifications) are saved instantly.
-  - **Commit**: Finalize entries to the permanent dataset.
-- **Dynamic Data Model**:
-  - Support for multiple affiliations (University, Country, Discipline) per paper.
-  - Custom disciplines and specialized species lists.
+- **AI-Assisted Annotation**: Automatically extract linguistic features, species, and computational stages from analysis notes using OpenAI (fill in API key from .env).
 - **Analytics Dashboard**: Visualize trends in publication years, geographic distribution, and research topics.
-- **Data Persistence**: Uses local JSONL files for storage (`research_data.jsonl`), making it lightweight and easy to version control.
 
 ## Installation
 
@@ -32,12 +24,6 @@ A comprehensive Streamlit application for annotating, managing, and analyzing Co
     ```
 
 3. **Configure Environment**:
-    - Copy `.env.example` to `.env`:
-
-      ```bash
-      cp .env.example .env
-      ```
-
     - Add your OpenAI API Key to `.env`:
 
       ```
@@ -61,10 +47,3 @@ A comprehensive Streamlit application for annotating, managing, and analyzing Co
 
 - `pending_entries.json`: Stores draft/in-progress annotations.
 - `research_data.jsonl`: The permanent dataset of committed entries.
-
-## Tech Stack
-
-- **Streamlit**: UI Framework
-- **Pandas**: Data manipulation
-- **OpenAI**: AI analysis
-- **Plotly**: Interactive charts
