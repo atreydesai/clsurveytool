@@ -832,43 +832,23 @@ def render_data_entry_page():
         if not st.session_state.parsed_entries:
             st.info("No parsed entries. Paste a .bib file above.")
         else:
-            # Build dataframe for display
-            pending_data = []
-            for idx, entry in enumerate(st.session_state.parsed_entries):
-                title = entry.get('title', 'Untitled')
-                is_saved = title in saved_titles
-                pending_data.append({
-                    'idx': idx,
-                    'title': title[:80],
-                    'year': entry.get('year', ''),
-                    'status': 'saved' if is_saved else 'pending'
-                })
+            st.caption(f"{len(st.session_state.parsed_entries)} entries")
             
-            pending_df = pd.DataFrame(pending_data)
-            
-            # Interactive dataframe with selection
-            event = st.dataframe(
-                pending_df[['title', 'year', 'status']],
-                use_container_width=True,
-                height=250,
-                hide_index=True,
-                on_select="rerun",
-                selection_mode="single-row"
-            )
-            
-            # Handle selection
-            if event.selection and event.selection.rows:
-                selected_row = event.selection.rows[0]
-                if selected_row < len(pending_data):
-                    new_idx = pending_data[selected_row]['idx']
-                    if pending_data[selected_row]['status'] != 'saved':
-                        if st.session_state.selected_entry_idx != new_idx:
-                            st.session_state.selected_entry_idx = new_idx
-                            st.session_state.ai_result = None
-                            save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, new_idx)
-                            st.rerun()
-            
-            st.caption(f"{len(pending_data)} entries ({sum(1 for p in pending_data if p['status']=='pending')} pending)")
+            # Scrollable container with buttons
+            with st.container(height=300):
+                for idx, entry in enumerate(st.session_state.parsed_entries):
+                    title = entry.get('title', 'Untitled')[:70]
+                    year = entry.get('year', '?')
+                    is_saved = title in saved_titles
+                    
+                    label = f"{title} ({year})" + (" ✓" if is_saved else "")
+                    btn_type = "secondary" if is_saved else ("primary" if idx == st.session_state.selected_entry_idx else "secondary")
+                    
+                    if st.button(label, key=f"entry_{idx}", use_container_width=True, disabled=is_saved, type=btn_type):
+                        st.session_state.selected_entry_idx = idx
+                        st.session_state.ai_result = None
+                        save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, idx)
+                        st.rerun()
     
     with tab_saved:
         if saved_df.empty:
@@ -876,33 +856,22 @@ def render_data_entry_page():
         else:
             search = st.text_input("Search saved entries", placeholder="Filter by title...")
             display_df = saved_df.copy()
-            display_df['idx'] = display_df.index
             if search:
                 display_df = display_df[display_df['title'].str.contains(search, case=False, na=False)]
             
             st.caption(f"{len(display_df)} entries")
             
             if not display_df.empty:
-                show_cols = ['title', 'year', 'journal']
-                available_cols = [c for c in show_cols if c in display_df.columns]
-                
-                # Interactive dataframe for deletion
-                event = st.dataframe(
-                    display_df[available_cols].head(200),
-                    use_container_width=True,
-                    height=250,
-                    hide_index=True,
-                    on_select="rerun",
-                    selection_mode="single-row"
-                )
-                
-                if event.selection and event.selection.rows:
-                    selected_row = event.selection.rows[0]
-                    if selected_row < len(display_df):
-                        del_idx = display_df.iloc[selected_row]['idx']
-                        if st.button("Delete Selected Entry", type="secondary"):
-                            delete_entry(del_idx)
-                            st.rerun()
+                with st.container(height=300):
+                    for original_idx, row in display_df.head(200).iterrows():
+                        title = str(row.get('title', 'Untitled'))[:60]
+                        year = row.get('year', '?')
+                        
+                        with st.expander(f"{title} ({year})"):
+                            st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
+                            if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
+                                delete_entry(original_idx)
+                                st.rerun()
     
     st.divider()
     
