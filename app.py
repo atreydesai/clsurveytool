@@ -1094,23 +1094,26 @@ def render_data_entry_page():
             
             col1, col2 = st.columns(2)
             with col1:
-                # Manual state management for complex widgets if needed, but for now relying on rerun logic
-                # However, for multiselect to update from AI result, we need to use 'default' carefully 
-                # OR update the key in session state.
-                # Let's use specific keys and update them in the trigger_ai block.
+                # Initialize session state if not present
+                if "species_cat_ms" not in st.session_state:
+                    st.session_state["species_cat_ms"] = [c for c in ai_categories if c in SPECIES_CATEGORIES]
+                
                 species_categories = st.multiselect(
                     "Species Category",
                     SPECIES_CATEGORIES,
-                    default=[c for c in ai_categories if c in SPECIES_CATEGORIES],
                     key="species_cat_ms"
                 )
             with col2:
-                specialized_species = st.text_input("Specialized Species", value=ai_species or '', key="spec_species_input")
+                if "spec_species_input" not in st.session_state:
+                    st.session_state["spec_species_input"] = ai_species or ''
+                specialized_species = st.text_input("Specialized Species", key="spec_species_input")
             
+            if "comp_stages_ms" not in st.session_state:
+                st.session_state["comp_stages_ms"] = [s for s in ai_stages if s in COMPUTATIONAL_STAGES]
+
             computational_stages = st.multiselect(
                 "Computational Stage",
                 COMPUTATIONAL_STAGES,
-                default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES],
                 key="comp_stages_ms"
             )
             
