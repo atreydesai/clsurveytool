@@ -10,6 +10,9 @@ openai>=1.12.0
 # Environment
 python-dotenv>=1.0.0
 
+# Clipboard
+st-copy-to-clipboard>=0.1.6
+
 # Data Processing
 pandas>=2.0.0
 

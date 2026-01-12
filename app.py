@@ -30,6 +30,9 @@ load_dotenv()
 # Import OpenAI
 from openai import OpenAI
 
+# Import copy to clipboard
+from st_copy_to_clipboard import st_copy_to_clipboard
+
 # Get API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
@@ -911,9 +914,10 @@ def render_data_entry_page():
             
             st.subheader(f"Annotating: {parsed.get('title', 'Untitled')}")
             
-            # Search string - always visible, click to copy
+            # Search string - one click to copy
             search_str = format_search_string(st.session_state.search_template, parsed)
-            st.text_input("Search String (click to copy)", value=search_str, disabled=False, key="search_copy")
+            st.caption("Search String:")
+            st_copy_to_clipboard(search_str, before_copy_label=search_str, after_copy_label="Copied!")
             
             with st.form("annotation_form"):
                 # Section A: Metadata
