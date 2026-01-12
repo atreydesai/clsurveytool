@@ -42,6 +42,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 DATA_FILE = "research_data.jsonl"
 PENDING_FILE = "pending_entries.json"
+LOG_FILE = "ai_logs.txt"
 
 LINGUISTIC_FEATURES = [
     "Vocal Auditory Channel and Turn-taking",
@@ -276,7 +277,22 @@ def format_search_string(template: str, parsed: dict) -> str:
 # AI INTEGRATION
 # ============================================================================
 
-def call_ai_api(notes: str) -> Optional[dict]:
+def log_ai_interaction(notes: str, response_content: str, success: bool, error: str = None):
+    """Log AI interaction to a file."""
+    timestamp = datetime.now().isoformat()
+    log_entry = f"\n{'='*50}\nTIMESTAMP: {timestamp}\nSUCCESS: {success}\n"
+    if error:
+        log_entry += f"ERROR: {error}\n"
+    log_entry += f"INPUT NOTES:\n{notes}\n{'-'*20}\nOUTPUT:\n{response_content}\n{'='*50}\n"
+    
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(log_entry)
+    except Exception as e:
+        print(f"Failed to write log: {e}")
+
+
+def call_ai_api(notes: str, status_container=None) -> Optional[dict]:
     """Call the OpenAI API to analyze notes and extract structured data."""
     if not OPENAI_API_KEY:
         st.warning("OPENAI_API_KEY not set in .env file.")
@@ -284,6 +300,9 @@ def call_ai_api(notes: str) -> Optional[dict]:
     
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        if status_container:
+            status_container.update(label="Sending request to OpenAI...", state="running")
         
         response = client.chat.completions.create(
             model="gpt-5-nano-2025-08-07",
@@ -293,9 +312,18 @@ def call_ai_api(notes: str) -> Optional[dict]:
             ]
         )
         
+        if status_container:
+            status_container.update(label="Processing response...", state="running")
+            
         content = response.choices[0].message.content
         
+        # Log successful response
+        log_ai_interaction(notes, content, True)
+        
         # Extract JSON from response
+        if status_container:
+            status_container.update(label="Parsing output...", state="running")
+            
         json_match = re.search(r'\{[\s\S]*\}', content)
         if json_match:
             return json.loads(json_match.group())
@@ -303,6 +331,8 @@ def call_ai_api(notes: str) -> Optional[dict]:
         return None
     except Exception as e:
         st.error(f"AI API error: {e}")
+        # Log error
+        log_ai_interaction(notes, "", False, str(e))
         return None
 
 
@@ -891,23 +921,30 @@ def render_data_entry_page():
                 for original_idx, row in display_df.head(200).iterrows():
                     title = str(row.get('title', 'Untitled'))[:60]
                     year = row.get('year', '?')
+                    journal = row.get('journal', 'N/A')
                     is_editing = st.session_state.editing_saved_idx == original_idx
                     
-                    with st.expander(f"{title} ({year})" + (" [editing]" if is_editing else "")):
-                        st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            if st.button("Edit", key=f"edit_{original_idx}", type="primary" if is_editing else "secondary"):
-                                st.session_state.editing_saved_idx = original_idx
-                                st.session_state.selected_entry_idx = None
-                                st.session_state.ai_result = None
-                                st.rerun()
-                        with col2:
-                            if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
-                                delete_entry(original_idx)
-                                if st.session_state.editing_saved_idx == original_idx:
-                                    st.session_state.editing_saved_idx = None
-                                st.rerun()
+                    # Row layout
+                    c1, c2, c3, c4 = st.columns([4, 2, 1, 1])
+                    with c1:
+                        st.markdown(f"**{title}**")
+                        st.caption(f"{year} • {journal}")
+                    with c2:
+                        if is_editing:
+                            st.caption("Editing now...")
+                    with c3:
+                        if st.button("Edit", key=f"edit_{original_idx}", use_container_width=True, type="primary" if is_editing else "secondary"):
+                            st.session_state.editing_saved_idx = original_idx
+                            st.session_state.selected_entry_idx = None
+                            st.session_state.ai_result = None
+                            st.rerun()
+                    with c4:
+                        if st.button("Delete", key=f"del_{original_idx}", use_container_width=True, type="secondary"):
+                            delete_entry(original_idx)
+                            if st.session_state.editing_saved_idx == original_idx:
+                                st.session_state.editing_saved_idx = None
+                            st.rerun()
+                    st.divider()
     
     st.divider()
     
@@ -1030,12 +1067,15 @@ def render_data_entry_page():
             
             if trigger_ai:
                 if analysis_notes:
-                    with st.spinner("Analyzing..."):
-                        result = call_ai_api(analysis_notes)
+                    with st.status("Analyzing paper...", expanded=True) as status:
+                        result = call_ai_api(analysis_notes, status_container=status)
                         if result:
                             st.session_state.ai_result = result
+                            status.update(label="Analysis complete!", state="complete", expanded=False)
                             st.success("Done. Re-submit to apply.")
                             st.rerun()
+                        else:
+                            status.update(label="Analysis failed.", state="error")
                 else:
                     st.warning("Add Analysis Notes first.")
             
