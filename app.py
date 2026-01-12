@@ -888,27 +888,27 @@ def render_data_entry_page():
             
             st.caption(f"{len(display_df)} entries")
             
-                with st.container(height=300):
-                    for original_idx, row in display_df.head(200).iterrows():
-                        title = str(row.get('title', 'Untitled'))[:60]
-                        year = row.get('year', '?')
-                        is_editing = st.session_state.editing_saved_idx == original_idx
-                        
-                        with st.expander(f"{title} ({year})" + (" [editing]" if is_editing else "")):
-                            st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                if st.button("Edit", key=f"edit_{original_idx}", type="primary" if is_editing else "secondary"):
-                                    st.session_state.editing_saved_idx = original_idx
-                                    st.session_state.selected_entry_idx = None  # Clear pending selection
-                                    st.session_state.ai_result = None
-                                    st.rerun()
-                            with col2:
-                                if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
-                                    delete_entry(original_idx)
-                                    if st.session_state.editing_saved_idx == original_idx:
-                                        st.session_state.editing_saved_idx = None
-                                    st.rerun()
+            with st.container(height=300):
+                for original_idx, row in display_df.head(200).iterrows():
+                    title = str(row.get('title', 'Untitled'))[:60]
+                    year = row.get('year', '?')
+                    is_editing = st.session_state.editing_saved_idx == original_idx
+                    
+                    with st.expander(f"{title} ({year})" + (" [editing]" if is_editing else "")):
+                        st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.button("Edit", key=f"edit_{original_idx}", type="primary" if is_editing else "secondary"):
+                                st.session_state.editing_saved_idx = original_idx
+                                st.session_state.selected_entry_idx = None
+                                st.session_state.ai_result = None
+                                st.rerun()
+                        with col2:
+                            if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
+                                delete_entry(original_idx)
+                                if st.session_state.editing_saved_idx == original_idx:
+                                    st.session_state.editing_saved_idx = None
+                                st.rerun()
     
     st.divider()
     
