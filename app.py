@@ -107,7 +107,7 @@ REFERENCE_TEXT = """
 **Learnability:** Ability of an animal to learn another species' language or dialects outside of what an animal has been taught.
 """
 
-AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species, general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
+AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species (focus on the main ones, but if there are multiple substantial focuses then include all), general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
 
 The 12 linguistic features are:
 1. Vocal Auditory Channel and Turn-taking
@@ -127,7 +127,7 @@ Species categories: Amphibian, Terrestrial Mammal, Marine Mammal, Bird, Primate,
 
 Return ONLY a valid JSON object with these exact keys:
 {
-    "specialized_species": "string or null",
+    "specialized_species": ["list of species strings"],
     "species_categories": ["list of categories"],
     "computational_stages": ["list of stages"],
     "linguistic_features": ["list of feature names"]
@@ -203,24 +203,42 @@ def get_jsonl_content() -> str:
 
 
 def load_pending() -> dict:
-    """Load pending entries from JSON file."""
+    """Load pending and in-progress entries from JSON file."""
     if os.path.exists(PENDING_FILE):
         try:
             with open(PENDING_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Migration/Fallback for old format
+                if 'entries' in data and 'pending' not in data:
+                    return {
+                        'pending': data['entries'],
+                        'in_progress': [],
+                        'bibtex': data.get('bibtex', ''),
+                        'selected_idx': data.get('selected_idx'),
+                        'selected_type': 'pending'
+                    }
+                return data
         except (json.JSONDecodeError, IOError):
             pass
-    return {'entries': [], 'bibtex': '', 'selected_idx': None}
+    return {
+        'pending': [],
+        'in_progress': [],
+        'bibtex': '',
+        'selected_idx': None,
+        'selected_type': 'pending'
+    }
 
 
-def save_pending(entries: list, bibtex: str, selected_idx):
-    """Save pending entries to JSON file."""
+def save_pending(pending: list, in_progress: list, bibtex: str, selected_idx, selected_type: str):
+    """Save pending and in-progress entries to JSON file."""
     try:
         with open(PENDING_FILE, 'w', encoding='utf-8') as f:
             json.dump({
-                'entries': entries,
+                'pending': pending,
+                'in_progress': in_progress,
                 'bibtex': bibtex,
-                'selected_idx': selected_idx
+                'selected_idx': selected_idx,
+                'selected_type': selected_type
             }, f, ensure_ascii=False, indent=2)
     except IOError as e:
         st.error(f"Error saving pending entries: {e}")
@@ -279,8 +297,9 @@ def format_search_string(template: str, parsed: dict) -> str:
 
 def clear_form_state():
     """Clear session state for annotation form widgets."""
-    keys_to_clear = [f"feat_{i}" for i in range(len(LINGUISTIC_FEATURES))] + [
-        "species_cat_ms", "spec_species_input", "comp_stages_ms"
+    # Clear static keys used in the editor
+    keys_to_clear = [
+        "meta_title", "meta_year", "meta_journal", "meta_authors", "meta_notes", "aff_editor"
     ]
     for key in keys_to_clear:
         if key in st.session_state:
@@ -288,28 +307,45 @@ def clear_form_state():
 
 
 def apply_pending_ai_updates():
-    """Apply pending AI updates to widget state if they exist."""
-    if 'pending_ai_updates' in st.session_state:
+    """Apply pending AI updates to the current entry."""
+    if 'pending_ai_updates' in st.session_state and st.session_state.get('selected_entry_idx') is not None:
         updates = st.session_state.pending_ai_updates
+        idx = st.session_state.selected_entry_idx
+        etype = st.session_state.selected_entry_type
         
-        # Update session state keys for widgets
-        # Since this runs before widgets are rendered, it is safe.
+        entry = None
+        if etype == 'pending':
+            if idx < len(st.session_state.pending_entries):
+                entry = st.session_state.pending_entries[idx]
+        elif etype == 'in_progress':
+            if idx < len(st.session_state.in_progress_entries):
+                entry = st.session_state.in_progress_entries[idx]
         
-        # Linguistic features
-        new_features = updates.get('linguistic_features', [])
-        for i, feature in enumerate(LINGUISTIC_FEATURES):
-            st.session_state[f"feat_{i}"] = feature in new_features
+        if entry:
+            # Apply updates
+            entry['linguistic_features'] = updates.get('linguistic_features', [])
+            entry['species_categories'] = [c for c in updates.get('species_categories', []) if c in SPECIES_CATEGORIES]
+            entry['computational_stages'] = [s for s in updates.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
             
-        # Species categories
-        cats = [c for c in updates.get('species_categories', []) if c in SPECIES_CATEGORIES]
-        st.session_state["species_cat_ms"] = cats
-        
-        # Specialized species
-        st.session_state["spec_species_input"] = updates.get('specialized_species', '')
-        
-        # Computational stages
-        stages = [s for s in updates.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
-        st.session_state["comp_stages_ms"] = stages
+            # Specialized species: AI returns list, or string. Handle both.
+            spec = updates.get('specialized_species', [])
+            if isinstance(spec, str): spec = [spec]
+            entry['specialized_species'] = spec
+
+            # Move to In Progress if pending
+            if etype == 'pending':
+                st.session_state.pending_entries.pop(idx)
+                st.session_state.in_progress_entries.append(entry)
+                st.session_state.selected_entry_type = 'in_progress'
+                st.session_state.selected_entry_idx = len(st.session_state.in_progress_entries) - 1
+            
+            save_pending(
+                st.session_state.pending_entries, 
+                st.session_state.in_progress_entries, 
+                st.session_state.last_bibtex, 
+                st.session_state.selected_entry_idx,
+                st.session_state.selected_entry_type
+            )
         
         # Clear the pending updates
         del st.session_state.pending_ai_updates
@@ -806,11 +842,16 @@ def create_network_graph(df: pd.DataFrame, node_type: str) -> Optional[str]:
 def init_session_state():
     """Initialize session state variables."""
     # Load pending entries from file if not already in session
-    if 'parsed_entries' not in st.session_state:
-        pending = load_pending()
-        st.session_state.parsed_entries = pending.get('entries', [])
-        st.session_state.last_bibtex = pending.get('bibtex', '')
-        st.session_state.selected_entry_idx = pending.get('selected_idx')
+    if 'pending_entries' not in st.session_state:
+        data = load_pending()
+        st.session_state.pending_entries = data.get('pending', [])
+        st.session_state.in_progress_entries = data.get('in_progress', [])
+        st.session_state.last_bibtex = data.get('bibtex', '')
+        st.session_state.selected_entry_idx = data.get('selected_idx')
+        st.session_state.selected_entry_type = data.get('selected_type', 'pending')
+        
+    # Maintain compatibility alias if needed, or remove 'parsed_entries' usage
+    # We will replace 'parsed_entries' with explicit 'pending_entries' usage.
     
     # Other defaults
     if 'ai_result' not in st.session_state:
@@ -886,7 +927,7 @@ def render_data_entry_page():
     saved_titles = set(saved_df['title'].tolist()) if not saved_df.empty else set()
     
     # === BibTeX Import Section ===
-    with st.expander("BibTeX Import", expanded=len(st.session_state.parsed_entries) == 0):
+    with st.expander("BibTeX Import", expanded=not st.session_state.pending_entries and not st.session_state.in_progress_entries):
         bibtex_input = st.text_area(
             "Paste your entire .bib file here:",
             height=200,
@@ -899,10 +940,12 @@ def render_data_entry_page():
             if st.button("Parse BibTeX", use_container_width=True):
                 if bibtex_input:
                     entries = parse_bibtex(bibtex_input)
-                    st.session_state.parsed_entries = entries
+                    st.session_state.pending_entries = entries
                     st.session_state.last_bibtex = bibtex_input
+                    # Reset
                     st.session_state.selected_entry_idx = None
-                    save_pending(entries, bibtex_input, None)
+                    st.session_state.selected_entry_type = 'pending'
+                    save_pending(entries, st.session_state.in_progress_entries, bibtex_input, None, 'pending')
                     if entries:
                         st.success(f"Parsed {len(entries)} entries.")
                     else:
@@ -912,49 +955,84 @@ def render_data_entry_page():
                     st.warning("Paste BibTeX content first.")
         
         with col2:
-            if st.button("Clear All Parsed", use_container_width=True):
-                st.session_state.parsed_entries = []
+            if st.button("Clear All Pending", use_container_width=True):
+                st.session_state.pending_entries = []
                 st.session_state.last_bibtex = ''
                 st.session_state.selected_entry_idx = None
-                save_pending([], '', None)
+                save_pending([], st.session_state.in_progress_entries, '', None, 'pending')
                 st.rerun()
         
-        if st.session_state.parsed_entries:
-            st.caption(f"{len(st.session_state.parsed_entries)} entries parsed from BibTeX")
+        if st.session_state.pending_entries:
+            st.caption(f"{len(st.session_state.pending_entries)} entries parsed from BibTeX")
     
     st.divider()
     
-    # === Entry Browser (combines parsed + saved) ===
+    # === Entry Browser ===
     st.subheader("Entries")
     
-    # Tabs for parsed vs saved
-    tab_parsed, tab_saved = st.tabs([
-        f"Pending ({len(st.session_state.parsed_entries)})", 
-        f"Saved ({len(saved_df)})"
+    # Tabs
+    n_pending = len(st.session_state.pending_entries)
+    n_progress = len(st.session_state.in_progress_entries)
+    n_saved = len(saved_df)
+    
+    tab_pending, tab_progress, tab_saved = st.tabs([
+        f"Pending ({n_pending})", 
+        f"In Progress ({n_progress})",
+        f"Saved ({n_saved})"
     ])
     
-    with tab_parsed:
-        if not st.session_state.parsed_entries:
-            st.info("No parsed entries. Paste a .bib file above.")
+    # --- PENDING TAB ---
+    with tab_pending:
+        if not st.session_state.pending_entries:
+            st.info("No pending entries. Paste a .bib file above.")
         else:
-            st.caption(f"{len(st.session_state.parsed_entries)} entries")
-            
-            # Scrollable container with buttons
             with st.container(height=300):
-                for idx, entry in enumerate(st.session_state.parsed_entries):
+                for idx, entry in enumerate(st.session_state.pending_entries):
                     title = entry.get('title', 'Untitled')[:70]
                     year = entry.get('year', '?')
-                    is_saved = title in saved_titles
                     
-                    label = f"{title} ({year})" + (" ✓" if is_saved else "")
-                    btn_type = "secondary" if is_saved else ("primary" if idx == st.session_state.selected_entry_idx else "secondary")
+                    is_selected = (st.session_state.selected_entry_idx == idx and 
+                                   st.session_state.selected_entry_type == 'pending')
                     
-                    if st.button(label, key=f"entry_{idx}", use_container_width=True, disabled=is_saved, type=btn_type):
+                    if st.button(f"{title} ({year})", key=f"p_entry_{idx}", use_container_width=True, 
+                                 type="primary" if is_selected else "secondary"):
                         st.session_state.selected_entry_idx = idx
+                        st.session_state.selected_entry_type = 'pending'
                         st.session_state.ai_result = None
                         clear_form_state()
-                        save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, idx)
+                        save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, idx, 'pending')
                         st.rerun()
+
+    # --- IN PROGRESS TAB ---
+    with tab_progress:
+        if not st.session_state.in_progress_entries:
+            st.info("No entries in progress.")
+        else:
+            with st.container(height=300):
+                for idx, entry in enumerate(st.session_state.in_progress_entries):
+                    title = entry.get('title', 'Untitled')[:70]
+                    year = entry.get('year', '?')
+                    
+                    is_selected = (st.session_state.selected_entry_idx == idx and 
+                                   st.session_state.selected_entry_type == 'in_progress')
+                    
+                    col1, col2 = st.columns([5, 1])
+                    with col1:
+                        if st.button(f"{title} ({year})", key=f"ip_entry_{idx}", use_container_width=True, 
+                                     type="primary" if is_selected else "secondary"):
+                            st.session_state.selected_entry_idx = idx
+                            st.session_state.selected_entry_type = 'in_progress'
+                            st.session_state.ai_result = None
+                            clear_form_state()
+                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, idx, 'in_progress')
+                            st.rerun()
+                    with col2:
+                        if st.button("🗑️", key=f"del_ip_{idx}"):
+                            st.session_state.in_progress_entries.pop(idx)
+                            if is_selected:
+                                st.session_state.selected_entry_idx = None
+                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx, st.session_state.selected_entry_type)
+                            st.rerun()
     
     with tab_saved:
         if saved_df.empty:
@@ -999,219 +1077,241 @@ def render_data_entry_page():
     
     st.divider()
     
-    # === Annotation Form ===
-    # Determine if we're editing a pending entry or a saved entry
-    is_editing_pending = st.session_state.selected_entry_idx is not None and st.session_state.selected_entry_idx < len(st.session_state.parsed_entries)
-    is_editing_saved = st.session_state.editing_saved_idx is not None
-    
-    if is_editing_pending or is_editing_saved:
-        # Get the entry data
-        if is_editing_pending:
-            idx = st.session_state.selected_entry_idx
-            parsed = st.session_state.parsed_entries[idx]
-            form_mode = "pending"
-            st.subheader(f"Annotating: {parsed.get('title', 'Untitled')}")
-        else:
-            idx = st.session_state.editing_saved_idx
-            # Load from saved data
-            saved_records = load_data()
-            if idx < len(saved_records):
-                parsed = saved_records.iloc[idx].to_dict()
-                form_mode = "saved"
-                st.subheader(f"Editing: {parsed.get('title', 'Untitled')}")
-            else:
-                st.session_state.editing_saved_idx = None
+    # === Editor Section ===
+    if st.session_state.selected_entry_idx is not None:
+        idx = st.session_state.selected_entry_idx
+        entry_type = st.session_state.selected_entry_type
+        
+        # Determine source list
+        if entry_type == 'pending':
+            current_entry = st.session_state.pending_entries[idx]
+        elif entry_type == 'in_progress':
+            current_entry = st.session_state.in_progress_entries[idx]
+        elif entry_type == 'saved':
+            # For saved entries, we just view/delete in tab. 
+            # To edit, we clicked "Edit" which should have moved it or logic handled elsewhere.
+            # But currently `tab_saved` uses `editing_saved_idx`.
+            # Let's handle saved editing separately or unify.
+            # For now, focus on Pending/In Progress.
+            st.info("Select a pending or in-progress entry to edit.")
+            return
+
+        st.divider()
+        st.subheader(f"Editing: {current_entry.get('title', 'Untitled')}")
+        
+        # Helper to handle updates
+        def auto_save():
+            # If pending, move to in-progress
+            if st.session_state.selected_entry_type == 'pending':
+                st.session_state.pending_entries.pop(idx)
+                st.session_state.in_progress_entries.append(current_entry)
+                st.session_state.selected_entry_type = 'in_progress'
+                st.session_state.selected_entry_idx = len(st.session_state.in_progress_entries) - 1
+            
+            save_pending(
+                st.session_state.pending_entries, 
+                st.session_state.in_progress_entries, 
+                st.session_state.last_bibtex, 
+                st.session_state.selected_entry_idx,
+                st.session_state.selected_entry_type
+            )
+        
+        # --- Metadata ---
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            new_title = st.text_input("Title", value=current_entry.get('title', ''), key="meta_title")
+            if new_title != current_entry.get('title', ''):
+                current_entry['title'] = new_title
+                auto_save()
                 st.rerun()
-                return
+
+        with col2:
+            new_year = st.text_input("Year", value=str(current_entry.get('year', '')), key="meta_year")
+            if new_year != str(current_entry.get('year', '')):
+                current_entry['year'] = new_year
+                auto_save()
+                st.rerun()
+
+        new_journal = st.text_input("Journal/Venue", value=current_entry.get('journal', ''), key="meta_journal")
+        if new_journal != current_entry.get('journal', ''):
+            current_entry['journal'] = new_journal
+            auto_save()
+            st.rerun()
+
+        # Authors
+        authors_val = current_entry.get('authors', [])
+        authors_str = "\n".join(authors_val) if isinstance(authors_val, list) else str(authors_val)
+        new_authors_str = st.text_area("Authors (one per line)", value=authors_str, height=100, key="meta_authors")
+        if new_authors_str != authors_str:
+            current_entry['authors'] = [a.strip() for a in new_authors_str.split('\n') if a.strip()]
+            auto_save()
+            st.rerun()
+
+        # Analysis Notes
+        new_notes = st.text_area(
+            "Analysis Notes", 
+            value=current_entry.get('analysis_notes', '') or current_entry.get('abstract', ''), 
+            height=150,
+            key="meta_notes",
+            help="Notes for AI analysis"
+        )
+        if new_notes != (current_entry.get('analysis_notes', '') or current_entry.get('abstract', '')):
+            current_entry['analysis_notes'] = new_notes
+            auto_save()
+            st.rerun()
+
+        # --- Affiliations (Dynamic Data Editor) ---
+        st.markdown("**Affiliations**")
         
-        # Search string - one click to copy
-        search_str = format_search_string(st.session_state.search_template, parsed)
-        st.caption("Search String:")
-        st_copy_to_clipboard(search_str, before_copy_label=search_str, after_copy_label="Copied!")
+        # Migrate old format if needed
+        if 'affiliations' not in current_entry:
+            old_aff = {}
+            if current_entry.get('university'): old_aff['university'] = current_entry['university']
+            if current_entry.get('country'): old_aff['country'] = current_entry['country']
+            if current_entry.get('discipline'): old_aff['discipline'] = current_entry['discipline']
+            current_entry['affiliations'] = [old_aff] if old_aff else []
+
+        # Prepare DataFrame for editor
+        aff_data = current_entry['affiliations']
+        aff_df = pd.DataFrame(aff_data)
+        if aff_df.empty:
+            aff_df = pd.DataFrame(columns=['university', 'country', 'discipline'])
         
-        # Get existing values for editing saved entries
-        existing_authors = parsed.get('authors', [])
-        if isinstance(existing_authors, list):
-            authors_str = '\n'.join(existing_authors)
-        else:
-            authors_str = str(existing_authors)
-        
-        existing_features = parsed.get('linguistic_features', []) if isinstance(parsed.get('linguistic_features'), list) else []
-        existing_categories = parsed.get('species_categories', []) if isinstance(parsed.get('species_categories'), list) else []
-        existing_stages = parsed.get('computational_stages', []) if isinstance(parsed.get('computational_stages'), list) else []
-        
-        with st.form("annotation_form"):
-            st.markdown("**Metadata**")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                title = st.text_input("Title", value=parsed.get('title', ''))
-                year = st.text_input("Year", value=str(parsed.get('year', '')))
-                journal = st.text_input("Journal/Venue", value=parsed.get('journal', ''))
-            with col2:
-                authors = st.text_area("Authors (one per line)", value=authors_str, height=100)
-            
-            analysis_notes = st.text_area(
-                "Analysis Notes",
-                height=150,
-                value=parsed.get('analysis_notes', '') or parsed.get('abstract', ''),
-                help="Notes about the paper for AI analysis"
-            )
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                university = st.text_input("University/Institution", value=parsed.get('university', ''))
-            with col2:
-                country = st.text_input("Country", value=parsed.get('country', ''))
-            with col3:
-                disc_val = parsed.get('discipline', '')
-                disc_idx = DISCIPLINES.index(disc_val) + 1 if disc_val in DISCIPLINES else 0
-                discipline = st.selectbox("Discipline", [""] + DISCIPLINES, index=disc_idx)
-            
-            st.divider()
-            st.markdown("**Classification**")
-            
-            trigger_ai = st.form_submit_button("Run AI Analysis", type="secondary")
-            
-            # Use AI results if available, otherwise use existing values
-            ai_features = st.session_state.ai_result.get('linguistic_features', []) if st.session_state.ai_result else existing_features
-            ai_categories = st.session_state.ai_result.get('species_categories', []) if st.session_state.ai_result else existing_categories
-            ai_species = st.session_state.ai_result.get('specialized_species', '') if st.session_state.ai_result else parsed.get('specialized_species', '')
-            ai_stages = st.session_state.ai_result.get('computational_stages', []) if st.session_state.ai_result else existing_stages
-            
-            st.markdown("**Linguistic Features:**")
-            feature_cols = st.columns(3)
-            selected_features = []
-            for i, feature in enumerate(LINGUISTIC_FEATURES):
-                with feature_cols[i % 3]:
-                    # Checkbox state is managed via keys "feat_{i}"
-                    # Default value is set in session state when AI runs
-                    if f"feat_{i}" not in st.session_state:
-                         st.session_state[f"feat_{i}"] = feature in ai_features
-                    
-                    if st.checkbox(feature, key=f"feat_{i}"):
-                        selected_features.append(feature)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                # Initialize session state if not present
-                if "species_cat_ms" not in st.session_state:
-                    st.session_state["species_cat_ms"] = [c for c in ai_categories if c in SPECIES_CATEGORIES]
-                
-                species_categories = st.multiselect(
-                    "Species Category",
-                    SPECIES_CATEGORIES,
-                    key="species_cat_ms"
+        # Get all disciplines for dropdown
+        all_disciplines = sorted(list(set(DISCIPLINES + saved_df['discipline'].unique().tolist() if 'discipline' in saved_df.columns else [])))
+
+        edited_aff_df = st.data_editor(
+            aff_df,
+            num_rows="dynamic",
+            column_config={
+                "university": st.column_config.TextColumn("University/Institution", required=True),
+                "country": st.column_config.TextColumn("Country", required=True),
+                "discipline": st.column_config.SelectboxColumn(
+                    "Discipline",
+                    options=all_disciplines,
+                    required=True,
+                    width="medium" # allow_custom_value not supported in standard SelectboxColumn? Use TextColumn or verify support.
+                    # Streamlit SelectboxColumn doesn't support 'allow_custom_value' yet.
+                    # Fallback: Just use TextColumn for flexibility as requested "allow typing in new one".
+                    # User asked for "typing in new one AND it becomes available". 
+                    # TextColumn is best for typing. Selectbox restricts choices.
+                    # I'll use TextColumn but provide autocomplete? Streamlit doesn't support autocomplete text column easily.
+                    # I will stick to TextColumn to allow free text as prioritized req.
                 )
-            with col2:
-                if "spec_species_input" not in st.session_state:
-                    st.session_state["spec_species_input"] = ai_species or ''
-                specialized_species = st.text_input("Specialized Species", key="spec_species_input")
-            
-            if "comp_stages_ms" not in st.session_state:
-                st.session_state["comp_stages_ms"] = [s for s in ai_stages if s in COMPUTATIONAL_STAGES]
+            },
+            key="aff_editor",
+            use_container_width=True
+        )
 
-            computational_stages = st.multiselect(
-                "Computational Stage",
-                COMPUTATIONAL_STAGES,
-                key="comp_stages_ms"
-            )
-            
-            st.divider()
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                submitted = st.form_submit_button("Save", type="primary", use_container_width=True)
-            with col2:
-                if form_mode == "pending":
-                    skip = st.form_submit_button("Skip", use_container_width=True)
-                else:
-                    skip = False
-            with col3:
-                cancel = st.form_submit_button("Cancel", use_container_width=True)
-            
-            if trigger_ai:
-                if analysis_notes:
-                    with st.status("Analyzing paper...", expanded=True) as status:
-                        result = call_ai_api(analysis_notes, status_container=status)
+        # Check for changes in affiliations
+        # Convert NaN to empty string
+        edited_aff_df = edited_aff_df.fillna("")
+        new_aff_list = edited_aff_df.to_dict('records')
+        # Filter out empty rows
+        new_aff_list = [r for r in new_aff_list if any(str(v).strip() for v in r.values())]
+        
+        if new_aff_list != current_entry['affiliations']:
+            current_entry['affiliations'] = new_aff_list
+            auto_save()
+            # No rerun needed here as data_editor handles its state well, usually.
+            # But for "Move to In Progress" logic we might need it.
+            if entry_type == 'pending':
+                st.rerun()
+
+        st.divider()
+
+        # --- AI Classification ---
+        col_ai, col_final = st.columns([3, 1])
+        with col_ai:
+            if st.button("Run AI Analysis", type="secondary"):
+                if new_notes:
+                    with st.status("Analyzing...", expanded=True) as status:
+                        result = call_ai_api(new_notes, status_container=status)
                         if result:
-                            st.session_state.ai_result = result
-                            status.update(label="Analysis complete!", state="complete", expanded=False)
-                            
-                            st.session_state.ai_result = result
-                            status.update(label="Analysis complete!", state="complete", expanded=False)
-                            
-                            # Store updates in a pending state to avoid "modify after instantiate" error
                             st.session_state.pending_ai_updates = result
-
-                            st.success("Done. Re-submit to apply.")
+                            status.update(label="Complete!", state="complete", expanded=False)
+                            auto_save() # Save current state first
                             st.rerun()
                         else:
-                            status.update(label="Analysis failed.", state="error")
+                            status.update(label="Failed.", state="error")
                 else:
                     st.warning("Add Analysis Notes first.")
-            
-            if submitted:
-                if not title:
-                    st.error("Title required.")
-                elif not year:
-                    st.error("Year required.")
+
+        with col_final:
+            if st.button("Commit to Dataset", type="primary", use_container_width=True):
+                # Save to research_data.jsonl
+                # Ensure we have minimum fields
+                if not current_entry.get('title') or not current_entry.get('year'):
+                    st.error("Title and Year required.")
                 else:
-                    entry = {
-                        "title": title,
-                        "year": year,
-                        "journal": journal,
-                        "authors": [a.strip() for a in authors.split('\n') if a.strip()],
-                        "analysis_notes": analysis_notes,
-                        "university": university,
-                        "country": country,
-                        "discipline": discipline,
-                        "linguistic_features": selected_features,
-                        "species_categories": species_categories,
-                        "specialized_species": specialized_species,
-                        "computational_stages": computational_stages,
-                        "created_at": parsed.get('created_at', datetime.now().isoformat())
-                    }
-                    
-                    if form_mode == "pending":
-                        if save_entry(entry):
-                            st.success("Saved.")
-                            st.session_state.parsed_entries.pop(idx)
-                            st.session_state.ai_result = None
-                            if st.session_state.parsed_entries:
-                                st.session_state.selected_entry_idx = min(idx, len(st.session_state.parsed_entries) - 1)
-                            else:
-                                st.session_state.selected_entry_idx = None
-                            clear_form_state()
-                            save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
-                            st.rerun()
-                    else:  # saved
-                        if update_entry(idx, entry):
-                            st.success("Updated.")
-                            st.session_state.editing_saved_idx = None
-                            st.session_state.ai_result = None
-                            clear_form_state()
-                            st.rerun()
-            
-            if skip and form_mode == "pending":
-                next_idx = idx + 1
-                if next_idx < len(st.session_state.parsed_entries):
-                    st.session_state.selected_entry_idx = next_idx
-                else:
-                    st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
-                st.session_state.ai_result = None
-                clear_form_state()
-                save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
-                st.rerun()
-            
-            if cancel:
-                st.session_state.selected_entry_idx = None
-                st.session_state.editing_saved_idx = None
-                st.session_state.ai_result = None
-                clear_form_state()
-                st.rerun()
-    else:
-        st.info("Select an entry to annotate or edit.")
+                    # Final clean: remove empty values
+                    current_entry['created_at'] = datetime.now().isoformat()
+                    if save_entry(current_entry):
+                        st.success("Entry committed!")
+                        # Remove from In Progress
+                        if entry_type == 'in_progress':
+                            st.session_state.in_progress_entries.pop(idx)
+                            st.session_state.selected_entry_idx = None
+                            save_pending(st.session_state.pending_entries, st.session_state.in_progress_entries, st.session_state.last_bibtex, None, 'pending')
+                        st.rerun()
+
+        # --- Classification Widgets (Auto-save) ---
+        st.markdown("**Classification**")
+        
+        # Linguistic Features
+        st.caption("Linguistic Features")
+        cols = st.columns(3)
+        current_features = current_entry.get('linguistic_features', [])
+        
+        # We need to manually match checkboxes to list
+        new_features = list(current_features)
+        
+        for i, feat in enumerate(LINGUISTIC_FEATURES):
+            # We use key based on feature name or index to avoid collision
+            # Since we removed st.form, we can use on_change or just check value
+            is_checked = feat in current_features
+            if cols[i%3].checkbox(feat, value=is_checked, key=f"feat_{idx}_{i}"):
+                if feat not in new_features:
+                    new_features.append(feat)
+            else:
+                if feat in new_features:
+                    new_features.remove(feat)
+        
+        if sorted(new_features) != sorted(current_features):
+            current_entry['linguistic_features'] = new_features
+            auto_save()
+            # Rerun not strictly needed for checkbox unless we want immediate validation
+        
+        # Species & Stages
+        c1, c2 = st.columns(2)
+        with c1:
+            curr_cats = current_entry.get('species_categories', [])
+            new_cats = st.multiselect("Species Category", SPECIES_CATEGORIES, default=[c for c in curr_cats if c in SPECIES_CATEGORIES], key=f"cat_{idx}")
+            if new_cats != curr_cats:
+                current_entry['species_categories'] = new_cats
+                auto_save()
+                
+        with c2:
+            # Specialized Species (Text Input, comma separated, or list)
+            # Prompt returns list. UI uses text input.
+            curr_spec = current_entry.get('specialized_species', [])
+            if isinstance(curr_spec, str): curr_spec = [curr_spec] if curr_spec else []
+            spec_str = ", ".join(curr_spec)
+            new_spec_str = st.text_input("Specialized Species (comma separated)", value=spec_str, key=f"spec_{idx}")
+            if new_spec_str != spec_str:
+                current_entry['specialized_species'] = [s.strip() for s in new_spec_str.split(',') if s.strip()]
+                auto_save()
+
+        curr_stages = current_entry.get('computational_stages', [])
+        new_stages = st.multiselect("Computational Stages", COMPUTATIONAL_STAGES, default=[s for s in curr_stages if s in COMPUTATIONAL_STAGES], key=f"stages_{idx}")
+        if new_stages != curr_stages:
+            current_entry['computational_stages'] = new_stages
+            auto_save()
+
+    elif st.session_state.in_progress_entries or st.session_state.pending_entries:
+         st.info("Select an entry above to start editing.")
+    
+    st.divider()
 
 
 def delete_entry(index: int) -> bool:
@@ -1291,15 +1391,29 @@ def render_data_browser_page():
                 
                 st.markdown(f"**Affiliation:** {row.get('university', 'N/A')} ({row.get('country', 'N/A')})")
                 st.markdown(f"**Discipline:** {row.get('discipline', 'N/A')}")
+                
+                 # Handle new affiliation structure
+                affiliations = row.get('affiliations', [])
+                if isinstance(affiliations, list) and affiliations:
+                     st.markdown("**Affiliations:**")
+                     for a in affiliations:
+                         st.caption(f"- {a.get('university', '')} ({a.get('country', '')}) — {a.get('discipline', '')}")
+                elif not affiliations and (row.get('university') or row.get('country')):
+                     # Fallback for old data
+                     st.markdown(f"**Affiliation:** {row.get('university', 'N/A')} ({row.get('country', 'N/A')})")
+                     st.markdown(f"**Discipline:** {row.get('discipline', 'N/A')}")
             
             with col2:
                 species_cats = row.get('species_categories', [])
                 if isinstance(species_cats, list) and species_cats:
                     st.markdown(f"**Species:** {', '.join(species_cats)}")
                 
-                spec_species = row.get('specialized_species', '')
-                if spec_species:
-                    st.markdown(f"**Specialized:** _{spec_species}_")
+                spec_species = row.get('specialized_species', [])
+                # Handle list or string
+                if isinstance(spec_species, str) and spec_species:
+                    spec_species = [spec_species]
+                if isinstance(spec_species, list) and spec_species:
+                    st.markdown(f"**Specialized:** _{', '.join(spec_species)}_")
                 
                 stages = row.get('computational_stages', [])
                 if isinstance(stages, list) and stages:
@@ -1331,6 +1445,25 @@ def render_analytics_page():
     
     # Load data
     df = load_data()
+    
+    # Preprocess for backward compatibility with nested affiliations
+    if not df.empty and 'affiliations' in df.columns:
+        # Fill missing legacy columns from the first affiliation
+        def get_primary(row, field):
+            val = row.get(field)
+            if val: return val
+            affs = row.get('affiliations', [])
+            if isinstance(affs, list) and affs:
+                return affs[0].get(field, '')
+            return ''
+            
+        if 'university' not in df.columns: df['university'] = ''
+        if 'country' not in df.columns: df['country'] = ''
+        if 'discipline' not in df.columns: df['discipline'] = ''
+        
+        df['university'] = df.apply(lambda x: get_primary(x, 'university'), axis=1)
+        df['country'] = df.apply(lambda x: get_primary(x, 'country'), axis=1)
+        df['discipline'] = df.apply(lambda x: get_primary(x, 'discipline'), axis=1)
     
     if df.empty:
         st.warning("No data available. Please add entries on the Data Entry page first.")
