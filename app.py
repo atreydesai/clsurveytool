@@ -277,13 +277,30 @@ def format_search_string(template: str, parsed: dict) -> str:
 # AI INTEGRATION
 # ============================================================================
 
-def log_ai_interaction(notes: str, response_content: str, success: bool, error: str = None):
+def clear_form_state():
+    """Clear session state for annotation form widgets."""
+    keys_to_clear = [f"feat_{i}" for i in range(len(LINGUISTIC_FEATURES))] + [
+        "species_cat_ms", "spec_species_input", "comp_stages_ms"
+    ]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+
+
+def log_ai_interaction(notes: str, response_content: str, success: bool, error: str = None, metadata: dict = None):
     """Log AI interaction to a file."""
+    
+    # Truncate notes to first 50 words
+    words = notes.split()
+    truncated_notes = ' '.join(words[:50]) + ("..." if len(words) > 50 else "")
+    
     timestamp = datetime.now().isoformat()
     log_entry = f"\n{'='*50}\nTIMESTAMP: {timestamp}\nSUCCESS: {success}\n"
+    if metadata:
+        log_entry += f"METADATA: {json.dumps(metadata)}\n"
     if error:
         log_entry += f"ERROR: {error}\n"
-    log_entry += f"INPUT NOTES:\n{notes}\n{'-'*20}\nOUTPUT:\n{response_content}\n{'='*50}\n"
+    log_entry += f"INPUT KEYWORDS (First 50 words):\n{truncated_notes}\n{'-'*20}\nOUTPUT:\n{response_content}\n{'='*50}\n"
     
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
@@ -316,9 +333,10 @@ def call_ai_api(notes: str, status_container=None) -> Optional[dict]:
             status_container.update(label="Processing response...", state="running")
             
         content = response.choices[0].message.content
+        usage = response.usage.model_dump() if response.usage else {}
         
         # Log successful response
-        log_ai_interaction(notes, content, True)
+        log_ai_interaction(notes, content, True, metadata=usage)
         
         # Extract JSON from response
         if status_container:
@@ -903,6 +921,7 @@ def render_data_entry_page():
                     if st.button(label, key=f"entry_{idx}", use_container_width=True, disabled=is_saved, type=btn_type):
                         st.session_state.selected_entry_idx = idx
                         st.session_state.ai_result = None
+                        clear_form_state()
                         save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, idx)
                         st.rerun()
     
@@ -937,6 +956,7 @@ def render_data_entry_page():
                             st.session_state.editing_saved_idx = original_idx
                             st.session_state.selected_entry_idx = None
                             st.session_state.ai_result = None
+                            clear_form_state()
                             st.rerun()
                     with c4:
                         if st.button("Delete", key=f"del_{original_idx}", use_container_width=True, type="secondary"):
@@ -1033,23 +1053,34 @@ def render_data_entry_page():
             selected_features = []
             for i, feature in enumerate(LINGUISTIC_FEATURES):
                 with feature_cols[i % 3]:
-                    if st.checkbox(feature, value=(feature in ai_features), key=f"feat_{i}"):
+                    # Checkbox state is managed via keys "feat_{i}"
+                    # Default value is set in session state when AI runs
+                    if f"feat_{i}" not in st.session_state:
+                         st.session_state[f"feat_{i}"] = feature in ai_features
+                    
+                    if st.checkbox(feature, key=f"feat_{i}"):
                         selected_features.append(feature)
             
             col1, col2 = st.columns(2)
             with col1:
+                # Manual state management for complex widgets if needed, but for now relying on rerun logic
+                # However, for multiselect to update from AI result, we need to use 'default' carefully 
+                # OR update the key in session state.
+                # Let's use specific keys and update them in the trigger_ai block.
                 species_categories = st.multiselect(
                     "Species Category",
                     SPECIES_CATEGORIES,
-                    default=[c for c in ai_categories if c in SPECIES_CATEGORIES]
+                    default=[c for c in ai_categories if c in SPECIES_CATEGORIES],
+                    key="species_cat_ms"
                 )
             with col2:
-                specialized_species = st.text_input("Specialized Species", value=ai_species or '')
+                specialized_species = st.text_input("Specialized Species", value=ai_species or '', key="spec_species_input")
             
             computational_stages = st.multiselect(
                 "Computational Stage",
                 COMPUTATIONAL_STAGES,
-                default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES]
+                default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES],
+                key="comp_stages_ms"
             )
             
             st.divider()
@@ -1072,6 +1103,20 @@ def render_data_entry_page():
                         if result:
                             st.session_state.ai_result = result
                             status.update(label="Analysis complete!", state="complete", expanded=False)
+                            
+                            # Manually update widget states
+                            new_features = result.get('linguistic_features', [])
+                            for i, feature in enumerate(LINGUISTIC_FEATURES):
+                                st.session_state[f"feat_{i}"] = feature in new_features
+                            
+                            st.session_state["species_cat_ms"] = [c for c in result.get('species_categories', []) if c in SPECIES_CATEGORIES]
+                            # st.text_input "value" argument takes precedence on rerun if key not in session state? 
+                            # No, if key in session state, it persists. We must update the key.
+                            # But wait, st.text_input with 'value' AND 'key'...
+                            # If we update session state[key], it updates the widget.
+                            st.session_state["spec_species_input"] = result.get('specialized_species', '')
+                            st.session_state["comp_stages_ms"] = [s for s in result.get('computational_stages', []) if s in COMPUTATIONAL_STAGES]
+
                             st.success("Done. Re-submit to apply.")
                             st.rerun()
                         else:
@@ -1110,6 +1155,7 @@ def render_data_entry_page():
                                 st.session_state.selected_entry_idx = min(idx, len(st.session_state.parsed_entries) - 1)
                             else:
                                 st.session_state.selected_entry_idx = None
+                            clear_form_state()
                             save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
                             st.rerun()
                     else:  # saved
@@ -1117,6 +1163,7 @@ def render_data_entry_page():
                             st.success("Updated.")
                             st.session_state.editing_saved_idx = None
                             st.session_state.ai_result = None
+                            clear_form_state()
                             st.rerun()
             
             if skip and form_mode == "pending":
@@ -1126,6 +1173,7 @@ def render_data_entry_page():
                 else:
                     st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
                 st.session_state.ai_result = None
+                clear_form_state()
                 save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
                 st.rerun()
             
@@ -1133,6 +1181,7 @@ def render_data_entry_page():
                 st.session_state.selected_entry_idx = None
                 st.session_state.editing_saved_idx = None
                 st.session_state.ai_result = None
+                clear_form_state()
                 st.rerun()
     else:
         st.info("Select an entry to annotate or edit.")
