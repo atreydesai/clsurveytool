@@ -176,39 +176,36 @@ def get_jsonl_content() -> str:
 # BIBTEX PARSING
 # ============================================================================
 
-def parse_bibtex(bibtex_str: str) -> dict:
-    """Parse a BibTeX entry and extract relevant fields."""
-    result = {
-        "title": "",
-        "year": "",
-        "journal": "",
-        "authors": [],
-        "doi": "",
-        "abstract": ""
-    }
+def parse_bibtex(bibtex_str: str) -> list:
+    """Parse a BibTeX file and extract all entries."""
+    results = []
     
     try:
         parser = bibtexparser.bparser.BibTexParser(common_strings=True)
         bib_database = bibtexparser.loads(bibtex_str, parser=parser)
         
-        if bib_database.entries:
-            entry = bib_database.entries[0]
-            result["title"] = entry.get("title", "").replace("{", "").replace("}", "")
-            result["year"] = entry.get("year", "")
-            result["journal"] = entry.get("journal", entry.get("booktitle", ""))
-            result["doi"] = entry.get("doi", "")
-            result["abstract"] = entry.get("abstract", "")
+        for entry in bib_database.entries:
+            parsed = {
+                "title": entry.get("title", "").replace("{", "").replace("}", ""),
+                "year": entry.get("year", ""),
+                "journal": entry.get("journal", entry.get("booktitle", "")),
+                "doi": entry.get("doi", ""),
+                "abstract": entry.get("abstract", ""),
+                "authors": [],
+                "bib_key": entry.get("ID", "")
+            }
             
             # Parse authors
             author_str = entry.get("author", "")
             if author_str:
-                # Split by 'and' and clean up
                 authors = [a.strip() for a in author_str.split(" and ")]
-                result["authors"] = authors
+                parsed["authors"] = authors
+            
+            results.append(parsed)
     except Exception as e:
         st.error(f"Error parsing BibTeX: {e}")
     
-    return result
+    return results
 
 
 def format_search_string(template: str, parsed: dict) -> str:
@@ -681,8 +678,9 @@ def create_network_graph(df: pd.DataFrame, node_type: str) -> Optional[str]:
 def init_session_state():
     """Initialize session state variables."""
     defaults = {
-        'parsed_bibtex': {},
-        'last_notes_time': 0,
+        'parsed_entries': [],  # List of parsed BibTeX entries
+        'selected_entry_idx': None,  # Currently selected entry to annotate
+        'last_bibtex': '',  # Last BibTeX content for change detection
         'ai_result': None,
         'auto_trigger': False,
         'search_template': '"{title}" by {author}, {journal}, {year}'
@@ -700,7 +698,7 @@ def render_sidebar():
         # Page navigation
         page = st.radio(
             "Navigate to:",
-            ["Data Entry", "Data Browser", "Analytics Dashboard"],
+            ["Data Entry", "Analytics Dashboard"],
             label_visibility="collapsed"
         )
         
@@ -747,168 +745,253 @@ def render_data_entry_page():
     """Render Page 1: Data Entry & Annotation."""
     st.header("Data Entry & Annotation")
     
-    # BibTeX Input Section
-    st.subheader("BibTeX Input")
+    # Load saved entries
+    saved_df = load_data()
+    saved_titles = set(saved_df['title'].tolist()) if not saved_df.empty else set()
     
-    bibtex_input = st.text_area(
-        "Paste BibTeX entry here:",
-        height=150,
-        placeholder="@article{...\n  title = {...},\n  author = {...},\n  ...\n}"
-    )
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Parse BibTeX", use_container_width=True):
-            if bibtex_input:
-                st.session_state.parsed_bibtex = parse_bibtex(bibtex_input)
-                st.success("BibTeX parsed.")
-            else:
-                st.warning("Please paste a BibTeX entry first.")
-    
-    with col2:
-        if st.button("Copy Search String", use_container_width=True):
-            if st.session_state.parsed_bibtex:
-                search_str = format_search_string(
-                    st.session_state.search_template,
-                    st.session_state.parsed_bibtex
-                )
-                st.code(search_str, language=None)
-                st.info("Copy the text above to search for this paper.")
-            else:
-                st.warning("Parse a BibTeX entry first.")
+    # === BibTeX Import Section ===
+    with st.expander("BibTeX Import", expanded=len(st.session_state.parsed_entries) == 0):
+        bibtex_input = st.text_area(
+            "Paste your entire .bib file here:",
+            height=200,
+            value=st.session_state.last_bibtex,
+            placeholder="@article{key1,\n  title = {...},\n  author = {...},\n}\n\n@article{key2,\n  ...\n}"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Parse BibTeX", use_container_width=True):
+                if bibtex_input:
+                    entries = parse_bibtex(bibtex_input)
+                    st.session_state.parsed_entries = entries
+                    st.session_state.last_bibtex = bibtex_input
+                    st.session_state.selected_entry_idx = None
+                    if entries:
+                        st.success(f"Parsed {len(entries)} entries.")
+                    else:
+                        st.warning("No valid entries found.")
+                    st.rerun()
+                else:
+                    st.warning("Paste BibTeX content first.")
+        
+        with col2:
+            if st.button("Clear All Parsed", use_container_width=True):
+                st.session_state.parsed_entries = []
+                st.session_state.last_bibtex = ''
+                st.session_state.selected_entry_idx = None
+                st.rerun()
+        
+        if st.session_state.parsed_entries:
+            st.caption(f"{len(st.session_state.parsed_entries)} entries parsed from BibTeX")
     
     st.divider()
     
-    # Form
-    with st.form("annotation_form"):
-        # Section A: Metadata
-        st.subheader("Section A: Metadata (Manual/Parsed)")
-        
-        parsed = st.session_state.parsed_bibtex
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            title = st.text_input("Title", value=parsed.get('title', ''))
-            year = st.text_input("Year Published", value=parsed.get('year', ''))
-            journal = st.text_input("Journal/Venue", value=parsed.get('journal', ''))
-        
-        with col2:
-            authors = st.text_area(
-                "Authors (one per line)",
-                value='\n'.join(parsed.get('authors', [])),
-                height=100
-            )
-        
-        analysis_notes = st.text_area(
-            "Analysis Notes (Abstract/Key Findings)",
-            height=200,
-            help="Enter your notes about the paper here. If auto-trigger is ON, AI will analyze this after you stop typing.",
-            value=parsed.get('abstract', '')
-        )
-        
-        st.markdown("**Author Affiliations:**")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            university = st.text_input("University/Institution")
-        with col2:
-            country = st.text_input("Country")
-        with col3:
-            discipline = st.selectbox("Discipline", [""] + DISCIPLINES)
-        
-        st.divider()
-        
-        # Section B: AI-Assisted Classification
-        st.subheader("Section B: AI-Assisted Classification")
-        st.caption("These fields can be auto-filled by AI based on Analysis Notes, or edited manually.")
-        
-        # AI trigger button
-        trigger_ai = st.form_submit_button("Run AI Analysis", type="secondary")
-        
-        # Linguistic Features
-        st.markdown("**Linguistic Features:**")
-        feature_cols = st.columns(3)
-        selected_features = []
-        
-        ai_features = st.session_state.ai_result.get('linguistic_features', []) if st.session_state.ai_result else []
-        
-        for i, feature in enumerate(LINGUISTIC_FEATURES):
-            with feature_cols[i % 3]:
-                default = feature in ai_features
-                if st.checkbox(feature, value=default, key=f"feat_{i}"):
-                    selected_features.append(feature)
-        
-        # Species
-        st.markdown("**Species:**")
-        col1, col2 = st.columns(2)
-        
-        ai_categories = st.session_state.ai_result.get('species_categories', []) if st.session_state.ai_result else []
-        ai_species = st.session_state.ai_result.get('specialized_species', '') if st.session_state.ai_result else ''
-        
-        with col1:
-            species_categories = st.multiselect(
-                "General Species Category",
-                SPECIES_CATEGORIES,
-                default=[c for c in ai_categories if c in SPECIES_CATEGORIES]
-            )
-        with col2:
-            specialized_species = st.text_input(
-                "Specialized Species (e.g., Tursiops truncatus)",
-                value=ai_species or ''
-            )
-        
-        # Computational Stage
-        ai_stages = st.session_state.ai_result.get('computational_stages', []) if st.session_state.ai_result else []
-        computational_stages = st.multiselect(
-            "Computational Stage",
-            COMPUTATIONAL_STAGES,
-            default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES]
-        )
-        
-        st.divider()
-        
-        # Submit button
-        submitted = st.form_submit_button("Add to Dataset", type="primary", use_container_width=True)
-        
-        if trigger_ai:
-            if analysis_notes:
-                with st.spinner("Analyzing with AI..."):
-                    result = call_ai_api(analysis_notes)
-                    if result:
-                        st.session_state.ai_result = result
-                        st.success("AI analysis complete. Re-submit to see updated values.")
-                        st.rerun()
-            else:
-                st.warning("Please enter Analysis Notes for AI to analyze.")
-        
-        if submitted:
-            # Validate required fields
-            if not title:
-                st.error("Title is required.")
-            elif not year:
-                st.error("Year is required.")
-            else:
-                # Build entry
-                entry = {
-                    "title": title,
-                    "year": year,
-                    "journal": journal,
-                    "authors": [a.strip() for a in authors.split('\n') if a.strip()],
-                    "analysis_notes": analysis_notes,
-                    "university": university,
-                    "country": country,
-                    "discipline": discipline,
-                    "linguistic_features": selected_features,
-                    "species_categories": species_categories,
-                    "specialized_species": specialized_species,
-                    "computational_stages": computational_stages,
-                    "created_at": datetime.now().isoformat()
-                }
+    # === Entry Browser (combines parsed + saved) ===
+    st.subheader("Entries")
+    
+    # Tabs for parsed vs saved
+    tab_parsed, tab_saved = st.tabs([
+        f"Pending ({len(st.session_state.parsed_entries)})", 
+        f"Saved ({len(saved_df)})"
+    ])
+    
+    with tab_parsed:
+        if not st.session_state.parsed_entries:
+            st.info("No parsed entries. Paste a .bib file above.")
+        else:
+            for idx, entry in enumerate(st.session_state.parsed_entries):
+                title = entry.get('title', 'Untitled')
+                year = entry.get('year', '?')
+                is_saved = title in saved_titles
+                status = " [saved]" if is_saved else ""
                 
-                if save_entry(entry):
-                    st.success("Entry saved.")
-                    # Clear state
-                    st.session_state.parsed_bibtex = {}
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.markdown(f"**{title}** ({year}){status}")
+                with col2:
+                    if st.button("Annotate", key=f"select_{idx}", disabled=is_saved):
+                        st.session_state.selected_entry_idx = idx
+                        st.session_state.ai_result = None
+                        st.rerun()
+    
+    with tab_saved:
+        if saved_df.empty:
+            st.info("No saved entries yet.")
+        else:
+            search = st.text_input("Search saved entries", placeholder="Filter by title...")
+            display_df = saved_df
+            if search:
+                display_df = saved_df[saved_df['title'].str.contains(search, case=False, na=False)]
+            
+            for original_idx, row in display_df.iterrows():
+                with st.expander(f"{row.get('title', 'Untitled')} ({row.get('year', 'N/A')})"):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
+                        authors = row.get('authors', [])
+                        if isinstance(authors, list) and authors:
+                            st.markdown(f"**Authors:** {', '.join(authors)}")
+                    with col2:
+                        species_cats = row.get('species_categories', [])
+                        if isinstance(species_cats, list) and species_cats:
+                            st.markdown(f"**Species:** {', '.join(species_cats)}")
+                    
+                    features = row.get('linguistic_features', [])
+                    if isinstance(features, list) and features:
+                        st.caption(f"Features: {', '.join(features)}")
+                    
+                    if st.button("Delete", key=f"del_{original_idx}"):
+                        delete_entry(original_idx)
+                        st.rerun()
+    
+    st.divider()
+    
+    # === Annotation Form ===
+    if st.session_state.selected_entry_idx is not None:
+        idx = st.session_state.selected_entry_idx
+        if idx < len(st.session_state.parsed_entries):
+            parsed = st.session_state.parsed_entries[idx]
+            
+            st.subheader(f"Annotating: {parsed.get('title', 'Untitled')}")
+            
+            # Search string helper
+            search_str = format_search_string(st.session_state.search_template, parsed)
+            with st.expander("Search String (for finding paper online)"):
+                st.code(search_str, language=None)
+            
+            with st.form("annotation_form"):
+                # Section A: Metadata
+                st.markdown("**Metadata**")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    title = st.text_input("Title", value=parsed.get('title', ''))
+                    year = st.text_input("Year", value=parsed.get('year', ''))
+                    journal = st.text_input("Journal/Venue", value=parsed.get('journal', ''))
+                with col2:
+                    authors = st.text_area(
+                        "Authors (one per line)",
+                        value='\n'.join(parsed.get('authors', [])),
+                        height=100
+                    )
+                
+                analysis_notes = st.text_area(
+                    "Analysis Notes",
+                    height=150,
+                    value=parsed.get('abstract', ''),
+                    help="Notes about the paper for AI analysis"
+                )
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    university = st.text_input("University/Institution")
+                with col2:
+                    country = st.text_input("Country")
+                with col3:
+                    discipline = st.selectbox("Discipline", [""] + DISCIPLINES)
+                
+                st.divider()
+                
+                # Section B: Classification
+                st.markdown("**Classification**")
+                
+                trigger_ai = st.form_submit_button("Run AI Analysis", type="secondary")
+                
+                ai_features = st.session_state.ai_result.get('linguistic_features', []) if st.session_state.ai_result else []
+                ai_categories = st.session_state.ai_result.get('species_categories', []) if st.session_state.ai_result else []
+                ai_species = st.session_state.ai_result.get('specialized_species', '') if st.session_state.ai_result else ''
+                ai_stages = st.session_state.ai_result.get('computational_stages', []) if st.session_state.ai_result else []
+                
+                st.markdown("**Linguistic Features:**")
+                feature_cols = st.columns(3)
+                selected_features = []
+                for i, feature in enumerate(LINGUISTIC_FEATURES):
+                    with feature_cols[i % 3]:
+                        if st.checkbox(feature, value=(feature in ai_features), key=f"feat_{i}"):
+                            selected_features.append(feature)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    species_categories = st.multiselect(
+                        "Species Category",
+                        SPECIES_CATEGORIES,
+                        default=[c for c in ai_categories if c in SPECIES_CATEGORIES]
+                    )
+                with col2:
+                    specialized_species = st.text_input(
+                        "Specialized Species",
+                        value=ai_species or ''
+                    )
+                
+                computational_stages = st.multiselect(
+                    "Computational Stage",
+                    COMPUTATIONAL_STAGES,
+                    default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES]
+                )
+                
+                st.divider()
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    submitted = st.form_submit_button("Save Entry", type="primary", use_container_width=True)
+                with col2:
+                    skip = st.form_submit_button("Skip (Next)", use_container_width=True)
+                
+                if trigger_ai:
+                    if analysis_notes:
+                        with st.spinner("Analyzing..."):
+                            result = call_ai_api(analysis_notes)
+                            if result:
+                                st.session_state.ai_result = result
+                                st.success("Done. Re-submit to apply.")
+                                st.rerun()
+                    else:
+                        st.warning("Add Analysis Notes first.")
+                
+                if submitted:
+                    if not title:
+                        st.error("Title required.")
+                    elif not year:
+                        st.error("Year required.")
+                    else:
+                        entry = {
+                            "title": title,
+                            "year": year,
+                            "journal": journal,
+                            "authors": [a.strip() for a in authors.split('\n') if a.strip()],
+                            "analysis_notes": analysis_notes,
+                            "university": university,
+                            "country": country,
+                            "discipline": discipline,
+                            "linguistic_features": selected_features,
+                            "species_categories": species_categories,
+                            "specialized_species": specialized_species,
+                            "computational_stages": computational_stages,
+                            "created_at": datetime.now().isoformat()
+                        }
+                        
+                        if save_entry(entry):
+                            st.success("Saved.")
+                            # Move to next entry
+                            st.session_state.parsed_entries.pop(idx)
+                            st.session_state.ai_result = None
+                            if st.session_state.parsed_entries:
+                                st.session_state.selected_entry_idx = min(idx, len(st.session_state.parsed_entries) - 1)
+                            else:
+                                st.session_state.selected_entry_idx = None
+                            st.rerun()
+                
+                if skip:
+                    # Move to next without saving
+                    next_idx = idx + 1
+                    if next_idx < len(st.session_state.parsed_entries):
+                        st.session_state.selected_entry_idx = next_idx
+                    else:
+                        st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
                     st.session_state.ai_result = None
+                    st.rerun()
+    else:
+        st.info("Select an entry from 'Pending' to annotate.")
 
 
 def delete_entry(index: int) -> bool:
@@ -1192,8 +1275,6 @@ def main():
     
     if page == "Data Entry":
         render_data_entry_page()
-    elif page == "Data Browser":
-        render_data_browser_page()
     else:
         render_analytics_page()
 
