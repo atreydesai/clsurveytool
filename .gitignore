@@ -22,3 +22,7 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data files (local only)
+pending_entries.json
+research_data.jsonl

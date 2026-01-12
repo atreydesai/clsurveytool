@@ -38,6 +38,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # ============================================================================
 
 DATA_FILE = "research_data.jsonl"
+PENDING_FILE = "pending_entries.json"
 
 LINGUISTIC_FEATURES = [
     "Vocal Auditory Channel and Turn-taking",
@@ -170,6 +171,30 @@ def get_jsonl_content() -> str:
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             return f.read()
     return ""
+
+
+def load_pending() -> dict:
+    """Load pending entries from JSON file."""
+    if os.path.exists(PENDING_FILE):
+        try:
+            with open(PENDING_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {'entries': [], 'bibtex': '', 'selected_idx': None}
+
+
+def save_pending(entries: list, bibtex: str, selected_idx):
+    """Save pending entries to JSON file."""
+    try:
+        with open(PENDING_FILE, 'w', encoding='utf-8') as f:
+            json.dump({
+                'entries': entries,
+                'bibtex': bibtex,
+                'selected_idx': selected_idx
+            }, f, ensure_ascii=False, indent=2)
+    except IOError as e:
+        st.error(f"Error saving pending entries: {e}")
 
 
 # ============================================================================
@@ -677,17 +702,20 @@ def create_network_graph(df: pd.DataFrame, node_type: str) -> Optional[str]:
 
 def init_session_state():
     """Initialize session state variables."""
-    defaults = {
-        'parsed_entries': [],  # List of parsed BibTeX entries
-        'selected_entry_idx': None,  # Currently selected entry to annotate
-        'last_bibtex': '',  # Last BibTeX content for change detection
-        'ai_result': None,
-        'auto_trigger': False,
-        'search_template': '"{title}" by {author}, {journal}, {year}'
-    }
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
+    # Load pending entries from file if not already in session
+    if 'parsed_entries' not in st.session_state:
+        pending = load_pending()
+        st.session_state.parsed_entries = pending.get('entries', [])
+        st.session_state.last_bibtex = pending.get('bibtex', '')
+        st.session_state.selected_entry_idx = pending.get('selected_idx')
+    
+    # Other defaults
+    if 'ai_result' not in st.session_state:
+        st.session_state.ai_result = None
+    if 'auto_trigger' not in st.session_state:
+        st.session_state.auto_trigger = False
+    if 'search_template' not in st.session_state:
+        st.session_state.search_template = '"{title}" by {author}, {journal}, {year}'
 
 
 def render_sidebar():
@@ -766,6 +794,7 @@ def render_data_entry_page():
                     st.session_state.parsed_entries = entries
                     st.session_state.last_bibtex = bibtex_input
                     st.session_state.selected_entry_idx = None
+                    save_pending(entries, bibtex_input, None)
                     if entries:
                         st.success(f"Parsed {len(entries)} entries.")
                     else:
@@ -779,6 +808,7 @@ def render_data_entry_page():
                 st.session_state.parsed_entries = []
                 st.session_state.last_bibtex = ''
                 st.session_state.selected_entry_idx = None
+                save_pending([], '', None)
                 st.rerun()
         
         if st.session_state.parsed_entries:
@@ -812,6 +842,7 @@ def render_data_entry_page():
                     if st.button("Annotate", key=f"select_{idx}", disabled=is_saved):
                         st.session_state.selected_entry_idx = idx
                         st.session_state.ai_result = None
+                        save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, idx)
                         st.rerun()
     
     with tab_saved:
@@ -979,6 +1010,7 @@ def render_data_entry_page():
                                 st.session_state.selected_entry_idx = min(idx, len(st.session_state.parsed_entries) - 1)
                             else:
                                 st.session_state.selected_entry_idx = None
+                            save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
                             st.rerun()
                 
                 if skip:
@@ -989,6 +1021,7 @@ def render_data_entry_page():
                     else:
                         st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
                     st.session_state.ai_result = None
+                    save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
                     st.rerun()
     else:
         st.info("Select an entry from 'Pending' to annotate.")
