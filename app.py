@@ -168,6 +168,31 @@ def save_entry(entry: dict) -> bool:
         return False
 
 
+def update_entry(index: int, updated_entry: dict) -> bool:
+    """Update an entry at a specific index in the JSONL file."""
+    try:
+        records = []
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        records.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+        
+        if 0 <= index < len(records):
+            records[index] = updated_entry
+            with open(DATA_FILE, 'w', encoding='utf-8') as f:
+                for record in records:
+                    f.write(json.dumps(record, ensure_ascii=False) + '\n')
+            return True
+        return False
+    except Exception as e:
+        st.error(f"Error updating entry: {e}")
+        return False
+
+
 def get_jsonl_content() -> str:
     """Get the full content of the JSONL file for download."""
     if os.path.exists(DATA_FILE):
@@ -719,6 +744,8 @@ def init_session_state():
         st.session_state.auto_trigger = False
     if 'search_template' not in st.session_state:
         st.session_state.search_template = '{title} {author} {journal} {year}'
+    if 'editing_saved_idx' not in st.session_state:
+        st.session_state.editing_saved_idx = None
 
 
 def render_sidebar():
@@ -861,147 +888,183 @@ def render_data_entry_page():
             
             st.caption(f"{len(display_df)} entries")
             
-            if not display_df.empty:
                 with st.container(height=300):
                     for original_idx, row in display_df.head(200).iterrows():
                         title = str(row.get('title', 'Untitled'))[:60]
                         year = row.get('year', '?')
+                        is_editing = st.session_state.editing_saved_idx == original_idx
                         
-                        with st.expander(f"{title} ({year})"):
+                        with st.expander(f"{title} ({year})" + (" [editing]" if is_editing else "")):
                             st.markdown(f"**Journal:** {row.get('journal', 'N/A')}")
-                            if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
-                                delete_entry(original_idx)
-                                st.rerun()
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                if st.button("Edit", key=f"edit_{original_idx}", type="primary" if is_editing else "secondary"):
+                                    st.session_state.editing_saved_idx = original_idx
+                                    st.session_state.selected_entry_idx = None  # Clear pending selection
+                                    st.session_state.ai_result = None
+                                    st.rerun()
+                            with col2:
+                                if st.button("Delete", key=f"del_{original_idx}", type="secondary"):
+                                    delete_entry(original_idx)
+                                    if st.session_state.editing_saved_idx == original_idx:
+                                        st.session_state.editing_saved_idx = None
+                                    st.rerun()
     
     st.divider()
     
     # === Annotation Form ===
-    if st.session_state.selected_entry_idx is not None:
-        idx = st.session_state.selected_entry_idx
-        if idx < len(st.session_state.parsed_entries):
+    # Determine if we're editing a pending entry or a saved entry
+    is_editing_pending = st.session_state.selected_entry_idx is not None and st.session_state.selected_entry_idx < len(st.session_state.parsed_entries)
+    is_editing_saved = st.session_state.editing_saved_idx is not None
+    
+    if is_editing_pending or is_editing_saved:
+        # Get the entry data
+        if is_editing_pending:
+            idx = st.session_state.selected_entry_idx
             parsed = st.session_state.parsed_entries[idx]
-            
+            form_mode = "pending"
             st.subheader(f"Annotating: {parsed.get('title', 'Untitled')}")
+        else:
+            idx = st.session_state.editing_saved_idx
+            # Load from saved data
+            saved_records = load_data()
+            if idx < len(saved_records):
+                parsed = saved_records.iloc[idx].to_dict()
+                form_mode = "saved"
+                st.subheader(f"Editing: {parsed.get('title', 'Untitled')}")
+            else:
+                st.session_state.editing_saved_idx = None
+                st.rerun()
+                return
+        
+        # Search string - one click to copy
+        search_str = format_search_string(st.session_state.search_template, parsed)
+        st.caption("Search String:")
+        st_copy_to_clipboard(search_str, before_copy_label=search_str, after_copy_label="Copied!")
+        
+        # Get existing values for editing saved entries
+        existing_authors = parsed.get('authors', [])
+        if isinstance(existing_authors, list):
+            authors_str = '\n'.join(existing_authors)
+        else:
+            authors_str = str(existing_authors)
+        
+        existing_features = parsed.get('linguistic_features', []) if isinstance(parsed.get('linguistic_features'), list) else []
+        existing_categories = parsed.get('species_categories', []) if isinstance(parsed.get('species_categories'), list) else []
+        existing_stages = parsed.get('computational_stages', []) if isinstance(parsed.get('computational_stages'), list) else []
+        
+        with st.form("annotation_form"):
+            st.markdown("**Metadata**")
             
-            # Search string - one click to copy
-            search_str = format_search_string(st.session_state.search_template, parsed)
-            st.caption("Search String:")
-            st_copy_to_clipboard(search_str, before_copy_label=search_str, after_copy_label="Copied!")
+            col1, col2 = st.columns(2)
+            with col1:
+                title = st.text_input("Title", value=parsed.get('title', ''))
+                year = st.text_input("Year", value=str(parsed.get('year', '')))
+                journal = st.text_input("Journal/Venue", value=parsed.get('journal', ''))
+            with col2:
+                authors = st.text_area("Authors (one per line)", value=authors_str, height=100)
             
-            with st.form("annotation_form"):
-                # Section A: Metadata
-                st.markdown("**Metadata**")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    title = st.text_input("Title", value=parsed.get('title', ''))
-                    year = st.text_input("Year", value=parsed.get('year', ''))
-                    journal = st.text_input("Journal/Venue", value=parsed.get('journal', ''))
-                with col2:
-                    authors = st.text_area(
-                        "Authors (one per line)",
-                        value='\n'.join(parsed.get('authors', [])),
-                        height=100
-                    )
-                
-                analysis_notes = st.text_area(
-                    "Analysis Notes",
-                    height=150,
-                    value=parsed.get('abstract', ''),
-                    help="Notes about the paper for AI analysis"
+            analysis_notes = st.text_area(
+                "Analysis Notes",
+                height=150,
+                value=parsed.get('analysis_notes', '') or parsed.get('abstract', ''),
+                help="Notes about the paper for AI analysis"
+            )
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                university = st.text_input("University/Institution", value=parsed.get('university', ''))
+            with col2:
+                country = st.text_input("Country", value=parsed.get('country', ''))
+            with col3:
+                disc_val = parsed.get('discipline', '')
+                disc_idx = DISCIPLINES.index(disc_val) + 1 if disc_val in DISCIPLINES else 0
+                discipline = st.selectbox("Discipline", [""] + DISCIPLINES, index=disc_idx)
+            
+            st.divider()
+            st.markdown("**Classification**")
+            
+            trigger_ai = st.form_submit_button("Run AI Analysis", type="secondary")
+            
+            # Use AI results if available, otherwise use existing values
+            ai_features = st.session_state.ai_result.get('linguistic_features', []) if st.session_state.ai_result else existing_features
+            ai_categories = st.session_state.ai_result.get('species_categories', []) if st.session_state.ai_result else existing_categories
+            ai_species = st.session_state.ai_result.get('specialized_species', '') if st.session_state.ai_result else parsed.get('specialized_species', '')
+            ai_stages = st.session_state.ai_result.get('computational_stages', []) if st.session_state.ai_result else existing_stages
+            
+            st.markdown("**Linguistic Features:**")
+            feature_cols = st.columns(3)
+            selected_features = []
+            for i, feature in enumerate(LINGUISTIC_FEATURES):
+                with feature_cols[i % 3]:
+                    if st.checkbox(feature, value=(feature in ai_features), key=f"feat_{i}"):
+                        selected_features.append(feature)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                species_categories = st.multiselect(
+                    "Species Category",
+                    SPECIES_CATEGORIES,
+                    default=[c for c in ai_categories if c in SPECIES_CATEGORIES]
                 )
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    university = st.text_input("University/Institution")
-                with col2:
-                    country = st.text_input("Country")
-                with col3:
-                    discipline = st.selectbox("Discipline", [""] + DISCIPLINES)
-                
-                st.divider()
-                
-                # Section B: Classification
-                st.markdown("**Classification**")
-                
-                trigger_ai = st.form_submit_button("Run AI Analysis", type="secondary")
-                
-                ai_features = st.session_state.ai_result.get('linguistic_features', []) if st.session_state.ai_result else []
-                ai_categories = st.session_state.ai_result.get('species_categories', []) if st.session_state.ai_result else []
-                ai_species = st.session_state.ai_result.get('specialized_species', '') if st.session_state.ai_result else ''
-                ai_stages = st.session_state.ai_result.get('computational_stages', []) if st.session_state.ai_result else []
-                
-                st.markdown("**Linguistic Features:**")
-                feature_cols = st.columns(3)
-                selected_features = []
-                for i, feature in enumerate(LINGUISTIC_FEATURES):
-                    with feature_cols[i % 3]:
-                        if st.checkbox(feature, value=(feature in ai_features), key=f"feat_{i}"):
-                            selected_features.append(feature)
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    species_categories = st.multiselect(
-                        "Species Category",
-                        SPECIES_CATEGORIES,
-                        default=[c for c in ai_categories if c in SPECIES_CATEGORIES]
-                    )
-                with col2:
-                    specialized_species = st.text_input(
-                        "Specialized Species",
-                        value=ai_species or ''
-                    )
-                
-                computational_stages = st.multiselect(
-                    "Computational Stage",
-                    COMPUTATIONAL_STAGES,
-                    default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES]
-                )
-                
-                st.divider()
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    submitted = st.form_submit_button("Save Entry", type="primary", use_container_width=True)
-                with col2:
-                    skip = st.form_submit_button("Skip (Next)", use_container_width=True)
-                
-                if trigger_ai:
-                    if analysis_notes:
-                        with st.spinner("Analyzing..."):
-                            result = call_ai_api(analysis_notes)
-                            if result:
-                                st.session_state.ai_result = result
-                                st.success("Done. Re-submit to apply.")
-                                st.rerun()
-                    else:
-                        st.warning("Add Analysis Notes first.")
-                
-                if submitted:
-                    if not title:
-                        st.error("Title required.")
-                    elif not year:
-                        st.error("Year required.")
-                    else:
-                        entry = {
-                            "title": title,
-                            "year": year,
-                            "journal": journal,
-                            "authors": [a.strip() for a in authors.split('\n') if a.strip()],
-                            "analysis_notes": analysis_notes,
-                            "university": university,
-                            "country": country,
-                            "discipline": discipline,
-                            "linguistic_features": selected_features,
-                            "species_categories": species_categories,
-                            "specialized_species": specialized_species,
-                            "computational_stages": computational_stages,
-                            "created_at": datetime.now().isoformat()
-                        }
-                        
+            with col2:
+                specialized_species = st.text_input("Specialized Species", value=ai_species or '')
+            
+            computational_stages = st.multiselect(
+                "Computational Stage",
+                COMPUTATIONAL_STAGES,
+                default=[s for s in ai_stages if s in COMPUTATIONAL_STAGES]
+            )
+            
+            st.divider()
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                submitted = st.form_submit_button("Save", type="primary", use_container_width=True)
+            with col2:
+                if form_mode == "pending":
+                    skip = st.form_submit_button("Skip", use_container_width=True)
+                else:
+                    skip = False
+            with col3:
+                cancel = st.form_submit_button("Cancel", use_container_width=True)
+            
+            if trigger_ai:
+                if analysis_notes:
+                    with st.spinner("Analyzing..."):
+                        result = call_ai_api(analysis_notes)
+                        if result:
+                            st.session_state.ai_result = result
+                            st.success("Done. Re-submit to apply.")
+                            st.rerun()
+                else:
+                    st.warning("Add Analysis Notes first.")
+            
+            if submitted:
+                if not title:
+                    st.error("Title required.")
+                elif not year:
+                    st.error("Year required.")
+                else:
+                    entry = {
+                        "title": title,
+                        "year": year,
+                        "journal": journal,
+                        "authors": [a.strip() for a in authors.split('\n') if a.strip()],
+                        "analysis_notes": analysis_notes,
+                        "university": university,
+                        "country": country,
+                        "discipline": discipline,
+                        "linguistic_features": selected_features,
+                        "species_categories": species_categories,
+                        "specialized_species": specialized_species,
+                        "computational_stages": computational_stages,
+                        "created_at": parsed.get('created_at', datetime.now().isoformat())
+                    }
+                    
+                    if form_mode == "pending":
                         if save_entry(entry):
                             st.success("Saved.")
-                            # Move to next entry
                             st.session_state.parsed_entries.pop(idx)
                             st.session_state.ai_result = None
                             if st.session_state.parsed_entries:
@@ -1010,19 +1073,30 @@ def render_data_entry_page():
                                 st.session_state.selected_entry_idx = None
                             save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
                             st.rerun()
-                
-                if skip:
-                    # Move to next without saving
-                    next_idx = idx + 1
-                    if next_idx < len(st.session_state.parsed_entries):
-                        st.session_state.selected_entry_idx = next_idx
-                    else:
-                        st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
-                    st.session_state.ai_result = None
-                    save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
-                    st.rerun()
+                    else:  # saved
+                        if update_entry(idx, entry):
+                            st.success("Updated.")
+                            st.session_state.editing_saved_idx = None
+                            st.session_state.ai_result = None
+                            st.rerun()
+            
+            if skip and form_mode == "pending":
+                next_idx = idx + 1
+                if next_idx < len(st.session_state.parsed_entries):
+                    st.session_state.selected_entry_idx = next_idx
+                else:
+                    st.session_state.selected_entry_idx = 0 if st.session_state.parsed_entries else None
+                st.session_state.ai_result = None
+                save_pending(st.session_state.parsed_entries, st.session_state.last_bibtex, st.session_state.selected_entry_idx)
+                st.rerun()
+            
+            if cancel:
+                st.session_state.selected_entry_idx = None
+                st.session_state.editing_saved_idx = None
+                st.session_state.ai_result = None
+                st.rerun()
     else:
-        st.info("Select an entry from 'Pending' to annotate.")
+        st.info("Select an entry to annotate or edit.")
 
 
 def delete_entry(index: int) -> bool:
