@@ -287,7 +287,6 @@ def call_ai_api(notes: str) -> Optional[dict]:
         
         response = client.chat.completions.create(
             model="gpt-5-nano-2025-08-07",
-            temperature=0,
             messages=[
                 {"role": "system", "content": AI_SYSTEM_PROMPT},
                 {"role": "user", "content": f"Research paper notes:\n\n{notes}"}
