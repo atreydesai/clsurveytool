@@ -27,13 +27,8 @@ import tempfile
 from dotenv import load_dotenv
 load_dotenv()
 
-# Try to import AI libraries
-try:
-    from langchain_openai import ChatOpenAI
-    from langchain.schema import HumanMessage, SystemMessage
-    LANGCHAIN_AVAILABLE = True
-except ImportError:
-    LANGCHAIN_AVAILABLE = False
+# Import OpenAI
+from openai import OpenAI
 
 # Get API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -233,28 +228,23 @@ def format_search_string(template: str, parsed: dict) -> str:
 
 def call_ai_api(notes: str) -> Optional[dict]:
     """Call the OpenAI API to analyze notes and extract structured data."""
-    if not LANGCHAIN_AVAILABLE:
-        st.warning("LangChain not available. Install langchain-openai.")
-        return None
-    
     if not OPENAI_API_KEY:
         st.warning("OPENAI_API_KEY not set in .env file.")
         return None
     
     try:
-        llm = ChatOpenAI(
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        response = client.chat.completions.create(
             model="gpt-5-nano-2025-08-07",
-            api_key=OPENAI_API_KEY,
-            temperature=0
+            temperature=0,
+            messages=[
+                {"role": "system", "content": AI_SYSTEM_PROMPT},
+                {"role": "user", "content": f"Research paper notes:\n\n{notes}"}
+            ]
         )
         
-        messages = [
-            SystemMessage(content=AI_SYSTEM_PROMPT),
-            HumanMessage(content=f"Research paper notes:\n\n{notes}")
-        ]
-        
-        response = llm.invoke(messages)
-        content = response.content
+        content = response.choices[0].message.content
         
         # Extract JSON from response
         json_match = re.search(r'\{[\s\S]*\}', content)
