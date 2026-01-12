@@ -715,7 +715,7 @@ def init_session_state():
     if 'auto_trigger' not in st.session_state:
         st.session_state.auto_trigger = False
     if 'search_template' not in st.session_state:
-        st.session_state.search_template = '"{title}" by {author}, {journal}, {year}'
+        st.session_state.search_template = '{title} {author} {journal} {year}'
 
 
 def render_sidebar():
@@ -911,10 +911,9 @@ def render_data_entry_page():
             
             st.subheader(f"Annotating: {parsed.get('title', 'Untitled')}")
             
-            # Search string helper
+            # Search string - always visible, click to copy
             search_str = format_search_string(st.session_state.search_template, parsed)
-            with st.expander("Search String (for finding paper online)"):
-                st.code(search_str, language=None)
+            st.text_input("Search String (click to copy)", value=search_str, disabled=False, key="search_copy")
             
             with st.form("annotation_form"):
                 # Section A: Metadata
