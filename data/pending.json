@@ -1,44 +1,5 @@
 [
   {
-    "id": "1eea6165-8eec-442c-9982-3c1b45f0fb6c",
-    "title": "The Origin of Speech",
-    "authors": [
-      "Hockett,  Charles F."
-    ],
-    "year": "1960",
-    "journal": "Scientific American",
-    "abstract": "",
-    "doi": "10.1038/scientificamerican0960-88",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.882639",
-    "updated_at": "2026-01-13T12:53:01.995072"
-  },
-  {
-    "id": "6161760c-d002-497b-9782-7f1da871009a",
-    "title": "A Critical Companion to Zoosemiotics:",
-    "authors": [
-      "Martinelli,  Dario"
-    ],
-    "year": "2010",
-    "journal": "Biosemiotics",
-    "abstract": "",
-    "doi": "10.1007/978-90-481-9249-6",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.882657"
-  },
-  {
     "id": "2955d7b2-5dc8-4e76-8426-e9f10c023de5",
     "title": "Derived vocalizations of geladas (Theropithecus gelada) and the evolution of vocal complexity in primates",
     "authors": [
@@ -57,7 +18,8 @@
     "computational_stages": [],
     "linguistic_features": [],
     "status": "pending",
-    "created_at": "2026-01-13T12:49:59.882666"
+    "created_at": "2026-01-13T12:49:59.882666",
+    "updated_at": "2026-01-13T13:25:30.021110"
   },
   {
     "id": "582bfd51-8d4d-4c45-be29-3104800fc8d8",

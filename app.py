@@ -52,29 +52,50 @@ LINGUISTIC_FEATURES = [
     "Learnability"
 ]
 
-DISCIPLINES = [
-    "Biology", "Ecology", "Animal Behavior", "Neuroscience", "Bioacoustics",
-    "Linguistics", "Computer Science", "AI/ML", "Psychology", "Cognitive Science",
-    "Zoology", "Marine Biology", "Veterinary Science", "Anthropology", "Other"
+DISCIPLINES = ["Linguistics", "Computer Science", "Biology", "Other"]
+
+COUNTRIES = [
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia", "Australia",
+    "Austria", "Azerbaijan", "Bahrain", "Bangladesh", "Belarus", "Belgium", "Bhutan", "Bolivia",
+    "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Cambodia", "Cameroon",
+    "Canada", "Chile", "China", "Colombia", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+    "Denmark", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Estonia", "Ethiopia",
+    "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Guatemala", "Honduras", "Hong Kong",
+    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica",
+    "Japan", "Jordan", "Kazakhstan", "Kenya", "Kuwait", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
+    "Malaysia", "Maldives", "Malta", "Mexico", "Moldova", "Monaco", "Mongolia", "Morocco", "Myanmar",
+    "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan",
+    "Panama", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia",
+    "Saudi Arabia", "Senegal", "Serbia", "Singapore", "Slovakia", "Slovenia", "South Africa",
+    "South Korea", "Spain", "Sri Lanka", "Sudan", "Sweden", "Switzerland", "Syria", "Taiwan",
+    "Tanzania", "Thailand", "Tunisia", "Turkey", "UAE", "Uganda", "UK", "Ukraine", "Uruguay", "United States",
+    "Uzbekistan", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ]
 
-AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract:
-1. Specific animal species (main ones, include all if multiple focuses)
-2. General species category from: Amphibian, Terrestrial Mammal, Marine Mammal, Bird, Primate, Reptile, Fish, Insect, Other
-3. Computational stages from: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation
-4. Which of these 12 linguistic features are present:
-   - Vocal Auditory Channel and Turn-taking
-   - Broadcast and Direct Reception
-   - Reference and Displacement
-   - Specialization
-   - Arbitrariness and Duality of Patterns
-   - Discreteness and Syntax
-   - Recursion
-   - Semanticity
-   - Prevarication
-   - Openness
-   - Tradition and Cultural Transmission
-   - Learnability
+AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species (focus on the main ones, but if there are multiple substantial focuses then include all), general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
+
+Definition of the computational stages:
+1. Data Collection: This stage involves the acquisition of high-quality, contextualized animal vocalizations and videos from sources such as wild recordings, laboratory experiments, and crowdsourced citizen science platforms. It serves as the foundation for the pipeline by building large, diverse datasets that capture the rich behavioral contexts necessary for analysis.
+2. Pre-processing: Preprocessing applies computational techniques like denoising and sound source separation to isolate pure animal vocals from environmental background noise or overlapping signals. Additionally, it utilizes sound event detection to accurately identify and segment specific acoustic events within long-form recordings for further study.
+3. Sequence Representation: In this stage, vocal segments are divided into smaller, fine-grained units and tokenized into discrete symbols or "phones" to create a structural repertoire. These representations allow researchers to model the syntactical patterns of animal communication and discover underlying phonetic alphabets.
+4. Meaning Identification: This process employs machine learning classifiers and statistical correlations to associate specific vocal tokens with semantic meanings, such as emotional states, individual identities, or environmental contexts. By analyzing these relationships, researchers attempt to uncover the functional intent and communicative structure behind animal signals.
+5. Generation: Generation uses statistical sequence models or deep generative neural networks to synthesize realistic, targeted animal vocalizations for use in controlled playback experiments. This final stage completes the computational loop, enabling researchers to test biological hypotheses and potentially move toward human-to-animal translation.
+
+The 12 linguistic features are:
+1. Vocal Auditory Channel and Turn-taking: The exchange of language, where communication will occur by the producer emitting sounds i.e. speech, and the receiving of these sounds by another animal completes the exchange. Turn-taking refers to the taking of turns when communicating.
+2. Broadcast and Direct Reception: Vocalizations can be sent out in all directions but will be localized in space by the receiver.
+3. Reference and Displacement: Reference is the relationship between an object and its associated vocalization/word. Displacement is an animal's ability to refer to objects that are remote in time and space.
+4. Specialization: The idea that the meaning of a word is not dependent on how softly or loudly it is said.
+5. Arbitrariness and Duality of Patterns: Words sound different from their inherent meaning, i.e., a long word doesn't need to represent a complex idea.
+6. Discreteness and Syntax: Vocabulary is made of distinct units, and syntax is the way these units are strung together to form words and sentences.
+7. Recursion: The structuring of language. It occurs when units of words are repeated within the words.
+8. Semanticity: Words have meaning and are used to explain features of the world.
+9. Prevarication: With access to language, animals also have access to lie and deceive one another.
+10. Openness: The ability to generate new words/create new messages.
+11. Tradition and Cultural Transmission: Tradition is the ability of animals to learn/teach their language, and cultural transmission is the passing down of language.
+12. Learnability: Ability of an animal to learn another species' language or dialects outside of what an animal has been taught.
+
+Species categories: Amphibian, Terrestrial Mammal, Marine Mammal, Bird, Primate, Reptile, Fish, Insect, Other
 
 Return JSON only:
 {
@@ -229,6 +250,14 @@ def get_entries():
     """Get all entries (pending + saved)."""
     pending = load_pending()
     saved = load_dataset()
+    
+    # Collect known universities from all entries
+    known_universities = set()
+    for entry in pending + saved:
+        for aff in entry.get('affiliations', []):
+            if aff.get('university'):
+                known_universities.add(aff['university'])
+    
     return jsonify({
         'pending': pending,
         'saved': saved,
@@ -236,7 +265,9 @@ def get_entries():
             'species_categories': SPECIES_CATEGORIES,
             'computational_stages': COMPUTATIONAL_STAGES,
             'linguistic_features': LINGUISTIC_FEATURES,
-            'disciplines': DISCIPLINES
+            'disciplines': DISCIPLINES,
+            'countries': COUNTRIES,
+            'known_universities': sorted(list(known_universities))
         }
     })
 

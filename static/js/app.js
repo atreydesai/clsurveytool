@@ -214,9 +214,15 @@ function renderEditor() {
                             <tbody id="affiliations-body">
                                 ${(entry.affiliations || []).map((aff, i) => `
                                     <tr data-index="${i}">
-                                        <td><input type="text" class="aff-university" value="${escapeHtml(aff.university || '')}"></td>
-                                        <td><input type="text" class="aff-country" value="${escapeHtml(aff.country || '')}"></td>
-                                        <td><input type="text" class="aff-discipline" value="${escapeHtml(aff.discipline || '')}"></td>
+                                        <td class="autocomplete-cell">
+                                            <input type="text" class="aff-university autocomplete-input" data-list="universities" value="${escapeHtml(aff.university || '')}" placeholder="Start typing...">
+                                        </td>
+                                        <td class="autocomplete-cell">
+                                            <input type="text" class="aff-country autocomplete-input" data-list="countries" value="${escapeHtml(aff.country || '')}">
+                                        </td>
+                                        <td class="autocomplete-cell">
+                                            <input type="text" class="aff-discipline autocomplete-input" data-list="disciplines" value="${escapeHtml(aff.discipline || '')}">
+                                        </td>
                                         <td><button class="btn btn-danger btn-small aff-remove">×</button></td>
                                     </tr>
                                 `).join('')}
@@ -228,17 +234,25 @@ function renderEditor() {
                     <!-- Species Categories -->
                     <div class="form-group">
                         <label>Species Categories</label>
-                        <div class="tag-list" id="species-tags">
-                            ${(entry.species_categories || []).map(cat => `
-                                <span class="tag">${escapeHtml(cat)} <span class="tag-remove" data-value="${escapeHtml(cat)}">×</span></span>
-                            `).join('')}
+                        <div class="dual-select" data-field="species_categories">
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Available</div>
+                                <div class="dual-select-options available">
+                                    ${(state.constants.species_categories || [])
+            .filter(cat => !(entry.species_categories || []).includes(cat))
+            .map(cat => `<button type="button" class="select-item" data-value="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`)
+            .join('')}
+                                </div>
+                            </div>
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Selected</div>
+                                <div class="dual-select-options selected">
+                                    ${(entry.species_categories || [])
+            .map(cat => `<button type="button" class="select-item selected" data-value="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`)
+            .join('') || '<span class="empty-hint">Click to add</span>'}
+                                </div>
+                            </div>
                         </div>
-                        <select id="field-species-category" style="margin-top: 0.5rem;">
-                            <option value="">Add category...</option>
-                            ${(state.constants.species_categories || []).map(cat => `
-                                <option value="${escapeHtml(cat)}" ${(entry.species_categories || []).includes(cat) ? 'disabled' : ''}>${escapeHtml(cat)}</option>
-                            `).join('')}
-                        </select>
                     </div>
                     
                     <!-- Specialized Species -->
@@ -250,29 +264,48 @@ function renderEditor() {
                     <!-- Computational Stages -->
                     <div class="form-group">
                         <label>Computational Stages</label>
-                        <div class="tag-list" id="stages-tags">
-                            ${(entry.computational_stages || []).map(stage => `
-                                <span class="tag">${escapeHtml(stage)} <span class="tag-remove" data-value="${escapeHtml(stage)}">×</span></span>
-                            `).join('')}
+                        <div class="dual-select" data-field="computational_stages">
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Available</div>
+                                <div class="dual-select-options available">
+                                    ${(state.constants.computational_stages || [])
+            .filter(stage => !(entry.computational_stages || []).includes(stage))
+            .map(stage => `<button type="button" class="select-item" data-value="${escapeHtml(stage)}">${escapeHtml(stage)}</button>`)
+            .join('')}
+                                </div>
+                            </div>
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Selected</div>
+                                <div class="dual-select-options selected">
+                                    ${(entry.computational_stages || [])
+            .map(stage => `<button type="button" class="select-item selected" data-value="${escapeHtml(stage)}">${escapeHtml(stage)}</button>`)
+            .join('') || '<span class="empty-hint">Click to add</span>'}
+                                </div>
+                            </div>
                         </div>
-                        <select id="field-computational-stage" style="margin-top: 0.5rem;">
-                            <option value="">Add stage...</option>
-                            ${(state.constants.computational_stages || []).map(stage => `
-                                <option value="${escapeHtml(stage)}" ${(entry.computational_stages || []).includes(stage) ? 'disabled' : ''}>${escapeHtml(stage)}</option>
-                            `).join('')}
-                        </select>
                     </div>
                     
                     <!-- Linguistic Features -->
                     <div class="form-group">
                         <label>Linguistic Features</label>
-                        <div class="checkbox-grid-compact" id="features-grid">
-                            ${(state.constants.linguistic_features || []).map((feat, i) => `
-                                <label class="checkbox-item ${(entry.linguistic_features || []).includes(feat) ? 'checked' : ''}">
-                                    <input type="checkbox" value="${escapeHtml(feat)}" ${(entry.linguistic_features || []).includes(feat) ? 'checked' : ''}>
-                                    ${escapeHtml(feat)}
-                                </label>
-                            `).join('')}
+                        <div class="dual-select dual-select-tall" data-field="linguistic_features">
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Available</div>
+                                <div class="dual-select-options available">
+                                    ${(state.constants.linguistic_features || [])
+            .filter(feat => !(entry.linguistic_features || []).includes(feat))
+            .map(feat => `<button type="button" class="select-item" data-value="${escapeHtml(feat)}">${escapeHtml(feat)}</button>`)
+            .join('')}
+                                </div>
+                            </div>
+                            <div class="dual-select-pane">
+                                <div class="dual-select-header">Selected</div>
+                                <div class="dual-select-options selected">
+                                    ${(entry.linguistic_features || [])
+            .map(feat => `<button type="button" class="select-item selected" data-value="${escapeHtml(feat)}">${escapeHtml(feat)}</button>`)
+            .join('') || '<span class="empty-hint">Click to add</span>'}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -360,62 +393,97 @@ function attachEditorHandlers(entry) {
         });
     });
 
-    // Affiliation input changes
-    document.querySelectorAll('.affiliations-table input').forEach(input => {
-        input.addEventListener('input', () => debounceAutoSave(entry));
-    });
+    // Affiliation input changes with custom autocomplete
+    document.querySelectorAll('.autocomplete-input').forEach(input => {
+        const listType = input.dataset.list;
+        let options = [];
 
-    // Species category select
-    document.getElementById('field-species-category')?.addEventListener('change', (e) => {
-        if (e.target.value) {
-            if (!entry.species_categories) entry.species_categories = [];
-            if (!entry.species_categories.includes(e.target.value)) {
-                entry.species_categories.push(e.target.value);
-                saveEntry(entry.id, { species_categories: entry.species_categories });
-                renderEditor();
-            }
+        if (listType === 'universities') {
+            // Combine known universities with current entry's universities
+            const currentUnis = (entry.affiliations || []).map(a => a.university).filter(u => u);
+            options = [...new Set([...(state.constants.known_universities || []), ...currentUnis])];
+        } else if (listType === 'countries') {
+            options = state.constants.countries || [];
+        } else if (listType === 'disciplines') {
+            options = state.constants.disciplines || [];
         }
-    });
 
-    // Remove species category
-    document.querySelectorAll('#species-tags .tag-remove').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const value = btn.dataset.value;
-            entry.species_categories = (entry.species_categories || []).filter(c => c !== value);
-            saveEntry(entry.id, { species_categories: entry.species_categories });
-            renderEditor();
+        // Create dropdown container
+        let dropdown = input.parentElement.querySelector('.autocomplete-dropdown');
+        if (!dropdown) {
+            dropdown = document.createElement('div');
+            dropdown.className = 'autocomplete-dropdown';
+            input.parentElement.appendChild(dropdown);
+        }
+
+        const showDropdown = () => {
+            const query = input.value.toLowerCase();
+            const filtered = options.filter(opt => opt.toLowerCase().includes(query));
+
+            if (filtered.length === 0 || (filtered.length === 1 && filtered[0].toLowerCase() === query)) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            dropdown.innerHTML = filtered.slice(0, 8).map((opt, i) => `
+                <div class="autocomplete-option ${i === 0 ? 'first' : ''}">${escapeHtml(opt)}</div>
+            `).join('');
+            dropdown.style.display = 'block';
+
+            dropdown.querySelectorAll('.autocomplete-option').forEach(opt => {
+                opt.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    input.value = opt.textContent;
+                    dropdown.style.display = 'none';
+                    debounceAutoSave(entry);
+                });
+            });
+        };
+
+        input.addEventListener('input', () => {
+            showDropdown();
+            debounceAutoSave(entry);
+        });
+
+        input.addEventListener('focus', showDropdown);
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => dropdown.style.display = 'none', 150);
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const firstOption = dropdown.querySelector('.autocomplete-option');
+                if (firstOption && dropdown.style.display === 'block') {
+                    input.value = firstOption.textContent;
+                    dropdown.style.display = 'none';
+                    debounceAutoSave(entry);
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+            }
         });
     });
 
-    // Computational stage select
-    document.getElementById('field-computational-stage')?.addEventListener('change', (e) => {
-        if (e.target.value) {
-            if (!entry.computational_stages) entry.computational_stages = [];
-            if (!entry.computational_stages.includes(e.target.value)) {
-                entry.computational_stages.push(e.target.value);
-                saveEntry(entry.id, { computational_stages: entry.computational_stages });
-                renderEditor();
-            }
-        }
-    });
-
-    // Remove computational stage
-    document.querySelectorAll('#stages-tags .tag-remove').forEach(btn => {
+    // Dual-select handlers for species, stages, and features
+    document.querySelectorAll('.dual-select .select-item').forEach(btn => {
         btn.addEventListener('click', () => {
             const value = btn.dataset.value;
-            entry.computational_stages = (entry.computational_stages || []).filter(s => s !== value);
-            saveEntry(entry.id, { computational_stages: entry.computational_stages });
-            renderEditor();
-        });
-    });
+            const field = btn.closest('.dual-select').dataset.field;
 
-    // Linguistic features checkboxes
-    document.querySelectorAll('#features-grid input').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const checked = Array.from(document.querySelectorAll('#features-grid input:checked'))
-                .map(cb => cb.value);
-            entry.linguistic_features = checked;
-            saveEntry(entry.id, { linguistic_features: checked });
+            if (!entry[field]) entry[field] = [];
+
+            if (entry[field].includes(value)) {
+                // Remove from selected
+                entry[field] = entry[field].filter(v => v !== value);
+            } else {
+                // Add to selected
+                entry[field].push(value);
+            }
+
+            saveEntry(entry.id, { [field]: entry[field] });
+            renderEditor();  // Re-render for smooth transition
         });
     });
 }
