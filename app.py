@@ -319,13 +319,16 @@ def get_entries():
     pending = load_pending()
     saved = load_dataset()
     
-    # Collect known universities and disciplines from all entries
+    # Collect known universities, countries, and disciplines from all entries
     known_universities = set()
+    known_countries = set(COUNTRIES)  # Start with base countries
     known_disciplines = set(DISCIPLINES)  # Start with base disciplines
     for entry in pending + saved:
         for aff in entry.get('affiliations', []):
             if aff.get('university'):
                 known_universities.add(aff['university'])
+            if aff.get('country'):
+                known_countries.add(aff['country'])
             if aff.get('discipline'):
                 known_disciplines.add(aff['discipline'])
     
@@ -337,7 +340,7 @@ def get_entries():
             'computational_stages': COMPUTATIONAL_STAGES,
             'linguistic_features': LINGUISTIC_FEATURES,
             'disciplines': sorted(list(known_disciplines)),
-            'countries': COUNTRIES,
+            'countries': sorted(list(known_countries)),
             'known_universities': sorted(list(known_universities))
         }
     })
