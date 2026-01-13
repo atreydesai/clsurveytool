@@ -6,6 +6,7 @@ A simple web app for annotating computational linguistics research papers.
 import os
 import json
 import uuid
+from pathlib import Path
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from dotenv import load_dotenv
@@ -72,7 +73,7 @@ COUNTRIES = [
     "Uzbekistan", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ]
 
-AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species (focus on the main ones, but if there are multiple substantial focuses then include all), general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
+AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species (focus on the main ones, but if there are multiple substantial focuses then include all. This should also be general name not scientific name), general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
 
 Definition of the computational stages:
 1. Data Collection: This stage involves the acquisition of high-quality, contextualized animal vocalizations and videos from sources such as wild recordings, laboratory experiments, and crowdsourced citizen science platforms. It serves as the foundation for the pipeline by building large, diverse datasets that capture the rich behavioral contexts necessary for analysis.
@@ -229,7 +230,24 @@ def analyze_with_ai(notes):
             ],
             response_format={"type": "json_object"}
         )
-        result = json.loads(response.choices[0].message.content)
+        raw_response = response.choices[0].message.content
+        result = json.loads(raw_response)
+        
+        # Log the raw AI response (keep last 10)
+        log_file = Path('ai_logs.txt')
+        log_entry = f"\n{'='*80}\nTimestamp: {datetime.now().isoformat()}\nNotes: {notes[:500]}...\nRaw Response:\n{raw_response}\n"
+        
+        try:
+            existing = log_file.read_text() if log_file.exists() else ""
+            # Split by separator and keep last 9, then add new entry
+            entries = existing.split('='*80)
+            entries = [e.strip() for e in entries if e.strip()]
+            entries = entries[-9:]  # Keep last 9
+            entries.append(log_entry.strip())
+            log_file.write_text(('='*80 + '\n').join([''] + entries))
+        except Exception as log_error:
+            print(f"Log error: {log_error}")
+        
         return result
     except Exception as e:
         return {'error': str(e)}
@@ -251,12 +269,15 @@ def get_entries():
     pending = load_pending()
     saved = load_dataset()
     
-    # Collect known universities from all entries
+    # Collect known universities and disciplines from all entries
     known_universities = set()
+    known_disciplines = set(DISCIPLINES)  # Start with base disciplines
     for entry in pending + saved:
         for aff in entry.get('affiliations', []):
             if aff.get('university'):
                 known_universities.add(aff['university'])
+            if aff.get('discipline'):
+                known_disciplines.add(aff['discipline'])
     
     return jsonify({
         'pending': pending,
@@ -265,7 +286,7 @@ def get_entries():
             'species_categories': SPECIES_CATEGORIES,
             'computational_stages': COMPUTATIONAL_STAGES,
             'linguistic_features': LINGUISTIC_FEATURES,
-            'disciplines': DISCIPLINES,
+            'disciplines': sorted(list(known_disciplines)),
             'countries': COUNTRIES,
             'known_universities': sorted(list(known_universities))
         }
