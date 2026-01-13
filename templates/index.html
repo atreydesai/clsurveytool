@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CL Survey Tool</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>CL Survey Tool</h1>
+            <nav class="nav">
+                <button id="btn-import" class="btn btn-primary">Import BibTeX</button>
+                <button id="btn-analytics" class="btn">Analytics</button>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Left Panel: Entry List -->
+            <aside class="sidebar">
+                <div class="tabs">
+                    <button class="tab active" data-tab="pending">Pending <span id="pending-count">0</span></button>
+                    <button class="tab" data-tab="saved">Saved <span id="saved-count">0</span></button>
+                </div>
+                <div class="entry-list" id="entry-list">
+                    <!-- Entries rendered by JS -->
+                </div>
+            </aside>
+
+            <!-- Right Panel: Editor -->
+            <section class="editor" id="editor">
+                <div class="editor-placeholder">
+                    <p>Select an entry to edit</p>
+                </div>
+            </section>
+
+            <!-- Analytics Panel (hidden by default) -->
+            <section class="analytics" id="analytics" style="display: none;">
+                <h2>Analytics Dashboard</h2>
+                <div class="stats-grid" id="stats-grid">
+                    <!-- Stats rendered by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Import Modal -->
+        <div class="modal" id="import-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Import BibTeX</h2>
+                    <button class="modal-close" id="modal-close">&times;</button>
+                </div>
+                <textarea id="bibtex-input" placeholder="Paste your .bib file contents here..."></textarea>
+                <div class="modal-actions">
+                    <button id="btn-parse" class="btn btn-primary">Parse & Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
