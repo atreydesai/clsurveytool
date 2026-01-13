@@ -73,7 +73,9 @@ COUNTRIES = [
     "Uzbekistan", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ]
 
-AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper. Extract the specific animal species (focus on the main ones, but if there are multiple substantial focuses then include all. This should also be general name not scientific name), general species category, computational stages (from the list: Data Collection, Pre-processing, Sequence Representation, Meaning Identification, Generation), and which of the 12 linguistic features are present.
+AI_SYSTEM_PROMPT = """Analyze the following notes about a research paper based on what is explicitly stated in the text. This task supports a survey paper on computational animal linguistics. Try not to infer, extrapolate, or generalize beyond the information given. 
+
+Extract only those elements that are supported by the notes: Specific animal species (use common names only). Include multiple species only if each is a primary focus of the study, not incidental or comparative. General species categories corresponding to the included species. Computational stages only if the paper describes methods or analyses that match the provided stage definitions. Linguistic features if the paper provides direct evidence, analysis, or claims addressing that feature. If only given the abstract, you can loosen this criteria slightly to prevent information loss.
 
 Definition of the computational stages:
 1. Data Collection: This stage involves the acquisition of high-quality, contextualized animal vocalizations and videos from sources such as wild recordings, laboratory experiments, and crowdsourced citizen science platforms. It serves as the foundation for the pipeline by building large, diverse datasets that capture the rich behavioral contexts necessary for analysis.
@@ -98,13 +100,61 @@ The 12 linguistic features are:
 
 Species categories: Amphibian, Terrestrial Mammal, Marine Mammal, Bird, Primate, Reptile, Fish, Insect, Other
 
-Return JSON only:
+Return JSON only, with no explanatory text before or after.
+All values must be chosen exactly and verbatim from the predefined lists in this prompt. Do not invent labels, placeholders (for example, "feature1"), abbreviations, or paraphrases. Do not lowercase, split, merge, or reword any item names. 
+
+Formatting rules:
+Use exact string matches for all list items.
+Preserve capitalization and punctuation exactly as given.
+Multi-word features must appear as one complete string and must not be split into multiple entries.
+Though not every paper has computational stages, there should be linguistic features present.
+
+Allowed values:
+
+For "computational_stages", choose only from:
+"Data Collection"
+"Pre-processing"
+"Sequence Representation"
+"Meaning Identification"
+"Generation"
+
+For "linguistic_features", choose only from the following exact names:
+"Vocal Auditory Channel and Turn-taking"
+"Broadcast and Direct Reception"
+"Reference and Displacement"
+"Specialization"
+"Arbitrariness and Duality of Patterns"
+"Discreteness and Syntax"
+"Recursion"
+"Semanticity"
+"Prevarication"
+"Openness"
+"Tradition and Cultural Transmission"
+"Learnability"
+
+For "species_categories", choose only from:
+"Amphibian"
+"Terrestrial Mammal"
+"Marine Mammal"
+"Bird"
+"Primate"
+"Reptile"
+"Fish"
+"Insect"
+"Other"
+
+For "specialized_species", use common names only, exactly as written in the notes.
+
+Required JSON schema:
+
 {
-    "specialized_species": ["species1", "species2"],
-    "species_categories": ["category1"],
-    "computational_stages": ["stage1", "stage2"],
-    "linguistic_features": ["feature1", "feature2"]
-}"""
+"specialized_species": [],
+"species_categories": [],
+"computational_stages": [],
+"linguistic_features": []
+}
+
+"""
 
 
 # ============================================================================
