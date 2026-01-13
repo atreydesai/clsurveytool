@@ -1,49 +1,46 @@
 # CL Survey Tool
 
-A Streamlit application for annotating, managing, and analyzing our computational animal linguistics research papers.
+A web app for annotating computational linguistics research papers with AI-assisted classification.
 
 ## Features
 
-- **BibTeX Import**: Bulk import papers directly from `.bib` files.
-- **AI-Assisted Annotation**: Automatically extract linguistic features, species, and computational stages from analysis notes using OpenAI (fill in API key from .env).
-- **Analytics Dashboard**: Visualize trends in publication years, geographic distribution, and research topics.
+- **BibTeX Import**: Bulk import papers from BibTeX files
+- **AI Analysis**: OpenAI-powered extraction of species, computational stages, and linguistic features
+- **Smart Autocomplete**: Dynamic autocomplete for universities, countries, and disciplines
+- **Dual-Pane Selectors**: Click-to-select UI for multi-value fields
+- **Auto-Save**: Changes are saved automatically as you type
+- **Analytics Dashboard**: Visualize your dataset statistics
 
-## Installation
+## Setup
 
-1. **Clone the repository**:
+1. Create a `.env` file:
 
-    ```bash
-    git clone https://github.com/yourusername/clsurveytool.git
-    cd clsurveytool
-    ```
+   ```
+   OPENAI_API_KEY=your-api-key-here
+   ```
 
-2. **Install dependencies**:
+2. Install dependencies:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. **Configure Environment**:
-    - Add your OpenAI API Key to `.env`:
+3. Run the app:
 
-      ```
-      OPENAI_API_KEY=sk-...
-      ```
+   ```bash
+   python app.py
+   ```
 
-## Usage
+4. Open <http://127.0.0.1:5000>
 
-1. **Run the App**:
+## Data Files
 
-    ```bash
-    streamlit run app.py
-    ```
+- `data/pending.json` - Entries being annotated
+- `data/dataset.jsonl` - Committed entries (final dataset)
+- `ai_logs.txt` - Last 10 AI analysis responses
 
-2. **Import Data**: Use the "BibTeX Import" expander to paste and parse citations.
-3. **Annotate**: Click "Edit" on any pending entry. Add notes, run AI analysis, and refine metadata.
-4. **Commit**: Save finalized entries to the dataset.
-5. **Analyze**: Switch to the **Analytics** page to view charts and statistics.
+## Tech Stack
 
-## Data Structure
-
-- `pending_entries.json`: Stores draft/in-progress annotations.
-- `research_data.jsonl`: The permanent dataset of committed entries.
+- **Backend**: Flask + OpenAI API
+- **Frontend**: Vanilla HTML/CSS/JS
+- **Data**: JSON/JSONL files
