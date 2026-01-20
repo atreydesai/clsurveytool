@@ -324,6 +324,7 @@ def get_entries():
     known_countries = set(COUNTRIES)  # Start with base countries
     known_disciplines = set(DISCIPLINES)  # Start with base disciplines
     university_country_map = {}  # Map university -> country for auto-fill
+    discipline_counts = {}  # Track (university, country) -> {discipline: count}
     for entry in pending + saved:
         for aff in entry.get('affiliations', []):
             if aff.get('university'):
@@ -331,10 +332,25 @@ def get_entries():
                 # Store university -> country mapping (last one wins if duplicates)
                 if aff.get('country'):
                     university_country_map[aff['university']] = aff['country']
+                    # Track discipline counts for each (university, country) pair
+                    if aff.get('discipline'):
+                        key = (aff['university'], aff['country'])
+                        if key not in discipline_counts:
+                            discipline_counts[key] = {}
+                        disc = aff['discipline']
+                        discipline_counts[key][disc] = discipline_counts[key].get(disc, 0) + 1
             if aff.get('country'):
                 known_countries.add(aff['country'])
             if aff.get('discipline'):
                 known_disciplines.add(aff['discipline'])
+    
+    # Build university_discipline_map with most common discipline for each (university, country) pair
+    # Key format: "university|country" -> most common discipline
+    university_discipline_map = {}
+    for (uni, country), disc_dict in discipline_counts.items():
+        if disc_dict:
+            most_common = max(disc_dict, key=disc_dict.get)
+            university_discipline_map[f"{uni}|{country}"] = most_common
     
     return jsonify({
         'pending': pending,
@@ -346,7 +362,8 @@ def get_entries():
             'disciplines': sorted(list(known_disciplines)),
             'countries': sorted(list(known_countries)),
             'known_universities': sorted(list(known_universities)),
-            'university_country_map': university_country_map
+            'university_country_map': university_country_map,
+            'university_discipline_map': university_discipline_map
         }
     })
 

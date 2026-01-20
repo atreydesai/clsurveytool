@@ -436,15 +436,27 @@ function attachEditorHandlers(entry) {
                     input.value = opt.textContent;
                     dropdown.style.display = 'none';
 
-                    // Auto-fill country when selecting a pre-saved university
+                    // Auto-fill country and discipline when selecting a pre-saved university
                     if (listType === 'universities') {
                         const universityCountryMap = state.constants.university_country_map || {};
+                        const universityDisciplineMap = state.constants.university_discipline_map || {};
                         const selectedUniversity = opt.textContent;
+                        const row = input.closest('tr');
+
                         if (universityCountryMap[selectedUniversity]) {
-                            const row = input.closest('tr');
                             const countryInput = row.querySelector('.aff-country');
+                            const associatedCountry = universityCountryMap[selectedUniversity];
                             if (countryInput && !countryInput.value) {
-                                countryInput.value = universityCountryMap[selectedUniversity];
+                                countryInput.value = associatedCountry;
+                            }
+
+                            // Auto-fill discipline using university|country key
+                            const disciplineKey = `${selectedUniversity}|${associatedCountry}`;
+                            if (universityDisciplineMap[disciplineKey]) {
+                                const disciplineInput = row.querySelector('.aff-discipline');
+                                if (disciplineInput && !disciplineInput.value) {
+                                    disciplineInput.value = universityDisciplineMap[disciplineKey];
+                                }
                             }
                         }
                     }
@@ -473,15 +485,27 @@ function attachEditorHandlers(entry) {
                     input.value = firstOption.textContent;
                     dropdown.style.display = 'none';
 
-                    // Auto-fill country when selecting a pre-saved university via Enter
+                    // Auto-fill country and discipline when selecting a pre-saved university via Enter
                     if (listType === 'universities') {
                         const universityCountryMap = state.constants.university_country_map || {};
+                        const universityDisciplineMap = state.constants.university_discipline_map || {};
                         const selectedUniversity = firstOption.textContent;
+                        const row = input.closest('tr');
+
                         if (universityCountryMap[selectedUniversity]) {
-                            const row = input.closest('tr');
                             const countryInput = row.querySelector('.aff-country');
+                            const associatedCountry = universityCountryMap[selectedUniversity];
                             if (countryInput && !countryInput.value) {
-                                countryInput.value = universityCountryMap[selectedUniversity];
+                                countryInput.value = associatedCountry;
+                            }
+
+                            // Auto-fill discipline using university|country key
+                            const disciplineKey = `${selectedUniversity}|${associatedCountry}`;
+                            if (universityDisciplineMap[disciplineKey]) {
+                                const disciplineInput = row.querySelector('.aff-discipline');
+                                if (disciplineInput && !disciplineInput.value) {
+                                    disciplineInput.value = universityDisciplineMap[disciplineKey];
+                                }
                             }
                         }
                     }
