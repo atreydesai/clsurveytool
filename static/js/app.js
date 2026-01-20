@@ -435,6 +435,20 @@ function attachEditorHandlers(entry) {
                     e.preventDefault();
                     input.value = opt.textContent;
                     dropdown.style.display = 'none';
+
+                    // Auto-fill country when selecting a pre-saved university
+                    if (listType === 'universities') {
+                        const universityCountryMap = state.constants.university_country_map || {};
+                        const selectedUniversity = opt.textContent;
+                        if (universityCountryMap[selectedUniversity]) {
+                            const row = input.closest('tr');
+                            const countryInput = row.querySelector('.aff-country');
+                            if (countryInput && !countryInput.value) {
+                                countryInput.value = universityCountryMap[selectedUniversity];
+                            }
+                        }
+                    }
+
                     debounceAutoSave(entry);
                 });
             });
@@ -458,6 +472,20 @@ function attachEditorHandlers(entry) {
                 if (firstOption && dropdown.style.display === 'block') {
                     input.value = firstOption.textContent;
                     dropdown.style.display = 'none';
+
+                    // Auto-fill country when selecting a pre-saved university via Enter
+                    if (listType === 'universities') {
+                        const universityCountryMap = state.constants.university_country_map || {};
+                        const selectedUniversity = firstOption.textContent;
+                        if (universityCountryMap[selectedUniversity]) {
+                            const row = input.closest('tr');
+                            const countryInput = row.querySelector('.aff-country');
+                            if (countryInput && !countryInput.value) {
+                                countryInput.value = universityCountryMap[selectedUniversity];
+                            }
+                        }
+                    }
+
                     debounceAutoSave(entry);
                 }
             } else if (e.key === 'Escape') {

@@ -323,10 +323,14 @@ def get_entries():
     known_universities = set()
     known_countries = set(COUNTRIES)  # Start with base countries
     known_disciplines = set(DISCIPLINES)  # Start with base disciplines
+    university_country_map = {}  # Map university -> country for auto-fill
     for entry in pending + saved:
         for aff in entry.get('affiliations', []):
             if aff.get('university'):
                 known_universities.add(aff['university'])
+                # Store university -> country mapping (last one wins if duplicates)
+                if aff.get('country'):
+                    university_country_map[aff['university']] = aff['country']
             if aff.get('country'):
                 known_countries.add(aff['country'])
             if aff.get('discipline'):
@@ -341,7 +345,8 @@ def get_entries():
             'linguistic_features': LINGUISTIC_FEATURES,
             'disciplines': sorted(list(known_disciplines)),
             'countries': sorted(list(known_countries)),
-            'known_universities': sorted(list(known_universities))
+            'known_universities': sorted(list(known_universities)),
+            'university_country_map': university_country_map
         }
     })
 
