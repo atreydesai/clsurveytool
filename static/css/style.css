@@ -19,6 +19,23 @@
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* Light Mode */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #eaeef2;
+    --border: #d0d7de;
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-muted: #8c959f;
+    --accent: #0969da;
+    --accent-hover: #0550ae;
+    --success: #1a7f37;
+    --warning: #9a6700;
+    --danger: #cf222e;
+    --shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -131,6 +148,12 @@ body {
 .btn-small {
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
+}
+
+.btn-icon {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 /* ============================================================================
@@ -632,6 +655,183 @@ textarea {
    Analytics
    ============================================================================ */
 
+.analytics {
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: var(--bg-primary);
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.analytics-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.analytics-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.analytics-tab {
+    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.analytics-tab:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.analytics-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.analytics-group {
+    display: none;
+}
+
+.analytics-group.active {
+    display: block;
+}
+
+.chart-row {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-row.two-col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.chart-row.three-col {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1200px) {
+    .chart-row.three-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .chart-row.two-col,
+    .chart-row.three-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chart-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    min-height: 400px;
+    height: auto;
+}
+
+/* Make Plotly charts fill their containers */
+.chart-container .js-plotly-plot,
+.chart-container .plotly {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 350px;
+}
+
+.chart-container h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Word cloud containers */
+.wordcloud-container {
+    text-align: center;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.wordcloud-img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    overflow: hidden;
+}
+
+.wordcloud-img img {
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+}
+
+.wordcloud-img p {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.wordcloud-img .loading {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Network containers */
+.network-container {
+    min-height: 450px;
+}
+
+.network-chart {
+    height: 350px;
+    margin-bottom: 0.5rem;
+}
+
+.network-stats {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.network-stats .stat-item {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.network-stats .stat-label {
+    color: var(--text-muted);
+}
+
+.network-stats .stat-value {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Original stat cards (keep for backward compatibility) */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -699,6 +899,21 @@ textarea {
     font-size: 0.75rem;
     color: var(--text-muted);
     text-align: right;
+}
+
+/* Loading states */
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: var(--text-muted);
+}
+
+.error-message {
+    color: var(--danger);
+    text-align: center;
+    padding: 2rem;
 }
 
 /* ============================================================================

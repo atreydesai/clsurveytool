@@ -6,12 +6,22 @@ A simple web app for annotating computational linguistics research papers.
 import os
 import json
 import uuid
+import re
+import io
+import base64
 from pathlib import Path
 from datetime import datetime
+from collections import Counter, defaultdict
+from itertools import combinations
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from dotenv import load_dotenv
 import openai
 import bibtexparser
+import matplotlib
+matplotlib.use('Agg')  # Non-GUI backend for server
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
+import networkx as nx
 
 # Load environment variables
 load_dotenv()
@@ -502,5 +512,315 @@ def get_stats():
     })
 
 
+@app.route('/api/analytics', methods=['GET'])
+def get_analytics():
+    """Get comprehensive analytics data for all visualizations."""
+    saved = load_dataset()
+    
+    if not saved:
+        return jsonify({'empty': True})
+    
+    # ---------- Group 1: Longitudinal Analysis ----------
+    # Papers per year
+    papers_by_year = defaultdict(int)
+    features_by_year = defaultdict(lambda: defaultdict(int))
+    stages_by_year = defaultdict(lambda: defaultdict(int))
+    all_text_by_year = defaultdict(list)
+    
+    for e in saved:
+        year_str = str(e.get('year', '')).strip()
+        try:
+            year = int(year_str.split('-')[0]) if year_str else None
+        except ValueError:
+            year = None
+        
+        if year and 1900 <= year <= 2100:
+            papers_by_year[year] += 1
+            
+            # Features by year
+            for feat in e.get('linguistic_features', []):
+                features_by_year[year][feat] += 1
+            
+            # Stages by year
+            for stage in e.get('computational_stages', []):
+                stages_by_year[year][stage] += 1
+            
+            # Collect text for keyword extraction
+            notes = e.get('analysis_notes', '') or ''
+            title = e.get('title', '') or ''
+            all_text_by_year[year].append(notes + ' ' + title)
+    
+    # Extract top keywords by year
+    stopwords = set(STOPWORDS)
+    stopwords.update(['paper', 'study', 'research', 'using', 'used', 'use', 'based', 
+                      'results', 'show', 'found', 'also', 'one', 'two', 'may', 'can',
+                      'however', 'et', 'al', 'well', 'via', 'new', 'first'])
+    
+    def extract_keywords(texts):
+        all_words = ' '.join(texts).lower()
+        words = re.findall(r'\b[a-z]{4,}\b', all_words)
+        return Counter(w for w in words if w not in stopwords)
+    
+    # Get overall top keywords
+    all_texts = []
+    for texts in all_text_by_year.values():
+        all_texts.extend(texts)
+    overall_keywords = extract_keywords(all_texts).most_common(10)
+    top_keywords = [kw for kw, _ in overall_keywords[:5]]
+    
+    # Track top 5 keywords over years
+    keywords_by_year = {}
+    for year, texts in all_text_by_year.items():
+        word_counts = extract_keywords(texts)
+        keywords_by_year[year] = {kw: word_counts.get(kw, 0) for kw in top_keywords}
+    
+    # ---------- Group 2: Distribution Stats ----------
+    # Feature counts
+    feature_counts = defaultdict(int)
+    stage_counts = defaultdict(int)
+    species_cat_counts = defaultdict(int)
+    specialized_species_counts = defaultdict(int)
+    country_counts = defaultdict(int)
+    discipline_counts = defaultdict(int)
+    affiliation_counts = defaultdict(int)
+    
+    for e in saved:
+        for feat in e.get('linguistic_features', []):
+            feature_counts[feat] += 1
+        for stage in e.get('computational_stages', []):
+            stage_counts[stage] += 1
+        for cat in e.get('species_categories', []):
+            species_cat_counts[cat] += 1
+        for sp in e.get('specialized_species', []):
+            specialized_species_counts[sp.lower().strip()] += 1
+        for aff in e.get('affiliations', []):
+            if aff.get('country'):
+                country_counts[aff['country']] += 1
+            if aff.get('discipline'):
+                discipline_counts[aff['discipline']] += 1
+            if aff.get('university'):
+                affiliation_counts[aff['university']] += 1
+    
+    # Top 10 specialized species
+    top_species = sorted(specialized_species_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+    
+    # Top affiliations
+    top_affiliations = sorted(affiliation_counts.items(), key=lambda x: x[1], reverse=True)[:15]
+    
+    return jsonify({
+        'total': len(saved),
+        # Group 1: Longitudinal
+        'papers_by_year': dict(papers_by_year),
+        'features_by_year': {y: dict(f) for y, f in features_by_year.items()},
+        'stages_by_year': {y: dict(s) for y, s in stages_by_year.items()},
+        'keywords_by_year': keywords_by_year,
+        'top_keywords': top_keywords,
+        # Group 2: Distributions
+        'feature_counts': dict(feature_counts),
+        'stage_counts': dict(stage_counts),
+        'species_category_counts': dict(species_cat_counts),
+        'top_specialized_species': top_species,
+        'country_counts': dict(country_counts),
+        'discipline_counts': dict(discipline_counts),
+        'top_affiliations': top_affiliations,
+        # Constants for chart ordering
+        'all_features': LINGUISTIC_FEATURES,
+        'all_stages': COMPUTATIONAL_STAGES,
+        'all_species_categories': SPECIES_CATEGORIES
+    })
+
+
+@app.route('/api/analytics/wordcloud/<era>', methods=['GET'])
+def get_wordcloud(era):
+    """Generate word cloud for pre-LLM (<=2020) or post-LLM (>2020) era."""
+    saved = load_dataset()
+    
+    if not saved:
+        return jsonify({'error': 'No data'}), 400
+    
+    # Collect text based on era
+    texts = []
+    for e in saved:
+        year_str = str(e.get('year', '')).strip()
+        try:
+            year = int(year_str.split('-')[0]) if year_str else None
+        except ValueError:
+            year = None
+        
+        if year:
+            include = (era == 'pre' and year <= 2020) or (era == 'post' and year > 2020)
+            if include:
+                notes = e.get('analysis_notes', '') or ''
+                title = e.get('title', '') or ''
+                texts.append(notes + ' ' + title)
+    
+    if not texts:
+        return jsonify({'error': f'No papers found for {era}-LLM era'}), 400
+    
+    # Generate word cloud
+    all_text = ' '.join(texts)
+    
+    # Clean text
+    all_text = re.sub(r'[^a-zA-Z\s]', ' ', all_text.lower())
+    
+    custom_stopwords = set(STOPWORDS)
+    custom_stopwords.update([
+        'paper', 'study', 'research', 'analysis', 'using', 'used', 'use',
+        'based', 'results', 'show', 'found', 'also', 'however', 'may',
+        'one', 'two', 'three', 'et', 'al', 'can', 'well', 'via',
+        'however', 'moreover', 'furthermore', 'therefore', 'thus',
+        'abstract', 'introduction', 'conclusion', 'discussion',
+        'method', 'methods', 'approach', 'approaches', 'data',
+        'present', 'presented', 'propose', 'proposed', 'although',
+        'either', 's', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 
+        'l', 'm', 'n', 'o', 'p', 'q', 'r', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        'set', 'know', 'first', 'new', 'different', 'many', 'will', 'able'
+    ])
+    
+    try:
+        wc = WordCloud(
+            width=800,
+            height=400,
+            background_color='white',
+            stopwords=custom_stopwords,
+            max_words=100,
+            colormap='viridis'
+        ).generate(all_text)
+        
+        # Convert to base64 image
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wc, interpolation='bilinear')
+        ax.axis('off')
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight', dpi=150, facecolor='white')
+        plt.close(fig)
+        buf.seek(0)
+        
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        
+        return jsonify({
+            'image': f'data:image/png;base64,{img_base64}',
+            'paper_count': len(texts),
+            'era': era
+        })
+    except Exception as ex:
+        return jsonify({'error': str(ex)}), 500
+
+
+@app.route('/api/analytics/network/<network_type>', methods=['GET'])
+def get_network(network_type):
+    """Generate network graph data for affiliations, countries, or disciplines."""
+    saved = load_dataset()
+    
+    if not saved:
+        return jsonify({'error': 'No data'}), 400
+    
+    # Discipline subfield mapping - merge subfields into parent disciplines
+    DISCIPLINE_MAP = {
+        'Ecology': 'Biology',
+        'Zoology': 'Biology',
+        'Neuroscience': 'Biology',
+        'Bioacoustics': 'Biology',
+        'Ethology': 'Biology',
+        'Marine Biology': 'Biology',
+        'Cognitive Science': 'Computer Science',
+        'Machine Learning': 'Computer Science',
+        'NLP': 'Computer Science',
+        'Psychology': 'Other',
+        'Anthropology': 'Other',
+        'Philosophy': 'Other',
+        'Music': 'Other'
+    }
+    
+    def map_discipline(disc):
+        """Map subfield disciplines to parent disciplines."""
+        if not disc:
+            return None
+        return DISCIPLINE_MAP.get(disc, disc)
+    
+    # For affiliation network, first find top 25 universities by paper count
+    top_universities = None
+    if network_type == 'affiliation':
+        uni_counts = {}
+        for e in saved:
+            for a in e.get('affiliations', []):
+                uni = a.get('university')
+                if uni:
+                    uni_counts[uni] = uni_counts.get(uni, 0) + 1
+        # Get top 25 universities
+        top_universities = set(
+            uni for uni, _ in sorted(uni_counts.items(), key=lambda x: x[1], reverse=True)[:25]
+        )
+    
+    G = nx.Graph()
+    
+    for e in saved:
+        affiliations = e.get('affiliations', [])
+        if len(affiliations) < 2:
+            continue
+        
+        # Determine what nodes to use based on network type
+        if network_type == 'affiliation':
+            nodes = [a.get('university') for a in affiliations 
+                     if a.get('university') and a.get('university') in top_universities]
+        elif network_type == 'country':
+            nodes = list(set(a.get('country') for a in affiliations if a.get('country')))
+        elif network_type == 'discipline':
+            # Map disciplines to parent disciplines
+            raw_disciplines = [a.get('discipline') for a in affiliations if a.get('discipline')]
+            nodes = list(set(map_discipline(d) for d in raw_disciplines if map_discipline(d)))
+        else:
+            return jsonify({'error': 'Invalid network type'}), 400
+        
+        # Add nodes
+        for node in nodes:
+            if not G.has_node(node):
+                G.add_node(node, weight=1)
+            else:
+                G.nodes[node]['weight'] = G.nodes[node].get('weight', 1) + 1
+        
+        # Add edges for all pairs (co-occurrence)
+        if len(nodes) >= 2:
+            for n1, n2 in combinations(set(nodes), 2):
+                if G.has_edge(n1, n2):
+                    G[n1][n2]['weight'] += 1
+                else:
+                    G.add_edge(n1, n2, weight=1)
+    
+    # Convert to JSON format for frontend visualization
+    nodes_list = []
+    for node in G.nodes():
+        nodes_list.append({
+            'id': node,
+            'label': node,
+            'size': G.nodes[node].get('weight', 1)
+        })
+    
+    edges_list = []
+    for u, v, data in G.edges(data=True):
+        edges_list.append({
+            'source': u,
+            'target': v,
+            'weight': data.get('weight', 1)
+        })
+    
+    # Get centrality metrics for top nodes
+    if G.number_of_nodes() > 0:
+        degree_cent = nx.degree_centrality(G)
+        top_nodes = sorted(degree_cent.items(), key=lambda x: x[1], reverse=True)[:10]
+    else:
+        top_nodes = []
+    
+    return jsonify({
+        'nodes': nodes_list,
+        'edges': edges_list,
+        'node_count': G.number_of_nodes(),
+        'edge_count': G.number_of_edges(),
+        'top_nodes': top_nodes,
+        'network_type': network_type
+    })
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

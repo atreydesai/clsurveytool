@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CL Survey Tool</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <!-- Plotly.js for interactive charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
+
 <body>
     <div class="app">
         <!-- Header -->
@@ -14,6 +18,7 @@
             <nav class="nav">
                 <button id="btn-import" class="btn btn-primary">Import BibTeX</button>
                 <button id="btn-analytics" class="btn">Analytics</button>
+                <button id="btn-theme" class="btn btn-icon" title="Toggle Light/Dark Mode">🌙</button>
             </nav>
         </header>
 
@@ -39,9 +44,89 @@
 
             <!-- Analytics Panel (hidden by default) -->
             <section class="analytics" id="analytics" style="display: none;">
-                <h2>Analytics Dashboard</h2>
-                <div class="stats-grid" id="stats-grid">
-                    <!-- Stats rendered by JS -->
+                <div class="analytics-header">
+                    <h2>Analytics Dashboard</h2>
+                    <div class="analytics-tabs">
+                        <button class="analytics-tab active" data-group="longitudinal">Longitudinal</button>
+                        <button class="analytics-tab" data-group="distributions">Distributions</button>
+                        <button class="analytics-tab" data-group="wordclouds">Word Clouds</button>
+                        <button class="analytics-tab" data-group="networks">Networks</button>
+                    </div>
+                </div>
+
+                <!-- Group 1: Longitudinal Analysis -->
+                <div class="analytics-group active" id="group-longitudinal">
+                    <div class="chart-row">
+                        <div class="chart-container" id="chart-volume"></div>
+                    </div>
+                    <div class="chart-row">
+                        <div class="chart-container" id="chart-features-evolution"></div>
+                    </div>
+                    <div class="chart-row">
+                        <div class="chart-container" id="chart-stages-evolution"></div>
+                    </div>
+                    <div class="chart-row">
+                        <div class="chart-container" id="chart-keywords"></div>
+                    </div>
+                </div>
+
+                <!-- Group 2: Distribution Stats -->
+                <div class="analytics-group" id="group-distributions" style="display: none;">
+                    <div class="chart-row two-col">
+                        <div class="chart-container" id="chart-features-dist"></div>
+                        <div class="chart-container" id="chart-stages-dist"></div>
+                    </div>
+                    <div class="chart-row two-col">
+                        <div class="chart-container" id="chart-species-cat"></div>
+                        <div class="chart-container" id="chart-species-top"></div>
+                    </div>
+                    <div class="chart-row two-col">
+                        <div class="chart-container" id="chart-countries"></div>
+                        <div class="chart-container" id="chart-disciplines"></div>
+                    </div>
+                    <div class="chart-row two-col">
+                        <div class="chart-container" id="chart-affiliations"></div>
+                        <div class="chart-container" id="chart-demographics-placeholder"></div>
+                    </div>
+                </div>
+
+                <!-- Group 3: Word Clouds -->
+                <div class="analytics-group" id="group-wordclouds" style="display: none;">
+                    <div class="chart-row two-col">
+                        <div class="chart-container wordcloud-container">
+                            <h3>Pre-LLM Era (≤2020)</h3>
+                            <div id="wordcloud-pre" class="wordcloud-img"></div>
+                        </div>
+                        <div class="chart-container wordcloud-container">
+                            <h3>Post-LLM Era (>2020)</h3>
+                            <div id="wordcloud-post" class="wordcloud-img"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 4: Network Graphs -->
+                <div class="analytics-group" id="group-networks" style="display: none;">
+                    <div class="chart-row">
+                        <div class="chart-container network-container">
+                            <h3>Affiliation Network</h3>
+                            <div id="network-affiliation" class="network-chart"></div>
+                            <div id="network-affiliation-stats" class="network-stats"></div>
+                        </div>
+                    </div>
+                    <div class="chart-row">
+                        <div class="chart-container network-container">
+                            <h3>Country Collaboration</h3>
+                            <div id="network-country" class="network-chart"></div>
+                            <div id="network-country-stats" class="network-stats"></div>
+                        </div>
+                    </div>
+                    <div class="chart-row">
+                        <div class="chart-container network-container">
+                            <h3>Discipline Network</h3>
+                            <div id="network-discipline" class="network-chart"></div>
+                            <div id="network-discipline-stats" class="network-stats"></div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -61,6 +146,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/app.js?v=3"></script>
 </body>
+
 </html>

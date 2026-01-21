@@ -584,59 +584,458 @@ function showSaveIndicator() {
     setTimeout(() => indicator.classList.remove('show'), 1500);
 }
 
-function renderAnalytics(stats) {
-    const grid = document.getElementById('stats-grid');
+// ============================================================================
+// Analytics Functions
+// ============================================================================
 
-    if (stats.empty) {
-        grid.innerHTML = `<p style="color: var(--text-muted);">No data yet. Commit some entries first.</p>`;
+async function loadAnalytics() {
+    return await api('/analytics');
+}
+
+async function loadWordCloud(era) {
+    return await api(`/analytics/wordcloud/${era}`);
+}
+
+async function loadNetwork(type) {
+    return await api(`/analytics/network/${type}`);
+}
+
+// Light theme for Plotly charts (optimized for downloading/printing)
+// IMPORTANT: Use getPlotlyLayout() instead of spreading this directly,
+// because Plotly mutates the layout object and corrupts shared xaxis/yaxis
+const plotlyThemeBase = {
+    paper_bgcolor: '#ffffff',
+    plot_bgcolor: '#ffffff',
+    font: { color: '#1f2328', size: 12 },
+    autosize: true
+};
+
+// Factory function to get a FRESH layout object for each chart
+// This prevents Plotly from mutating shared state between charts
+function getPlotlyLayout(overrides = {}) {
+    return {
+        ...plotlyThemeBase,
+        xaxis: {
+            gridcolor: '#e1e4e8',
+            linecolor: '#d0d7de',
+            tickcolor: '#656d76',
+            ...overrides.xaxis
+        },
+        yaxis: {
+            gridcolor: '#e1e4e8',
+            linecolor: '#d0d7de',
+            tickcolor: '#656d76',
+            ...overrides.yaxis
+        },
+        ...overrides
+    };
+}
+
+// Plotly config with download enabled - saves PNG to your Downloads folder
+const plotlyConfig = {
+    responsive: true,
+    displayModeBar: true,
+    modeBarButtonsToAdd: [],
+    toImageButtonOptions: {
+        format: 'png',
+        filename: 'chart',
+        height: 600,
+        width: 1200,
+        scale: 2
+    }
+};
+
+// Color palette for charts
+const chartColors = [
+    '#58a6ff', '#3fb950', '#d29922', '#f85149', '#a371f7',
+    '#79c0ff', '#56d364', '#e3b341', '#ff7b72', '#bc8cff',
+    '#39d353', '#1f6feb', '#db6d28', '#da3633', '#8957e5'
+];
+
+async function renderAnalytics(data) {
+    if (data.empty) {
+        document.getElementById('group-longitudinal').innerHTML =
+            '<p class="loading-spinner">No data yet. Commit some entries first.</p>';
         return;
     }
 
-    grid.innerHTML = `
-        <div class="stat-card">
-            <h3>Total Papers</h3>
-            <div class="stat-number">${stats.total || 0}</div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>By Year</h3>
-            <div class="stat-bars">
-                ${Object.entries(stats.years || {}).sort((a, b) => b[0] - a[0]).slice(0, 8).map(([year, count]) => `
-                    <div class="stat-bar">
-                        <span class="stat-bar-label">${year}</span>
-                        <div class="stat-bar-fill"><div class="stat-bar-fill-inner" style="width: ${(count / stats.total) * 100}%"></div></div>
-                        <span class="stat-bar-value">${count}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Species Categories</h3>
-            <div class="stat-bars">
-                ${Object.entries(stats.species || {}).sort((a, b) => b[1] - a[1]).map(([cat, count]) => `
-                    <div class="stat-bar">
-                        <span class="stat-bar-label">${cat}</span>
-                        <div class="stat-bar-fill"><div class="stat-bar-fill-inner" style="width: ${(count / stats.total) * 100}%"></div></div>
-                        <span class="stat-bar-value">${count}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Computational Stages</h3>
-            <div class="stat-bars">
-                ${Object.entries(stats.stages || {}).sort((a, b) => b[1] - a[1]).map(([stage, count]) => `
-                    <div class="stat-bar">
-                        <span class="stat-bar-label">${stage}</span>
-                        <div class="stat-bar-fill"><div class="stat-bar-fill-inner" style="width: ${(count / stats.total) * 100}%"></div></div>
-                        <span class="stat-bar-value">${count}</span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
+    // Render Group 1: Longitudinal Analysis
+    renderVolumeChart(data);
+    renderFeaturesEvolution(data);
+    renderStagesEvolution(data);
+    renderKeywordsChart(data);
+
+    // Render Group 2: Distributions
+    renderFeatureDistribution(data);
+    renderStageDistribution(data);
+    renderSpeciesCharts(data);
+    renderDemographicsCharts(data);
+
+    // Load word clouds (async)
+    loadAndRenderWordClouds();
+
+    // Load network graphs (async)
+    loadAndRenderNetworks();
+}
+
+// ----- Group 1: Longitudinal Charts -----
+
+function renderVolumeChart(data) {
+    const years = Object.keys(data.papers_by_year || {}).map(Number).sort();
+    const counts = years.map(y => data.papers_by_year[y] || 0);
+
+    Plotly.newPlot('chart-volume', [{
+        x: years,
+        y: counts,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: chartColors[0], width: 2 },
+        marker: { size: 8 },
+        name: 'Papers'
+    }], {
+        title: { text: 'Number of Papers per Year', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 50 }
+    }, plotlyConfig);
+}
+
+function renderFeaturesEvolution(data) {
+    const years = Object.keys(data.features_by_year || {}).map(Number).sort();
+    const features = data.all_features || [];
+
+    const traces = features.map((feat, i) => ({
+        x: years,
+        y: years.map(y => (data.features_by_year[y] || {})[feat] || 0),
+        type: 'scatter',
+        mode: 'lines',
+        stackgroup: 'one',
+        name: feat.length > 25 ? feat.substring(0, 23) + '...' : feat,
+        line: { color: chartColors[i % chartColors.length] }
+    }));
+
+    Plotly.newPlot('chart-features-evolution', traces, {
+        title: { text: 'Linguistic Features Over Time (Stacked)', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.3, font: { size: 9 } },
+        margin: { t: 40, r: 20, b: 100, l: 50 }
+    }, plotlyConfig);
+}
+
+function renderStagesEvolution(data) {
+    const years = Object.keys(data.stages_by_year || {}).map(Number).sort();
+    const stages = data.all_stages || [];
+
+    const traces = stages.map((stage, i) => ({
+        x: years,
+        y: years.map(y => (data.stages_by_year[y] || {})[stage] || 0),
+        type: 'scatter',
+        mode: 'lines',
+        stackgroup: 'one',
+        name: stage,
+        line: { color: chartColors[i % chartColors.length] }
+    }));
+
+    Plotly.newPlot('chart-stages-evolution', traces, {
+        title: { text: 'Computational Stages Over Time (Stacked)', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.2, font: { size: 10 } },
+        margin: { t: 40, r: 20, b: 70, l: 50 }
+    }, plotlyConfig);
+}
+
+function renderKeywordsChart(data) {
+    const years = Object.keys(data.keywords_by_year || {}).map(Number).sort();
+    const keywords = data.top_keywords || [];
+
+    if (keywords.length === 0) {
+        document.getElementById('chart-keywords').innerHTML = '<p class="loading-spinner">Not enough data for keyword analysis</p>';
+        return;
+    }
+
+    const traces = keywords.map((kw, i) => ({
+        x: years,
+        y: years.map(y => (data.keywords_by_year[y] || {})[kw] || 0),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: kw,
+        line: { color: chartColors[i % chartColors.length], width: 2 },
+        marker: { size: 6 }
+    }));
+
+    Plotly.newPlot('chart-keywords', traces, {
+        title: { text: 'Top 5 Keywords Over Time', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.2 },
+        margin: { t: 40, r: 20, b: 60, l: 50 }
+    }, plotlyConfig);
+}
+
+// ----- Group 2: Distribution Charts -----
+
+function renderFeatureDistribution(data) {
+    // Use actual data keys, sorted by count
+    const featureEntries = Object.entries(data.feature_counts || {})
+        .sort((a, b) => b[1] - a[1]);
+    const features = featureEntries.map(e => e[0]);
+    const counts = featureEntries.map(e => e[1]);
+
+    Plotly.newPlot('chart-features-dist', [{
+        y: features,
+        x: counts,
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: chartColors[0] }
+    }], {
+        title: { text: 'Papers by Linguistic Feature', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 250 }
+    }, plotlyConfig);
+}
+
+function renderStageDistribution(data) {
+    // Use actual data keys, sorted by count
+    const stageEntries = Object.entries(data.stage_counts || {})
+        .sort((a, b) => b[1] - a[1]);
+    const stages = stageEntries.map(e => e[0]);
+    const counts = stageEntries.map(e => e[1]);
+
+    Plotly.newPlot('chart-stages-dist', [{
+        x: stages,
+        y: counts,
+        type: 'bar',
+        marker: { color: chartColors.slice(0, stages.length) }
+    }], {
+        title: { text: 'Papers by Computational Stage', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 100, l: 50 },
+        xaxis: { ...getPlotlyLayout().xaxis, tickangle: -30 }
+    }, plotlyConfig);
+}
+
+function renderSpeciesCharts(data) {
+    // Species categories - use actual data keys
+    const catEntries = Object.entries(data.species_category_counts || {})
+        .sort((a, b) => b[1] - a[1]);
+    const categories = catEntries.map(e => e[0]);
+    const catCounts = catEntries.map(e => e[1]);
+
+    Plotly.newPlot('chart-species-cat', [{
+        x: categories,
+        y: catCounts,
+        type: 'bar',
+        marker: { color: chartColors.slice(0, categories.length) }
+    }], {
+        title: { text: 'Papers by Species Category', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 100, l: 50 },
+        xaxis: { ...getPlotlyLayout().xaxis, tickangle: -30 }
+    }, plotlyConfig);
+
+    // Top specialized species
+    const topSpecies = data.top_specialized_species || [];
+    const speciesNames = topSpecies.map(s => s[0]);
+    const speciesCounts = topSpecies.map(s => s[1]);
+
+    Plotly.newPlot('chart-species-top', [{
+        y: speciesNames.reverse(),
+        x: speciesCounts.reverse(),
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: chartColors[1] }
+    }], {
+        title: { text: 'Top 10 Specialized Species', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 150 }
+    }, plotlyConfig);
+}
+
+function renderDemographicsCharts(data) {
+    // Countries
+    const countries = Object.entries(data.country_counts || {})
+        .sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    Plotly.newPlot('chart-countries', [{
+        y: countries.map(c => c[0]).reverse(),
+        x: countries.map(c => c[1]).reverse(),
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: chartColors[0] }
+    }], {
+        title: { text: 'Papers by Country (Top 10)', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 100 }
+    }, plotlyConfig);
+
+    // Disciplines
+    const disciplines = Object.entries(data.discipline_counts || {})
+        .sort((a, b) => b[1] - a[1]);
+
+    Plotly.newPlot('chart-disciplines', [{
+        labels: disciplines.map(d => d[0]),
+        values: disciplines.map(d => d[1]),
+        type: 'pie',
+        marker: { colors: chartColors },
+        textinfo: 'label+percent',
+        textposition: 'inside'
+    }], {
+        title: { text: 'Papers by Discipline', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 20 },
+        showlegend: false
+    }, plotlyConfig);
+
+    // Affiliations
+    const affiliations = data.top_affiliations || [];
+
+    Plotly.newPlot('chart-affiliations', [{
+        y: affiliations.map(a => a[0]).slice(0, 10).reverse(),
+        x: affiliations.map(a => a[1]).slice(0, 10).reverse(),
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: chartColors[2] }
+    }], {
+        title: { text: 'Top 10 Affiliations', font: { size: 14 } },
+        ...getPlotlyLayout(),
+        margin: { t: 40, r: 20, b: 40, l: 180 }
+    }, plotlyConfig);
+}
+
+// ----- Group 3: Word Clouds -----
+
+async function loadAndRenderWordClouds() {
+    // Pre-LLM
+    document.getElementById('wordcloud-pre').innerHTML = '<p class="loading">Loading...</p>';
+    try {
+        const preData = await loadWordCloud('pre');
+        if (preData.image) {
+            document.getElementById('wordcloud-pre').innerHTML =
+                `<img src="${preData.image}" alt="Pre-LLM Word Cloud"><p style="font-size:0.75rem;color:var(--text-muted)">${preData.paper_count} papers</p>`;
+        } else if (preData.error) {
+            document.getElementById('wordcloud-pre').innerHTML = `<p class="error-message">${preData.error}</p>`;
+        }
+    } catch (e) {
+        document.getElementById('wordcloud-pre').innerHTML = '<p class="error-message">Failed to load</p>';
+    }
+
+    // Post-LLM
+    document.getElementById('wordcloud-post').innerHTML = '<p class="loading">Loading...</p>';
+    try {
+        const postData = await loadWordCloud('post');
+        if (postData.image) {
+            document.getElementById('wordcloud-post').innerHTML =
+                `<img src="${postData.image}" alt="Post-LLM Word Cloud"><p style="font-size:0.75rem;color:var(--text-muted)">${postData.paper_count} papers</p>`;
+        } else if (postData.error) {
+            document.getElementById('wordcloud-post').innerHTML = `<p class="error-message">${postData.error}</p>`;
+        }
+    } catch (e) {
+        document.getElementById('wordcloud-post').innerHTML = '<p class="error-message">Failed to load</p>';
+    }
+}
+
+// ----- Group 4: Network Graphs -----
+
+async function loadAndRenderNetworks() {
+    const networks = ['affiliation', 'country', 'discipline'];
+
+    for (const type of networks) {
+        const chartEl = document.getElementById(`network-${type}`);
+        const statsEl = document.getElementById(`network-${type}-stats`);
+
+        chartEl.innerHTML = '<p class="loading">Loading...</p>';
+
+        try {
+            const data = await loadNetwork(type);
+
+            if (data.error) {
+                chartEl.innerHTML = `<p class="error-message">${data.error}</p>`;
+                continue;
+            }
+
+            if (data.nodes.length === 0) {
+                chartEl.innerHTML = '<p class="loading-spinner">No network data available</p>';
+                continue;
+            }
+
+            // Create network visualization using Plotly scatter
+            renderNetworkGraph(chartEl.id, data);
+
+            // Show stats
+            statsEl.innerHTML = `
+                <span class="stat-item"><span class="stat-label">Nodes:</span> <span class="stat-value">${data.node_count}</span></span>
+                <span class="stat-item"><span class="stat-label">Edges:</span> <span class="stat-value">${data.edge_count}</span></span>
+            `;
+        } catch (e) {
+            chartEl.innerHTML = '<p class="error-message">Failed to load network</p>';
+        }
+    }
+}
+
+function renderNetworkGraph(containerId, data) {
+    // Simple force-directed layout approximation using Plotly
+    const nodes = data.nodes || [];
+    const edges = data.edges || [];
+
+    // Create positions using simple circular layout
+    const nodePositions = {};
+    nodes.forEach((node, i) => {
+        const angle = (2 * Math.PI * i) / nodes.length;
+        const radius = 1 + Math.log(node.size + 1) * 0.3;
+        nodePositions[node.id] = {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius
+        };
+    });
+
+    // Edge traces
+    const edgeX = [];
+    const edgeY = [];
+    edges.forEach(edge => {
+        const source = nodePositions[edge.source];
+        const target = nodePositions[edge.target];
+        if (source && target) {
+            edgeX.push(source.x, target.x, null);
+            edgeY.push(source.y, target.y, null);
+        }
+    });
+
+    const edgeTrace = {
+        x: edgeX,
+        y: edgeY,
+        mode: 'lines',
+        line: { width: 0.5, color: '#30363d' },
+        hoverinfo: 'none',
+        type: 'scatter'
+    };
+
+    // Node trace
+    const nodeTrace = {
+        x: nodes.map(n => nodePositions[n.id].x),
+        y: nodes.map(n => nodePositions[n.id].y),
+        mode: 'markers+text',
+        marker: {
+            size: nodes.map(n => 8 + Math.min(n.size * 3, 25)),
+            color: chartColors[0],
+            line: { width: 1, color: '#161b22' }
+        },
+        text: nodes.map(n => n.label.length > 15 ? n.label.substring(0, 13) + '...' : n.label),
+        textposition: 'top center',
+        textfont: { size: 8, color: '#8b949e' },
+        hovertext: nodes.map(n => `${n.label} (${n.size} papers)`),
+        hoverinfo: 'text',
+        type: 'scatter'
+    };
+
+    Plotly.newPlot(containerId, [edgeTrace, nodeTrace], {
+        ...getPlotlyLayout(),
+        showlegend: false,
+        hovermode: 'closest',
+        xaxis: { showgrid: false, zeroline: false, showticklabels: false },
+        yaxis: { showgrid: false, zeroline: false, showticklabels: false },
+        margin: { t: 10, r: 10, b: 10, l: 10 }
+    }, plotlyConfig);
 }
 
 // ============================================================================
@@ -698,14 +1097,37 @@ function setupEventHandlers() {
         if (analytics.style.display === 'none') {
             editor.style.display = 'none';
             analytics.style.display = 'block';
-            const stats = await loadStats();
-            renderAnalytics(stats);
             document.getElementById('btn-analytics').classList.add('active');
+
+            // Load analytics data
+            const data = await loadAnalytics();
+            renderAnalytics(data);
         } else {
             editor.style.display = 'block';
             analytics.style.display = 'none';
             document.getElementById('btn-analytics').classList.remove('active');
         }
+    });
+
+    // Analytics tab switching
+    document.querySelectorAll('.analytics-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Update tab styles
+            document.querySelectorAll('.analytics-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Show corresponding group
+            const group = tab.dataset.group;
+            document.querySelectorAll('.analytics-group').forEach(g => {
+                g.classList.remove('active');
+                g.style.display = 'none';
+            });
+            const targetGroup = document.getElementById(`group-${group}`);
+            if (targetGroup) {
+                targetGroup.classList.add('active');
+                targetGroup.style.display = 'block';
+            }
+        });
     });
 
     // Close modal on outside click
@@ -717,10 +1139,61 @@ function setupEventHandlers() {
 }
 
 // ============================================================================
+// Theme Toggle
+// ============================================================================
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+
+    // Update Plotly charts if visible
+    updatePlotlyTheme(newTheme);
+}
+
+function updateThemeButton(theme) {
+    const btn = document.getElementById('btn-theme');
+    if (btn) {
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+}
+
+function updatePlotlyTheme(theme) {
+    const bgColor = theme === 'dark' ? '#161b22' : '#f6f8fa';
+    const textColor = theme === 'dark' ? '#e6edf3' : '#1f2328';
+    const gridColor = theme === 'dark' ? '#30363d' : '#d0d7de';
+
+    // Update all Plotly charts on the page
+    const plotlyCharts = document.querySelectorAll('.js-plotly-plot');
+    plotlyCharts.forEach(chart => {
+        Plotly.relayout(chart, {
+            paper_bgcolor: bgColor,
+            plot_bgcolor: bgColor,
+            font: { color: textColor },
+            'xaxis.gridcolor': gridColor,
+            'yaxis.gridcolor': gridColor
+        });
+    });
+}
+
+// ============================================================================
 // Initialize
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     setupEventHandlers();
     loadEntries();
+
+    // Theme toggle listener
+    document.getElementById('btn-theme')?.addEventListener('click', toggleTheme);
 });
