@@ -674,7 +674,7 @@ def get_wordcloud(era):
         'present', 'presented', 'propose', 'proposed', 'although',
         'either', 's', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 
         'l', 'm', 'n', 'o', 'p', 'q', 'r', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        'set', 'know', 'first', 'new', 'different', 'many', 'will', 'able','doi','org','https','http',' '
+        'set', 'know', 'first', 'new', 'different', 'many', 'will', 'able','doi','org','https','http','www'
     ])
     
     try:
