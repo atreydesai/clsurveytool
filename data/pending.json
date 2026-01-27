@@ -1,88 +1,5 @@
 [
   {
-    "id": "d2c5b62f-afc9-4d8e-972a-5ccff4d761a9",
-    "title": "The units of perception in the antiphonal calling behavior of cotton-top tamarins ( Saguinus oedipus ): playback experiments with long calls",
-    "authors": [
-      "Ghazanfar,  Asif",
-      "Flombaum,  Jonathan",
-      "Miller,  Cory",
-      "Hauser,  Marc"
-    ],
-    "year": "2001",
-    "journal": "Journal of Comparative Physiology A: Sensory,  Neural,  and Behavioral Physiology",
-    "abstract": "",
-    "doi": "10.1007/s003590000173",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.883903"
-  },
-  {
-    "id": "b54473a3-9b47-4331-ac68-83f822e26196",
-    "title": "Perception of harmonics in the combination long call of cottontop tamarins,  Saguinus oedipus",
-    "authors": [
-      "Weiss,  Daniel J.",
-      "Hauser,  Marc D."
-    ],
-    "year": "2002",
-    "journal": "Animal Behaviour",
-    "abstract": "",
-    "doi": "10.1006/anbe.2002.3083",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.883907"
-  },
-  {
-    "id": "61adf2e0-b337-4075-8978-dd93038a3e5b",
-    "title": "SONG ORGANISATION AND SINGING PATTERNS OF THE WILLOW WARBLER,  PHYLLOSCOPUS TROCHILUS",
-    "authors": [
-      "Gil,  Diego",
-      "Slater,  Peter J.B."
-    ],
-    "year": "2000",
-    "journal": "Behaviour",
-    "abstract": "",
-    "doi": "10.1163/156853900502330",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.883912"
-  },
-  {
-    "id": "fb2e8102-0817-45bb-8d8b-f119f8388cb9",
-    "title": "Temporal and geographical variation in songs of humpback whales,  Megaptera novaeangliae: synchronous change in Hawaiian and Mexican breeding assemblages",
-    "authors": [
-      "Cerchio,  Salvatore",
-      "Jacobsen,  Jeff K.",
-      "Norris,  Thomas F."
-    ],
-    "year": "2001",
-    "journal": "Animal Behaviour",
-    "abstract": "",
-    "doi": "10.1006/anbe.2001.1747",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.883916"
-  },
-  {
     "id": "b06d0a1d-1772-41b0-b2aa-1f648599e388",
     "title": "Patterns of Vocal Sharing and Social Dynamics in a Captive Group of Campbell’s Monkeys (Cercopithecus campbelli campbelli).",
     "authors": [
@@ -101,31 +18,6 @@
     "linguistic_features": [],
     "status": "pending",
     "created_at": "2026-01-13T12:49:59.883921"
-  },
-  {
-    "id": "7daf5f5c-294d-4b2b-95ab-de56b7b38886",
-    "title": "Culturally transmitted song exchange between humpback whales (\nMegaptera novaeangliae\n) in the southeast Atlantic and southwest Indian Ocean basins",
-    "authors": [
-      "Rekdahl,  Melinda L.",
-      "Garland,  Ellen C.",
-      "Carvajal,  Gabriella A.",
-      "King,  Carissa D.",
-      "Collins,  Tim",
-      "Razafindrakoto,  Yvette",
-      "Rosenbaum,  Howard"
-    ],
-    "year": "2018",
-    "journal": "Royal Society Open Science",
-    "abstract": "",
-    "doi": "10.1098/rsos.172305",
-    "analysis_notes": "",
-    "affiliations": [],
-    "species_categories": [],
-    "specialized_species": [],
-    "computational_stages": [],
-    "linguistic_features": [],
-    "status": "pending",
-    "created_at": "2026-01-13T12:49:59.883925"
   },
   {
     "id": "780b1e52-8158-4758-9b07-bb1daccd33db",
