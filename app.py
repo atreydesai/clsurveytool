@@ -22,6 +22,7 @@ matplotlib.use('Agg')  # Non-GUI backend for server
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 import networkx as nx
+import pdfplumber
 
 # Load environment variables
 load_dotenv()
@@ -33,6 +34,15 @@ app.secret_key = os.urandom(24)
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 PENDING_FILE = os.path.join(DATA_DIR, 'pending.json')
 DATASET_FILE = os.path.join(DATA_DIR, 'dataset.jsonl')
+
+# Multi-dataset file paths
+HUMAN_DATASET_FILE = os.path.join(DATA_DIR, 'human_dataset.jsonl')
+SUBSET_DATASET_FILE = os.path.join(DATA_DIR, 'subset_dataset.jsonl')
+FULLSET_DATASET_FILE = os.path.join(DATA_DIR, 'fullset_dataset.jsonl')
+
+# Source data directories
+SOURCE_METADATA_DIR = os.path.join(DATA_DIR, 'source_metadata')
+SOURCE_PDFS_DIR = os.path.join(DATA_DIR, 'source_pdfs')
 
 # Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -231,6 +241,77 @@ def delete_from_dataset(entry_id):
 
 
 # ============================================================================
+# MULTI-DATASET SUPPORT
+# ============================================================================
+
+def load_dataset_file(filepath):
+    """Load entries from a JSONL dataset file."""
+    entries = []
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        entries.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+    return entries
+
+
+def save_dataset_file(filepath, entries):
+    """Save entries to a JSONL dataset file."""
+    with open(filepath, 'w', encoding='utf-8') as f:
+        for entry in entries:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+
+
+def load_all_datasets(sources=None):
+    """Load entries from specified dataset sources.
+    
+    Args:
+        sources: List of source names ('human', 'subset', 'fullset').
+                 If None, loads from all sources.
+    
+    Returns:
+        List of all entries from specified sources.
+    """
+    if sources is None:
+        sources = ['human', 'subset', 'fullset']
+    
+    all_entries = []
+    
+    source_files = {
+        'human': HUMAN_DATASET_FILE,
+        'subset': SUBSET_DATASET_FILE,
+        'fullset': FULLSET_DATASET_FILE
+    }
+    
+    for source in sources:
+        if source in source_files:
+            entries = load_dataset_file(source_files[source])
+            all_entries.extend(entries)
+    
+    # Fallback: if no entries found in new files, try legacy dataset.jsonl
+    if not all_entries and os.path.exists(DATASET_FILE):
+        all_entries = load_dataset()
+    
+    return all_entries
+
+
+def get_all_dois(filepath):
+    """Get set of DOIs from a dataset file."""
+    dois = set()
+    entries = load_dataset_file(filepath)
+    for entry in entries:
+        doi = entry.get('doi', '').strip()
+        if doi:
+            # Normalize DOI format
+            doi = doi.replace('https://doi.org/', '').replace('http://doi.org/', '')
+            dois.add(doi.lower())
+    return dois
+
+
+# ============================================================================
 # BIBTEX PARSING
 # ============================================================================
 
@@ -325,9 +406,40 @@ def index():
 
 @app.route('/api/entries', methods=['GET'])
 def get_entries():
-    """Get all entries (pending + saved)."""
-    pending = load_pending()
-    saved = load_dataset()
+    """Get all entries (pending + saved) filtered by sources."""
+    # Parse sources parameter
+    sources_param = request.args.get('sources', '')
+    if sources_param == 'none':
+        sources = []
+    elif sources_param:
+        sources = [s.strip() for s in sources_param.split(',') if s.strip()]
+    else:
+        sources = ['human', 'subset', 'fullset']  # Default to all
+    
+    pending = []
+    saved = []
+    
+    # Load pending entries (from main pending.json, filtered by data_source)
+    all_pending = load_pending()
+    for entry in all_pending:
+        source = entry.get('data_source', 'human')  # Default to human for legacy
+        if source in sources:
+            pending.append(entry)
+    
+    # Load saved entries from each source's dataset file
+    source_files = {
+        'human': HUMAN_DATASET_FILE,
+        'subset': SUBSET_DATASET_FILE,
+        'fullset': FULLSET_DATASET_FILE
+    }
+    for source in sources:
+        if source in source_files:
+            entries = load_dataset_file(source_files[source])
+            saved.extend(entries)
+    
+    # Fallback: if no saved entries found but legacy dataset exists, load from it
+    if not saved and os.path.exists(DATASET_FILE) and 'human' in sources:
+        saved = load_dataset()
     
     # Collect known universities, countries, and disciplines from all entries
     known_universities = set()
@@ -437,7 +549,20 @@ def commit_entry(entry_id):
             entry['status'] = 'saved'
             entry['committed_at'] = datetime.now().isoformat()
             save_pending(pending)
-            save_to_dataset(entry)
+            
+            # Save to correct dataset file based on data_source
+            data_source = entry.get('data_source', 'human')
+            source_files = {
+                'human': HUMAN_DATASET_FILE,
+                'subset': SUBSET_DATASET_FILE,
+                'fullset': FULLSET_DATASET_FILE
+            }
+            target_file = source_files.get(data_source, HUMAN_DATASET_FILE)
+            
+            # Append to the appropriate dataset file
+            with open(target_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+            
             return jsonify({'message': 'Committed', 'entry': entry})
     
     return jsonify({'error': 'Entry not found in pending'}), 404
@@ -515,7 +640,17 @@ def get_stats():
 @app.route('/api/analytics', methods=['GET'])
 def get_analytics():
     """Get comprehensive analytics data for all visualizations."""
-    saved = load_dataset()
+    # Parse sources parameter (comma-separated: human,subset,fullset)
+    sources_param = request.args.get('sources', '')
+    if sources_param == 'none':
+        # Explicitly no sources selected - return empty
+        return jsonify({'empty': True})
+    elif sources_param:
+        sources = [s.strip() for s in sources_param.split(',') if s.strip()]
+    else:
+        sources = None  # Load all sources
+    
+    saved = load_all_datasets(sources)
     
     if not saved:
         return jsonify({'empty': True})
@@ -633,7 +768,13 @@ def get_analytics():
 @app.route('/api/analytics/wordcloud/<era>', methods=['GET'])
 def get_wordcloud(era):
     """Generate word cloud for pre-LLM (<=2020) or post-LLM (>2020) era."""
-    saved = load_dataset()
+    # Parse sources parameter
+    sources_param = request.args.get('sources', '')
+    if sources_param == 'none':
+        return jsonify({'error': 'No sources selected'}), 400
+    sources = [s.strip() for s in sources_param.split(',') if s.strip()] if sources_param else None
+    
+    saved = load_all_datasets(sources)
     
     if not saved:
         return jsonify({'error': 'No data'}), 400
@@ -711,7 +852,13 @@ def get_wordcloud(era):
 @app.route('/api/analytics/network/<network_type>', methods=['GET'])
 def get_network(network_type):
     """Generate network graph data for affiliations, countries, or disciplines."""
-    saved = load_dataset()
+    # Parse sources parameter
+    sources_param = request.args.get('sources', '')
+    if sources_param == 'none':
+        return jsonify({'error': 'No sources selected'}), 400
+    sources = [s.strip() for s in sources_param.split(',') if s.strip()] if sources_param else None
+    
+    saved = load_all_datasets(sources)
     
     if not saved:
         return jsonify({'error': 'No data'}), 400
@@ -822,5 +969,218 @@ def get_network(network_type):
     })
 
 
+# ============================================================================
+# MULTI-DATASET IMPORT ENDPOINTS
+# ============================================================================
+
+@app.route('/api/sources/stats', methods=['GET'])
+def get_source_stats():
+    """Get paper counts per data source."""
+    human_count = len(load_dataset_file(HUMAN_DATASET_FILE))
+    subset_count = len(load_dataset_file(SUBSET_DATASET_FILE))
+    fullset_count = len(load_dataset_file(FULLSET_DATASET_FILE))
+    legacy_count = len(load_dataset()) if os.path.exists(DATASET_FILE) else 0
+    
+    return jsonify({
+        'human': human_count,
+        'subset': subset_count,
+        'fullset': fullset_count,
+        'legacy': legacy_count,
+        'total': human_count + subset_count + fullset_count
+    })
+
+
+@app.route('/api/import/fullset', methods=['POST'])
+def import_fullset():
+    """Import fullset metadata from source file, deduplicating against subset."""
+    source_file = os.path.join(SOURCE_METADATA_DIR, 'final_relevant_papers.jsonl')
+    
+    if not os.path.exists(source_file):
+        return jsonify({'error': 'Source file not found', 'path': source_file}), 404
+    
+    # Get DOIs from subset to exclude duplicates
+    subset_dois = get_all_dois(SUBSET_DATASET_FILE)
+    
+    # Also get DOIs from existing human dataset
+    human_dois = get_all_dois(HUMAN_DATASET_FILE)
+    exclude_dois = subset_dois | human_dois
+    
+    # Load source data (it's a JSON array, not JSONL)
+    with open(source_file, 'r', encoding='utf-8') as f:
+        content = f.read().strip()
+        if content.startswith('['):
+            source_entries = json.loads(content)
+        else:
+            # Handle JSONL format
+            source_entries = [json.loads(line) for line in content.split('\n') if line.strip()]
+    
+    # Filter and add data_source field
+    imported = []
+    skipped = 0
+    
+    for entry in source_entries:
+        doi = entry.get('doi', '').strip()
+        if doi:
+            normalized_doi = doi.replace('https://doi.org/', '').replace('http://doi.org/', '').lower()
+            if normalized_doi in exclude_dois:
+                skipped += 1
+                continue
+        
+        # Add data_source field
+        entry['data_source'] = 'fullset'
+        imported.append(entry)
+    
+    # Save to fullset dataset file
+    save_dataset_file(FULLSET_DATASET_FILE, imported)
+    
+    return jsonify({
+        'message': f'Imported {len(imported)} entries, skipped {skipped} duplicates',
+        'imported': len(imported),
+        'skipped': skipped
+    })
+
+
+@app.route('/api/import/migrate-legacy', methods=['POST'])
+def migrate_legacy():
+    """Migrate legacy dataset.jsonl to human_dataset.jsonl."""
+    if not os.path.exists(DATASET_FILE):
+        return jsonify({'error': 'No legacy dataset found'}), 404
+    
+    entries = load_dataset()
+    
+    # Add data_source field to each entry
+    for entry in entries:
+        entry['data_source'] = 'human'
+    
+    # Save to human dataset file
+    save_dataset_file(HUMAN_DATASET_FILE, entries)
+    
+    return jsonify({
+        'message': f'Migrated {len(entries)} entries to human dataset',
+        'count': len(entries)
+    })
+
+
+@app.route('/api/import/subset', methods=['POST'])
+def import_subset():
+    """Import subset PDF metadata as pending entries for processing."""
+    download_metadata_file = os.path.join(SOURCE_METADATA_DIR, 'download_metadata.jsonl')
+    fullset_file = os.path.join(SOURCE_METADATA_DIR, 'final_relevant_papers.jsonl')
+    
+    if not os.path.exists(download_metadata_file):
+        return jsonify({'error': 'Download metadata file not found', 'path': download_metadata_file}), 404
+    
+    # Load fullset metadata to get paper details (title, authors, etc.)
+    fullset_by_doi = {}
+    if os.path.exists(fullset_file):
+        with open(fullset_file, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            if content.startswith('['):
+                fullset_entries = json.loads(content)
+            else:
+                fullset_entries = [json.loads(line) for line in content.split('\n') if line.strip()]
+        
+        # Build DOI lookup map (normalize DOIs for matching)
+        for entry in fullset_entries:
+            doi = entry.get('doi', '').strip()
+            if doi:
+                # Normalize: remove URL prefix, lowercase
+                normalized_doi = doi.replace('https://doi.org/', '').replace('http://doi.org/', '').lower()
+                fullset_by_doi[normalized_doi] = entry
+    
+    # Load download metadata (JSONL format)
+    download_entries = []
+    with open(download_metadata_file, 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                try:
+                    download_entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+    
+    # Get existing pending entries and filter out already imported subset entries
+    pending = load_pending()
+    existing_dois = set()
+    for e in pending:
+        if e.get('doi'):
+            normalized = e['doi'].replace('https://doi.org/', '').replace('http://doi.org/', '').lower().strip()
+            existing_dois.add(normalized)
+    
+    # Create pending entries for each PDF
+    imported = []
+    skipped = 0
+    not_found = 0
+    
+    for entry in download_entries:
+        doi = entry.get('doi', '').strip()
+        # Normalize DOI for lookup and deduplication
+        normalized_doi = doi.replace('https://doi.org/', '').replace('http://doi.org/', '').lower()
+        
+        if normalized_doi in existing_dois:
+            skipped += 1
+            continue
+        
+        # Look up paper details from fullset
+        paper_info = fullset_by_doi.get(normalized_doi, {})
+        if not paper_info:
+            not_found += 1
+        
+        # Extract text from PDF
+        pdf_filename = entry.get('filename', '')
+        pdf_text = ''
+        if pdf_filename:
+            pdf_path = os.path.join(SOURCE_PDFS_DIR, pdf_filename)
+            if os.path.exists(pdf_path):
+                try:
+                    with pdfplumber.open(pdf_path) as pdf:
+                        pages_text = []
+                        for page in pdf.pages[:20]:  # Limit to first 20 pages
+                            text = page.extract_text()
+                            if text:
+                                pages_text.append(text)
+                        pdf_text = '\n\n'.join(pages_text)
+                        # Truncate if too long (keep first 50k chars)
+                        if len(pdf_text) > 50000:
+                            pdf_text = pdf_text[:50000] + '\n\n[TRUNCATED...]'
+                except Exception as e:
+                    pdf_text = f'[Error extracting PDF: {str(e)}]'
+        
+        # Create pending entry with data from fullset metadata
+        # analysis_notes contains extracted PDF text for AI analysis
+        pending_entry = {
+            'id': str(uuid.uuid4()),
+            'doi': doi,
+            'title': paper_info.get('title', ''),
+            'authors': paper_info.get('authors', []),
+            'year': paper_info.get('year', ''),
+            'journal': paper_info.get('journal', ''),
+            'abstract': paper_info.get('abstract', ''),
+            'pdf_filename': pdf_filename,
+            'data_source': 'subset',
+            'status': 'pending',
+            'created_at': datetime.now().isoformat(),
+            'analysis_notes': pdf_text,  # PDF text for AI analysis
+            'affiliations': [],
+            'species_categories': [],
+            'specialized_species': [],
+            'computational_stages': [],
+            'linguistic_features': []
+        }
+        imported.append(pending_entry)
+        existing_dois.add(normalized_doi)
+    
+    # Add to pending
+    pending.extend(imported)
+    save_pending(pending)
+    
+    return jsonify({
+        'message': f'Imported {len(imported)} subset entries as pending, skipped {skipped} duplicates, {not_found} without metadata',
+        'imported': len(imported),
+        'skipped': skipped,
+        'not_found': not_found
+    })
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
+

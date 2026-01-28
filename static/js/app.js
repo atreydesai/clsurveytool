@@ -24,7 +24,9 @@ async function api(endpoint, options = {}) {
 }
 
 async function loadEntries() {
-    const data = await api('/entries');
+    const sources = getSelectedSources();
+    const params = sources ? `?sources=${sources}` : '';
+    const data = await api(`/entries${params}`);
     state.entries = { pending: data.pending || [], saved: data.saved || [] };
     state.constants = data.constants || {};
     renderEntryList();
@@ -588,17 +590,53 @@ function showSaveIndicator() {
 // Analytics Functions
 // ============================================================================
 
+// Get currently selected data sources from toggles
+function getSelectedSources() {
+    const sources = [];
+    if (document.getElementById('toggle-human')?.checked) sources.push('human');
+    if (document.getElementById('toggle-subset')?.checked) sources.push('subset');
+    if (document.getElementById('toggle-fullset')?.checked) sources.push('fullset');
+    // Return 'none' explicitly when no sources selected
+    return sources.length > 0 ? sources.join(',') : 'none';
+}
+
 async function loadAnalytics() {
-    return await api('/analytics');
+    const sources = getSelectedSources();
+    const params = sources ? `?sources=${sources}` : '';
+    return await api(`/analytics${params}`);
 }
 
 async function loadWordCloud(era) {
-    return await api(`/analytics/wordcloud/${era}`);
+    const sources = getSelectedSources();
+    const params = sources ? `?sources=${sources}` : '';
+    return await api(`/analytics/wordcloud/${era}${params}`);
 }
 
 async function loadNetwork(type) {
-    return await api(`/analytics/network/${type}`);
+    const sources = getSelectedSources();
+    const params = sources ? `?sources=${sources}` : '';
+    return await api(`/analytics/network/${type}${params}`);
 }
+
+// Refresh entries and analytics when source toggles change
+function setupSourceToggleHandlers() {
+    ['toggle-human', 'toggle-subset', 'toggle-fullset'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', async () => {
+            // Reload entries with new source selection
+            await loadEntries();
+
+            // Also reload analytics if visible
+            const analyticsPanel = document.getElementById('analytics');
+            if (analyticsPanel && analyticsPanel.style.display !== 'none') {
+                const data = await loadAnalytics();
+                if (data) {
+                    await renderAnalytics(data);
+                }
+            }
+        });
+    });
+}
+
 
 // Light theme for Plotly charts (optimized for downloading/printing)
 // IMPORTANT: Use getPlotlyLayout() instead of spreading this directly,
@@ -1192,8 +1230,10 @@ function updatePlotlyTheme(theme) {
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     setupEventHandlers();
+    setupSourceToggleHandlers();
     loadEntries();
 
     // Theme toggle listener
     document.getElementById('btn-theme')?.addEventListener('click', toggleTheme);
 });
+
