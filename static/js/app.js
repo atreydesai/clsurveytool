@@ -185,6 +185,11 @@ function renderEditor() {
                         <textarea id="field-authors" style="min-height: 80px;">${(entry.authors || []).join('\n')}</textarea>
                     </div>
                     
+                    <div class="form-group">
+                        <label>DOI</label>
+                        <input type="text" id="field-doi" value="${escapeHtml(entry.doi || '')}" placeholder="e.g. 10.1000/example">
+                    </div>
+                    
                     <!-- Google Scholar Copy -->
                     <div class="form-group">
                         <label>Google Scholar Search</label>
@@ -321,7 +326,7 @@ function renderEditor() {
 
 function attachEditorHandlers(entry) {
     // Auto-save on input changes (debounced)
-    const inputs = ['field-title', 'field-year', 'field-journal', 'field-authors', 'field-notes', 'field-specialized-species'];
+    const inputs = ['field-title', 'field-year', 'field-journal', 'field-authors', 'field-doi', 'field-notes', 'field-specialized-species'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -548,6 +553,7 @@ function collectFormData(entry) {
     entry.year = document.getElementById('field-year')?.value || '';
     entry.journal = document.getElementById('field-journal')?.value || '';
     entry.authors = (document.getElementById('field-authors')?.value || '').split('\n').filter(a => a.trim());
+    entry.doi = document.getElementById('field-doi')?.value || '';
     entry.analysis_notes = document.getElementById('field-notes')?.value || '';
     entry.specialized_species = (document.getElementById('field-specialized-species')?.value || '')
         .split(',').map(s => s.trim()).filter(s => s);
