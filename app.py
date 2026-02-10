@@ -165,16 +165,149 @@ For "species_categories", choose only from:
 
 For "specialized_species", use common names only, exactly as written in the notes.
 
+AFFILIATIONS EXTRACTION:
+Extract author affiliations from the paper. For each UNIQUE combination of university and discipline, create one affiliation entry.
+- "university": The English name of the university or research institution. If the original is in another language, translate to English. Use standard ASCII characters only (no special characters like ʻ or ā - convert to regular letters). Do not include footnote numbers or superscripts.
+- "country": The country where that university is located. Use standard English country names.
+- "discipline": ONLY include if the department/field is EXPLICITLY stated in the paper. Map to one of: "Linguistics", "Computer Science", "Biology", "Other". If a specific discipline like "Marine Biology", "Ecology", "Zoology", "Neuroscience" is mentioned, map to "Biology". If "Machine Learning", "AI", "Data Science" is mentioned, map to "Computer Science". If no discipline is explicitly stated, leave discipline as empty string "".
+
+Rules for affiliations:
+- Only include UNIQUE combinations of (university, discipline). If multiple authors are from the same university and department, include only one entry.
+- If the same university has authors in different departments, include separate entries for each unique discipline.
+- If an author has multiple affiliations, include all applicable as separate entries.
+- Do NOT invent or guess affiliations - only extract what is explicitly written.
+- Convert non-English institution names to their English equivalents (e.g., "Université de Lyon" -> "University of Lyon").
+
+For "discipline" in affiliations, choose only from:
+"Linguistics"
+"Computer Science"
+"Biology"
+"Other"
+""  (empty string if not explicitly stated)
+
 Required JSON schema:
 
 {
 "specialized_species": [],
 "species_categories": [],
 "computational_stages": [],
-"linguistic_features": []
+"linguistic_features": [],
+"affiliations": [
+    {"university": "Example University", "country": "Country Name", "discipline": "Biology"}
+]
 }
 
 """
+
+import unicodedata
+
+def normalize_university(name):
+    """Normalize university name: convert to ASCII, remove footnotes."""
+    if not name:
+        return name
+    
+    # Normalize unicode characters to ASCII equivalents
+    # e.g., ʻ -> ', ā -> a, é -> e
+    normalized = unicodedata.normalize('NFKD', name)
+    ascii_name = normalized.encode('ascii', 'ignore').decode('ascii')
+    
+    # Remove trailing footnote numbers (e.g., "Roma1" -> "Roma", "University2" -> "University")
+    ascii_name = re.sub(r'(\d+)\s*$', '', ascii_name)
+    
+    # Remove superscript-like patterns
+    ascii_name = re.sub(r'\s*\d+\s*$', '', ascii_name)
+    
+    # Clean up extra whitespace
+    ascii_name = ' '.join(ascii_name.split())
+    
+    return ascii_name.strip()
+
+# Strict Validation Lists
+SPECIES_CATEGORIES_ALLOWED = {
+    "Amphibian", "Terrestrial Mammal", "Marine Mammal", "Bird", 
+    "Primate", "Reptile", "Fish", "Insect", "Other"
+}
+
+COMPUTATIONAL_STAGES_ALLOWED = {
+    "Data Collection", "Pre-processing", "Sequence Representation",
+    "Meaning Identification", "Generation"
+}
+
+LINGUISTIC_FEATURES_ALLOWED = {
+    "Vocal Auditory Channel and Turn-taking",
+    "Broadcast and Direct Reception",
+    "Reference and Displacement",
+    "Specialization",
+    "Arbitrariness and Duality of Patterns",
+    "Discreteness and Syntax",
+    "Recursion",
+    "Semanticity",
+    "Prevarication",
+    "Openness",
+    "Tradition and Cultural Transmission",
+    "Learnability"
+}
+
+DISCIPLINES_ALLOWED = {"Linguistics", "Computer Science", "Biology", "Other", ""}
+
+def validate_ai_result(result):
+    """Filter AI results to only include allowed values."""
+    validated = {}
+    
+    # specialized_species: pass through (no strict validation list, just strings)
+    validated['specialized_species'] = result.get('specialized_species', [])
+    
+    # species_categories
+    raw_species = result.get('species_categories', [])
+    validated['species_categories'] = [s for s in raw_species if s in SPECIES_CATEGORIES_ALLOWED]
+    
+    # computational_stages
+    raw_stages = result.get('computational_stages', [])
+    validated['computational_stages'] = [s for s in raw_stages if s in COMPUTATIONAL_STAGES_ALLOWED]
+    
+    # linguistic_features
+    raw_features = result.get('linguistic_features', [])
+    validated['linguistic_features'] = [f for f in raw_features if f in LINGUISTIC_FEATURES_ALLOWED]
+    
+    # affiliations: validate and deduplicate
+    raw_affiliations = result.get('affiliations', [])
+    seen_combos = set()
+    validated_affiliations = []
+    
+    for aff in raw_affiliations:
+        if not isinstance(aff, dict):
+            continue
+        
+        university = aff.get('university', '').strip()
+        country = aff.get('country', '').strip()
+        discipline = aff.get('discipline', '').strip()
+        
+        # Normalize university name (remove special chars, footnotes)
+        university = normalize_university(university)
+        
+        # Skip if no university
+        if not university:
+            continue
+        
+        # Validate discipline
+        if discipline not in DISCIPLINES_ALLOWED:
+            discipline = ""  # Clear invalid disciplines
+        
+        # Check for unique combination
+        combo = (university.lower(), discipline.lower())
+        if combo in seen_combos:
+            continue
+        seen_combos.add(combo)
+        
+        validated_affiliations.append({
+            'university': university,
+            'country': country,
+            'discipline': discipline
+        })
+    
+    validated['affiliations'] = validated_affiliations
+    
+    return validated
 
 
 # ============================================================================
@@ -389,7 +522,9 @@ def analyze_with_ai(notes):
         except Exception as log_error:
             print(f"Log error: {log_error}")
         
-        return result
+        # Validate result
+        validated_result = validate_ai_result(result)
+        return validated_result
     except Exception as e:
         return {'error': str(e)}
 
@@ -874,8 +1009,8 @@ def get_network(network_type):
         'Cognitive Science': 'Computer Science',
         'Machine Learning': 'Computer Science',
         'NLP': 'Computer Science',
-        'Psychology': 'Other',
-        'Anthropology': 'Other',
+        'Psychology': 'Biology',
+        'Anthropology': 'Biology',
         'Philosophy': 'Other',
         'Music': 'Other'
     }

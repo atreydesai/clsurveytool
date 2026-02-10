@@ -374,6 +374,9 @@ function attachEditorHandlers(entry) {
             entry.species_categories = [...new Set(result.species_categories || [])];
             entry.specialized_species = result.specialized_species || [];
             entry.computational_stages = result.computational_stages || [];
+            if (result.affiliations && result.affiliations.length > 0) {
+                entry.affiliations = result.affiliations;
+            }
             await saveEntry(entry.id, entry);
             renderEditor();
         }
@@ -631,9 +634,20 @@ function setupSourceToggleHandlers() {
             // Reload entries with new source selection
             await loadEntries();
 
-            // Also reload analytics if visible
+            // Also reload analytics if visible (check if analytics button is active)
+            const analyticsBtn = document.getElementById('btn-analytics');
             const analyticsPanel = document.getElementById('analytics');
-            if (analyticsPanel && analyticsPanel.style.display !== 'none') {
+            const isAnalyticsVisible = analyticsBtn?.classList.contains('active') ||
+                (analyticsPanel && analyticsPanel.style.display === 'block');
+
+            if (isAnalyticsVisible) {
+                // Show loading state
+                const activeGroup = document.querySelector('.analytics-group.active, .analytics-group[style*="block"]');
+                if (activeGroup) {
+                    activeGroup.innerHTML = '<p class="loading-spinner">Refreshing analytics...</p>';
+                }
+
+                // Reload analytics data
                 const data = await loadAnalytics();
                 if (data) {
                     await renderAnalytics(data);
