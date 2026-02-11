@@ -8,8 +8,54 @@ let state = {
     constants: {},
     activeTab: 'pending',
     selectedEntryId: null,
-    debounceTimer: null
+    debounceTimer: null,
+    backgroundTaskCount: 0
 };
+
+// ============================================================================
+// UI Helper Functions
+// ============================================================================
+
+function updateGlobalIndicator() {
+    let indicator = document.getElementById('global-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'global-indicator';
+        indicator.className = 'global-indicator';
+        document.body.appendChild(indicator);
+    }
+
+    if (state.backgroundTaskCount > 0) {
+        indicator.textContent = `Analyzing ${state.backgroundTaskCount} paper${state.backgroundTaskCount > 1 ? 's' : ''}...`;
+        indicator.style.display = 'block';
+    } else {
+        indicator.style.display = 'none';
+    }
+}
+
+function showNotification(message) {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
 // ============================================================================
 // API Functions
@@ -365,23 +411,47 @@ function attachEditorHandlers(entry) {
         btn.disabled = true;
         btn.textContent = 'Analyzing...';
 
-        const result = await runAnalysis(notes);
-        if (result.error) {
-            alert('Error: ' + result.error);
-        } else {
-            // Apply results
-            entry.linguistic_features = result.linguistic_features || [];
-            entry.species_categories = [...new Set(result.species_categories || [])];
-            entry.specialized_species = result.specialized_species || [];
-            entry.computational_stages = result.computational_stages || [];
-            if (result.affiliations && result.affiliations.length > 0) {
-                entry.affiliations = result.affiliations;
+        // Increment global task count
+        state.backgroundTaskCount++;
+        updateGlobalIndicator();
+
+        try {
+            const result = await runAnalysis(notes);
+            if (result.error) {
+                alert('Error: ' + result.error);
+            } else {
+                // Apply results
+                entry.linguistic_features = result.linguistic_features || [];
+                entry.species_categories = [...new Set(result.species_categories || [])];
+                entry.specialized_species = result.specialized_species || [];
+                entry.computational_stages = result.computational_stages || [];
+                if (result.affiliations && result.affiliations.length > 0) {
+                    entry.affiliations = result.affiliations;
+                }
+                await saveEntry(entry.id, entry);
+
+                // If this is still the selected entry, re-render
+                if (state.selectedEntryId === entry.id) {
+                    renderEditor();
+                } else {
+                    // Otherwise notify user
+                    showNotification(`Analysis complete for "${entry.title}"`);
+                }
             }
-            await saveEntry(entry.id, entry);
-            renderEditor();
+        } catch (e) {
+            console.error(e);
+            alert('Analysis failed');
+        } finally {
+            state.backgroundTaskCount--;
+            updateGlobalIndicator();
+
+            // Only update button if it still exists (user hasn't navigated away)
+            const currentBtn = document.getElementById('btn-analyze');
+            if (currentBtn) {
+                currentBtn.disabled = false;
+                currentBtn.textContent = 'Run AI Analysis';
+            }
         }
-        btn.disabled = false;
-        btn.textContent = 'Run AI Analysis';
     });
 
     // Add affiliation row
