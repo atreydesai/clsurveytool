@@ -950,7 +950,8 @@ def get_wordcloud(era):
         'present', 'presented', 'propose', 'proposed', 'although',
         'either', 's', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 
         'l', 'm', 'n', 'o', 'p', 'q', 'r', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        'set', 'know', 'first', 'new', 'different', 'many', 'will', 'able','doi','org','https','http','www'
+        'set', 'know', 'first', 'new', 'different', 'many', 'will', 'able','doi','org','https','http','www', 'cid', '.','preprint','fig','bioarxiv','arxiv','pdf','com','site',
+        'version','posted','author','funded','granted','peer review','nature','information','biorxiv','peer','review'
     ])
     
     try:
@@ -1317,5 +1318,5 @@ def import_subset():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5003)
 

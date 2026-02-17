@@ -714,7 +714,8 @@ function setupSourceToggleHandlers() {
                 // Show loading state
                 const activeGroup = document.querySelector('.analytics-group.active, .analytics-group[style*="block"]');
                 if (activeGroup) {
-                    activeGroup.innerHTML = '<p class="loading-spinner">Refreshing analytics...</p>';
+                    // Do not clear the innerHTML here as it destroys the chart containers
+                    // renderAnalytics will handle updating the charts
                 }
 
                 // Reload analytics data
