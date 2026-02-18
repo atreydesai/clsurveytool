@@ -26,3 +26,4 @@ Thumbs.db
 # Data files (local only)
 ai_logs.txt
 data/source_pdfs/
+data/fullset_dataset.jsonl
