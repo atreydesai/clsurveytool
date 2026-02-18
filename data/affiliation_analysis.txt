@@ -1,0 +1,1695 @@
+================================================================================
+COUNTRIES BY NUMBER OF PAPERS
+================================================================================
+
+Total unique countries: 79
+
+  1. United States                             663 papers
+  2. United Kingdom                            262 papers
+  3. Germany                                   188 papers
+  4. France                                    142 papers
+  5. Australia                                  95 papers
+  6. Canada                                     90 papers
+  7. Switzerland                                89 papers
+  8. Japan                                      77 papers
+  9. China                                      61 papers
+ 10. Brazil                                     58 papers
+ 11. Netherlands                                56 papers
+ 12. Italy                                      54 papers
+ 13. Denmark                                    46 papers
+ 14. Austria                                    35 papers
+ 15. Spain                                      34 papers
+ 16. Belgium                                    34 papers
+ 17. India                                      33 papers
+ 18. South Africa                               26 papers
+ 19. Israel                                     26 papers
+ 20. New Zealand                                25 papers
+ 21. Poland                                     24 papers
+ 22. Panama                                     19 papers
+ 23. Hungary                                    19 papers
+ 24. Mexico                                     16 papers
+ 25. Norway                                     16 papers
+ 26. Sweden                                     14 papers
+ 27. Portugal                                   13 papers
+ 28. Russia                                     12 papers
+ 29. Finland                                    11 papers
+ 30. South Korea                                11 papers
+ 31. Malaysia                                   11 papers
+ 32. Indonesia                                  10 papers
+ 33. Colombia                                   10 papers
+ 34. Uganda                                      8 papers
+ 35. Côte d'Ivoire                               7 papers
+ 36. Ireland                                     7 papers
+ 37. Czech Republic                              7 papers
+ 38. Argentina                                   6 papers
+ 39. Chile                                       6 papers
+ 40. Costa Rica                                  5 papers
+ 41. Turkey                                      5 papers
+ 42. Greece                                      5 papers
+ 43. Hong Kong                                   5 papers
+ 44. Kenya                                       4 papers
+ 45. Nigeria                                     4 papers
+ 46. Ivory Coast                                 4 papers
+ 47. Sri Lanka                                   4 papers
+ 48. Puerto Rico                                 4 papers
+ 49. Iceland                                     4 papers
+ 50. Romania                                     4 papers
+ 51. Taiwan                                      4 papers
+ 52. Slovenia                                    4 papers
+ 53. Brunei                                      3 papers
+ 54. Ukraine                                     3 papers
+ 55. Cyprus                                      3 papers
+ 56. Madagascar                                  3 papers
+ 57. Singapore                                   3 papers
+ 58. Philippines                                 2 papers
+ 59. Bulgaria                                    2 papers
+ 60. Thailand                                    2 papers
+ 61. Croatia                                     2 papers
+ 62. Dominica                                    1 papers
+ 63. French Polynesia                            1 papers
+ 64. Luxembourg                                  1 papers
+ 65. Tanzania                                    1 papers
+ 66. United Arab Emirates                        1 papers
+ 67. Peru                                        1 papers
+ 68. Bermuda                                     1 papers
+ 69. Belize                                      1 papers
+ 70. Morocco                                     1 papers
+ 71. French Guiana                               1 papers
+ 72. Slovakia                                    1 papers
+ 73. Venezuela                                   1 papers
+ 74. Vietnam                                     1 papers
+ 75. Gabon                                       1 papers
+ 76. New Caledonia                               1 papers
+ 77. Country Name                                1 papers
+ 78. Sultanate of Oman                           1 papers
+ 79. N/A                                         1 papers
+
+================================================================================
+UNIVERSITIES/AFFILIATIONS BY NUMBER OF PAPERS
+================================================================================
+
+Total unique affiliations: 1603
+
+  1. University of St Andrews                                       93 papers
+  2. University of Zurich                                           51 papers
+  3. Cornell University                                             47 papers
+  4. Harvard University                                             26 papers
+  5. Woods Hole Oceanographic Institution                           26 papers
+  6. Massachusetts Institute of Technology                          24 papers
+  7. University of California, San Diego                            24 papers
+  8. University of Cambridge                                        22 papers
+  9. University of Vienna                                           22 papers
+ 10. Rockefeller University                                         21 papers
+ 11. Aarhus University                                              21 papers
+ 12. University of California, Los Angeles                          20 papers
+ 13. Smithsonian Tropical Research Institute                        20 papers
+ 14. University of Oxford                                           20 papers
+ 15. University of Washington                                       19 papers
+ 16. Kyoto University                                               19 papers
+ 17. University of Lyon                                             19 papers
+ 18. Oregon State University                                        19 papers
+ 19. CNRS                                                           18 papers
+ 20. German Primate Center                                          18 papers
+ 21. Princeton University                                           18 papers
+ 22. University of São Paulo                                        17 papers
+ 23. University of Neuchâtel                                        17 papers
+ 24. University of Turin                                            17 papers
+ 25. Max Planck Institute                                           16 papers
+ 26. University of Warwick                                          16 papers
+ 27. University of California                                       16 papers
+ 28. University of California, Berkeley                             15 papers
+ 29. University of Tokyo                                            15 papers
+ 30. University of Pennsylvania                                     15 papers
+ 31. University of Maryland                                         15 papers
+ 32. Eotvos Lorand University                                       15 papers
+ 33. ETH Zurich                                                     15 papers
+ 34. University of Konstanz                                         14 papers
+ 35. Colorado State University                                      14 papers
+ 36. Freie Universität Berlin                                       14 papers
+ 37. Queensland University of Technology                            14 papers
+ 38. University of Southern Denmark                                 13 papers
+ 39. University of Victoria                                         13 papers
+ 40. University of Rennes                                           13 papers
+ 41. Paris-Sud University                                           13 papers
+ 42. University of Copenhagen                                       12 papers
+ 43. University College London                                      12 papers
+ 44. Adam Mickiewicz University                                     12 papers
+ 45. University of Chicago                                          12 papers
+ 46. University of Exeter                                           12 papers
+ 47. Max Planck Institute for Evolutionary Anthropology             12 papers
+ 48. Max Planck Institute for Psycholinguistics                     12 papers
+ 49. Max Planck Institute of Animal Behavior                        12 papers
+ 50. Purdue University                                              11 papers
+ 51. University of Tennessee                                        11 papers
+ 52. University of California, Davis                                11 papers
+ 53. University of Veterinary Medicine Hannover                     11 papers
+ 54. Queen Mary University of London                                11 papers
+ 55. University of Queensland                                       11 papers
+ 56. University of Auckland                                         11 papers
+ 57. Northeast Fisheries Science Center                             11 papers
+ 58. Australian National University                                 11 papers
+ 59. University of Liège                                            11 papers
+ 60. Max Planck Institute for Ornithology                           11 papers
+ 61. University of Texas at Austin                                  10 papers
+ 62. Swiss Center for Scientific Research                           10 papers
+ 63. RIKEN Center for Brain Science                                 10 papers
+ 64. New York University                                            10 papers
+ 65. Columbia University                                            10 papers
+ 66. Duke University                                                10 papers
+ 67. University of York                                             10 papers
+ 68. Dalhousie University                                           10 papers
+ 69. San Diego State University                                     10 papers
+ 70. Imperial College London                                        10 papers
+ 71. Google                                                         10 papers
+ 72. Fisheries and Oceans Canada                                    10 papers
+ 73. Emory University                                               10 papers
+ 74. Stanford University                                            10 papers
+ 75. Friedrich-Alexander-Universität Erlangen-Nürnberg               9 papers
+ 76. University of Western Australia                                 9 papers
+ 77. Leiden University                                               9 papers
+ 78. Utrecht University                                              9 papers
+ 79. The Graduate University for Advanced Studies                    9 papers
+ 80. University of Sheffield                                         9 papers
+ 81. McGill University                                               9 papers
+ 82. Tel Aviv University                                             9 papers
+ 83. Earth Species Project                                           9 papers
+ 84. Cornell Lab of Ornithology                                      9 papers
+ 85. University of Bristol                                           9 papers
+ 86. Université Paris-Saclay                                         9 papers
+ 87. University of Tübingen                                          9 papers
+ 88. University of Texas at Arlington                                9 papers
+ 89. University of California, Santa Cruz                            9 papers
+ 90. Goethe University Frankfurt                                     9 papers
+ 91. University of Michigan                                          8 papers
+ 92. University of Montana                                           8 papers
+ 93. University of Amsterdam                                         8 papers
+ 94. PSL Research University                                         8 papers
+ 95. University of Alberta                                           8 papers
+ 96. Ghent University                                                8 papers
+ 97. Ohio State University                                           8 papers
+ 98. University of Florida                                           8 papers
+ 99. University of Haifa                                             8 papers
+100. Stellenbosch University                                         8 papers
+101. Syracuse University                                             8 papers
+102. University of Delaware                                          8 papers
+103. University of Arizona                                           8 papers
+104. Georg-August-Universität Göttingen                              8 papers
+105. Curtin University                                               8 papers
+106. INRAE                                                           8 papers
+107. Aix-Marseille University                                        8 papers
+108. Hokkaido University                                             8 papers
+109. University of Göttingen                                         7 papers
+110. University of Illinois Urbana-Champaign                         7 papers
+111. Budongo Conservation Field Station                              7 papers
+112. Wildlife Conservation Society                                   7 papers
+113. Polytechnic University of Catalonia                             7 papers
+114. University of Sussex                                            7 papers
+115. Northeast Normal University                                     7 papers
+116. University of Southern Mississippi                              7 papers
+117. Boston University                                               7 papers
+118. Hebrew University of Jerusalem                                  7 papers
+119. University of Lisbon                                            7 papers
+120. Lomonosov Moscow State University                               7 papers
+121. Universite de Lyon                                              7 papers
+122. University of Wisconsin-Madison                                 6 papers
+123. Leibniz Institute for Zoo and Wildlife Research                 6 papers
+124. University of Cape Town                                         6 papers
+125. Macquarie University                                            6 papers
+126. Uppsala University                                              6 papers
+127. Carleton University                                             6 papers
+128. Naturalis Biodiversity Center                                   6 papers
+129. Leipzig University                                              6 papers
+130. Georgia State University                                        6 papers
+131. University of Lethbridge                                        6 papers
+132. Pennsylvania State University                                   6 papers
+133. University of Montpellier                                       6 papers
+134. Université Clermont Auvergne                                    6 papers
+135. University of Toulon                                            6 papers
+136. University of Lincoln                                           6 papers
+137. Sorbonne Université                                             6 papers
+138. Czech University of Life Sciences Prague                        6 papers
+139. Humboldt-Universität zu Berlin                                  6 papers
+140. University of Edinburgh                                         6 papers
+141. University of Pretoria                                          6 papers
+142. University of Manchester                                        6 papers
+143. James Cook University                                           6 papers
+144. Doshisha University                                             6 papers
+145. University of Vermont                                           5 papers
+146. University of Illinois                                          5 papers
+147. University of North Carolina                                    5 papers
+148. University of Costa Rica                                        5 papers
+149. Project CETI                                                    5 papers
+150. Austrian Academy of Sciences                                    5 papers
+151. Tilburg University                                              5 papers
+152. University of Portsmouth                                        5 papers
+153. University of Milan                                             5 papers
+154. Johns Hopkins University                                        5 papers
+155. Sapienza University of Rome                                     5 papers
+156. Carnegie Mellon University                                      5 papers
+157. University of Würzburg                                          5 papers
+158. University of Virginia                                          5 papers
+159. Technical University of Munich                                  5 papers
+160. University of Wisconsin                                         5 papers
+161. Vanderbilt University                                           5 papers
+162. Newcastle University                                            5 papers
+163. University of Veterinary Medicine Vienna                        5 papers
+164. Shanghai Jiao Tong University                                   5 papers
+165. Vrije Universiteit Brussel                                      5 papers
+166. City University of New York                                     5 papers
+167. Harvard Medical School                                          5 papers
+168. University of Bonn                                              5 papers
+169. University of Pittsburgh                                        5 papers
+170. University of Oregon                                            5 papers
+171. Brown University                                                5 papers
+172. Northeastern University                                         5 papers
+173. National Oceanic and Atmospheric Administration                 5 papers
+174. A.N. Severtsov Institute of Ecology and Evolution               5 papers
+175. Federal University of Rio Grande do Norte                       5 papers
+176. St. Mary's University                                           5 papers
+177. Zoological Research Museum Alexander Koenig                     5 papers
+178. University of New England                                       5 papers
+179. University of Cincinnati                                        5 papers
+180. Anglia Ruskin University                                        5 papers
+181. University of Hawaii at Manoa                                   5 papers
+182. University of Helsinki                                          4 papers
+183. University at Buffalo                                           4 papers
+184. University of Miami                                             4 papers
+185. Liverpool John Moores University                                4 papers
+186. Texas A&M University                                            4 papers
+187. Université Paris Cité                                           4 papers
+188. City University of New York–Hunter College                      4 papers
+189. Pacific University                                              4 papers
+190. University of New South Wales                                   4 papers
+191. Tufts University                                                4 papers
+192. Seoul National University                                       4 papers
+193. Alfred Wegener Institute for Polar and Marine Research          4 papers
+194. University of Ulm                                               4 papers
+195. North Carolina State University                                 4 papers
+196. Microsoft                                                       4 papers
+197. Griffith University                                             4 papers
+198. National Park Service                                           4 papers
+199. University of Sydney                                            4 papers
+200. University of Surrey                                            4 papers
+201. University of South Bohemia                                     4 papers
+202. University of Nebraska-Lincoln                                  4 papers
+203. Simon Fraser University                                         4 papers
+204. Tohoku University                                               4 papers
+205. University of Antioquia                                         4 papers
+206. National Research Council                                       4 papers
+207. Aalto University                                                4 papers
+208. Mie University                                                  4 papers
+209. Monterey Bay Aquarium Research Institute                        4 papers
+210. University of Ottawa                                            4 papers
+211. Ludwig-Maximilians-Universität München                          4 papers
+212. Hawaii Institute of Marine Biology                              4 papers
+213. New England Aquarium                                            4 papers
+214. University of Chester                                           4 papers
+215. Indiana University                                              4 papers
+216. Durham University                                               4 papers
+217. Universitas Nasional                                            4 papers
+218. University of New Hampshire                                     4 papers
+219. JASCO Applied Sciences                                          4 papers
+220. New Mexico State University                                     4 papers
+221. University of Antwerp                                           4 papers
+222. Institute of Marine Research                                    4 papers
+223. Universiti Malaysia Sabah                                       4 papers
+224. Yale University                                                 4 papers
+225. Max Planck Institute for Empirical Aesthetics                   4 papers
+226. Indian Institute of Science                                     4 papers
+227. University of Saint-Étienne                                     4 papers
+228. Lund University                                                 3 papers
+229. European Neuroscience Institute                                 3 papers
+230. University of Gdańsk                                            3 papers
+231. Université Félix Houphouët-Boigny                               3 papers
+232. Rikkyo University                                               3 papers
+233. Institut Jean Nicod                                             3 papers
+234. Humboldt State University                                       3 papers
+235. Howard Hughes Medical Institute                                 3 papers
+236. Bangor University                                               3 papers
+237. University of Toulouse                                          3 papers
+238. Saarland University                                             3 papers
+239. California Institute of Technology                              3 papers
+240. Northwestern University                                         3 papers
+241. Bat Conservation International                                  3 papers
+242. Moss Landing Marine Laboratories                                3 papers
+243. Stony Brook University                                          3 papers
+244. Bar-Ilan University                                             3 papers
+245. University of Minnesota                                         3 papers
+246. Florida International University                                3 papers
+247. New College of Florida                                          3 papers
+248. University of Liverpool                                         3 papers
+249. Tai Solarin University of Education                             3 papers
+250. Tianjin University                                              3 papers
+251. Hungarian Academy of Sciences                                   3 papers
+252. University of Veterinary Medicine                               3 papers
+253. Southern Cross University                                       3 papers
+254. University of Salford                                           3 papers
+255. Glacier Bay National Park and Preserve                          3 papers
+256. University of Brest                                             3 papers
+257. University of Southampton                                       3 papers
+258. ENSTA Bretagne                                                  3 papers
+259. Medical University of Vienna                                    3 papers
+260. Wolf Science Center                                             3 papers
+261. Norwegian University of Life Sciences                           3 papers
+262. University of Buenos Aires                                      3 papers
+263. CICESE-UT                                                       3 papers
+264. North Gulf Oceanic Society                                      3 papers
+265. Scripps Institution of Oceanography                             3 papers
+266. Massey University                                               3 papers
+267. Universiti Brunei Darussalam                                    3 papers
+268. University of Concepcion                                        3 papers
+269. University of Chile                                             3 papers
+270. Louisiana Universities Marine Consortium                        3 papers
+271. Osaka University                                                3 papers
+272. Southwest Forestry University                                   3 papers
+273. Atarau Sanctuary                                                3 papers
+274. University of Iceland                                           3 papers
+275. University of Texas                                             3 papers
+276. University of Glasgow                                           3 papers
+277. École Normale Supérieure de Lyon                                3 papers
+278. Research and Development Institute for Bovine                   3 papers
+279. University of Stirling                                          3 papers
+280. Washington State University                                     3 papers
+281. Australian Antarctic Division                                   3 papers
+282. Jilin Agricultural University                                   3 papers
+283. University of Aberdeen                                          3 papers
+284. National Marine Mammal Foundation                               3 papers
+285. Flatiron Institute                                              3 papers
+286. Mote Marine Laboratory                                          3 papers
+287. Charles University                                              3 papers
+288. Queen's University Belfast                                      3 papers
+289. Wageningen University and Research                              3 papers
+290. Scottish Oceans Institute, University of St Andrews             3 papers
+291. University of Pavia                                             3 papers
+292. Tokai University                                                3 papers
+293. Kamogawa Sea World                                              3 papers
+294. Rutgers University                                              3 papers
+295. University of Bern                                              3 papers
+296. Boise State University                                          3 papers
+297. Georgia Institute of Technology                                 3 papers
+298. Arizona State University                                        3 papers
+299. Czech Academy of Sciences                                       3 papers
+300. Indian Institute of Science Education and Research Pune         3 papers
+301. University of British Columbia                                  3 papers
+302. University of Geneva                                            3 papers
+303. Auburn University                                               3 papers
+304. Chinese Academy of Sciences                                     3 papers
+305. University College Dublin                                       3 papers
+306. University of Wyoming                                           3 papers
+307. University of Connecticut                                       3 papers
+308. National University of Singapore                                3 papers
+309. National Institute of Biology                                   3 papers
+310. University of Pisa                                              3 papers
+311. Dartmouth College                                               3 papers
+312. Koc University                                                  3 papers
+313. Institut Agro                                                   3 papers
+314. University of Texas at San Antonio                              3 papers
+315. École Normale Supérieure                                        3 papers
+316. Jichi Medical University                                        3 papers
+317. Radboud University                                              3 papers
+318. University of the Free State                                    2 papers
+319. University of Missouri, Columbia                                2 papers
+320. Chicago Zoological Society                                      2 papers
+321. Jean Monnet University                                          2 papers
+322. College of the Atlantic                                         2 papers
+323. Bicho do Mato Research Institute                                2 papers
+324. Kuruman River Reserve                                           2 papers
+325. PUC Minas Natural Sciences Museum                               2 papers
+326. Montana State University                                        2 papers
+327. University of Roehampton                                        2 papers
+328. University of Calgary                                           2 papers
+329. University of Toronto                                           2 papers
+330. University of Osnabrück                                         2 papers
+331. Zhejiang University                                             2 papers
+332. Jagiellonian University                                         2 papers
+333. Northern Arizona University                                     2 papers
+334. Leibniz Institute for Evolution and Biodiversity Science        2 papers
+335. University of Rochester                                         2 papers
+336. University of Memphis                                           2 papers
+337. College of Charleston                                           2 papers
+338. SETI Institute                                                  2 papers
+339. University of Georgia                                           2 papers
+340. University of California, Merced                                2 papers
+341. City University of New York–Baruch College                      2 papers
+342. University of Augsburg                                          2 papers
+343. Nanjing University of Science and Technology                    2 papers
+344. The Graduate Center of the City University of New York          2 papers
+345. University of Maine                                             2 papers
+346. University of Melbourne                                         2 papers
+347. University of Wollongong                                        2 papers
+348. Adelphi University                                              2 papers
+349. NOAA Pacific Marine Environmental Laboratory                    2 papers
+350. University of Trento                                            2 papers
+351. Bernstein Center for Computational Neuroscience                 2 papers
+352. Fairfield University                                            2 papers
+353. Institute of Animal Science                                     2 papers
+354. University of Agder                                             2 papers
+355. Research Institute for Farm Animal Biology                      2 papers
+356. Universita Degli Studi Di Milano                                2 papers
+357. University of Utah                                              2 papers
+358. University of Chinese Academy of Sciences                       2 papers
+359. Korea University                                                2 papers
+360. ElephantVoices                                                  2 papers
+361. Amboseli Elephant Research Project                              2 papers
+362. Save The Elephants                                              2 papers
+363. École Polytechnique Fédérale de Lausanne                        2 papers
+364. CICESE                                                          2 papers
+365. Universiti Sains Malaysia                                       2 papers
+366. University of Moncton                                           2 papers
+367. University of Alaska Fairbanks                                  2 papers
+368. University of Jaffna                                            2 papers
+369. KMCT College of Engineering for Women                           2 papers
+370. National Institute of Technology                                2 papers
+371. Universiti Sains Islam Malaysia                                 2 papers
+372. Universiti Malaya                                               2 papers
+373. Western Norway University of Applied Sciences                   2 papers
+374. Universidad Autonoma de Tlaxcala                                2 papers
+375. Mexican National Research Council (CONACyT)                     2 papers
+376. National Marine Fisheries                                       2 papers
+377. Ocean Associates, Inc.                                          2 papers
+378. Southeast Fisheries Science Center                              2 papers
+379. Pacific Islands Fisheries Science Center                        2 papers
+380. Centro de Estudios Avanzados en Zonas Aridas                    2 papers
+381. Coral Morphologic                                               2 papers
+382. Wildlife Conservation Society Canada                            2 papers
+383. Florida Atlantic University                                     2 papers
+384. HJR Reefscaping                                                 2 papers
+385. Defence Research and Development Canada                         2 papers
+386. Natural Resources Institute Finland                             2 papers
+387. University of Eastern Finland                                   2 papers
+388. Anthro-Media                                                    2 papers
+389. Mohamed bin Zayed University of Artificial Intelligence         2 papers
+390. RIKEN Center for Advanced Intelligence Project                  2 papers
+391. Xeno-Canto Foundation                                           2 papers
+392. Landesbund fur Vogel- und Naturschutz                           2 papers
+393. Jimei University                                                2 papers
+394. Sichuan Agriculture University                                  2 papers
+395. Northeast Forestry University                                   2 papers
+396. Ukrainian Catholic University                                   2 papers
+397. Weizmann Institute of Science                                   2 papers
+398. National Biodiversity Future Center                             2 papers
+399. University of Moratuwa                                          2 papers
+400. Cardiff University                                              2 papers
+401. Wellesley College                                               2 papers
+402. American Museum of Natural History                              2 papers
+403. Leibniz Science Campus Primate Cognition                        2 papers
+404. The Curious AI Company                                          2 papers
+405. New York Zoological Society                                     2 papers
+406. Leipzig University of Applied Sciences                          2 papers
+407. German Centre for Integrative Biodiversity Research (iDiv) Halle-Jena-Leipzig    2 papers
+408. University of Kassel                                            2 papers
+409. Ariel University                                                2 papers
+410. Bayer                                                           2 papers
+411. University of Debrecen                                          2 papers
+412. Korea Polar Research Institute                                  2 papers
+413. University of Hawaii at Hilo                                    2 papers
+414. Georg-August University                                         2 papers
+415. University of Hawaii                                            2 papers
+416. Fjord & Blt                                                     2 papers
+417. Department of Conservation                                      2 papers
+418. Institute of Zoology, Zoological Society of London              2 papers
+419. University of Alicante                                          2 papers
+420. University of La Laguna                                         2 papers
+421. Russian Academy of Sciences                                     2 papers
+422. University of Southern California                               2 papers
+423. University of Arkansas                                          2 papers
+424. USDA Forest Service                                             2 papers
+425. Dolphin Communication Project                                   2 papers
+426. Charles Sturt University                                        2 papers
+427. South Carolina Department of Natural Resources                  2 papers
+428. Wildlife Institute of India                                     2 papers
+429. Indian Institute of Science Education and Research Tirupati     2 papers
+430. Primate Research Institute, Kyoto University                    2 papers
+431. Scottish Association for Marine Science                         2 papers
+432. West Virginia University                                        2 papers
+433. Nanjing Forestry University                                     2 papers
+434. Cape Peninsula University of Technology                         2 papers
+435. Six Flags Discovery Kingdom                                     2 papers
+436. University of South Florida                                     2 papers
+437. Nottingham Trent University                                     2 papers
+438. Swiss Ornithological Institute                                  2 papers
+439. Swedish University of Agricultural Sciences                     2 papers
+440. Biodiversity Research Center, Academia Sinica                   2 papers
+441. Alaska Department of Fish and Game                              2 papers
+442. Northeast Ohio Medical University                               2 papers
+443. Canadian Wildlife Service, Environment and Climate Change Canada    2 papers
+444. University of Mississippi                                       2 papers
+445. Manchester Metropolitan University                              2 papers
+446. Swansea University                                              2 papers
+447. Indian Institute of Science Education and Research Bhopal       2 papers
+448. University of Parma                                             2 papers
+449. National Centre for Biological Sciences                         2 papers
+450. Iowa State University                                           2 papers
+451. National Taiwan University                                      2 papers
+452. Norwegian Institute for Nature Research                         2 papers
+453. Naval Information Warfare Center Pacific                        2 papers
+454. Department of Biology, University of Pennsylvania               2 papers
+455. Indian Institute of Science Education and Research Mohali       2 papers
+456. Universite de Rennes                                            2 papers
+457. Institut Universitaire de France                                2 papers
+458. Sealcentre Pieterburen                                          2 papers
+459. University of Strasbourg                                        2 papers
+460. Helmholtz Institute for Functional Marine Biodiversity          2 papers
+461. MaxPlanck Institute of Animal Behavior                          2 papers
+462. University of Massachusetts                                     2 papers
+463. European Neuroscience Center                                    2 papers
+464. Ernst Strungmann Institute                                      2 papers
+465. University of Brasilia                                          2 papers
+466. University of East Anglia                                       2 papers
+467. Salisbury University                                            2 papers
+468. University of Oklahoma                                          2 papers
+469. University of Girona                                            2 papers
+470. Natural History Museum                                          2 papers
+471. Universite Claude Bernard Lyon                                  2 papers
+472. Hiroshima University                                            2 papers
+473. California State University                                     2 papers
+474. California Polytechnic State University                         2 papers
+475. University of Kansas                                            2 papers
+476. Ewha Womans University                                          2 papers
+477. Virginia Tech                                                   2 papers
+478. INRAE-CNRS-IFCE-Universite de Tours                             2 papers
+479. KU Leuven                                                       2 papers
+480. Flinders University                                             2 papers
+481. Wilfrid Laurier University                                      2 papers
+482. Federal University of Rio Grande do Sul                         2 papers
+483. City University of Hong Kong                                    2 papers
+484. University of Cyprus                                            2 papers
+485. Kagoshima University                                            2 papers
+486. VU University                                                   2 papers
+487. Hochschule Geisenheim University                                2 papers
+488. Denver Museum of Nature and Science                             2 papers
+489. Chengdu Institute of Biology, Chinese Academy of Sciences       2 papers
+490. Bat Conservation Trust                                          2 papers
+491. Normandie University                                            2 papers
+492. The George Washington University                                2 papers
+493. The University of Hong Kong                                     2 papers
+494. Chubu University                                                2 papers
+495. University of Missouri                                          2 papers
+496. Applied Ocean Sciences                                          2 papers
+497. University of Puget Sound                                       2 papers
+498. Instituto Nacional de Pesquisas da Amazonia                     2 papers
+499. Memorial University                                             2 papers
+500. Universidade Federal de Goias                                   2 papers
+501. Zoological Society of London                                    2 papers
+502. Lancaster University                                            2 papers
+503. University of Wisconsin-Milwaukee                               1 papers
+504. Budongo Forest Project                                          1 papers
+505. Eastern Kentucky University                                     1 papers
+506. Twycross Zoo                                                    1 papers
+507. Brazilian Humpback Whale Institute                              1 papers
+508. Cetos Research Organization                                     1 papers
+509. National University                                             1 papers
+510. Biomedical Primate Research Center                              1 papers
+511. University of Salford Manchester                                1 papers
+512. Pontifical Catholic University of Minas Gerais                  1 papers
+513. University of Nevada                                            1 papers
+514. Cooperative Predator Vocalization Consortium                    1 papers
+515. Indian Institute of Science Education and Research Thiruvananthapuram,    1 papers
+516. Villanova University                                            1 papers
+517. Trent University                                                1 papers
+518. Ontario Ministry of Natural Resources and Forestry              1 papers
+519. University Institute of Psychological, Social, and Life Sciences    1 papers
+520. Amboseli Trust for Elephants                                    1 papers
+521. University of Tsukuba                                           1 papers
+522. The Dominica Sperm Whale Project                                1 papers
+523. Marine Mammal Research Program                                  1 papers
+524. Williams College                                                1 papers
+525. Center for Functional and Evolutionary Ecology                  1 papers
+526. TU Wien                                                         1 papers
+527. Amazon AGI                                                      1 papers
+528. China Telecom Artificial Intelligence Technology Co. Ltd        1 papers
+529. Beijing University of Posts and Telecommunications              1 papers
+530. Janelia Research Campus                                         1 papers
+531. IRLAB Therapeutics                                              1 papers
+532. JAX Labs                                                        1 papers
+533. AICrowd                                                         1 papers
+534. Konrad Lorenz Research Station                                  1 papers
+535. Pompeu Fabra University                                         1 papers
+536. Idiap Research Institute                                        1 papers
+537. Swiss Federal Technology Institute of Lausanne                  1 papers
+538. University of Birmingham                                        1 papers
+539. Yerkes National Primate Research Center                         1 papers
+540. Konrad Lorenz Institute for Evolution and Cognition Research    1 papers
+541. Paris Nanterre University                                       1 papers
+542. University of Massachusetts Dartmouth                           1 papers
+543. CNRS-UMR8620                                                    1 papers
+544. Paris Institute of Technology for Life, Food and Environmental Sciences    1 papers
+545. Saitama University                                              1 papers
+546. Japan Science Technology Agency                                 1 papers
+547. Indiana University Bloomington                                  1 papers
+548. University of Western Sydney                                    1 papers
+549. Royal Holloway, University of London                            1 papers
+550. Federal University for Latin American Integration               1 papers
+551. Federal University of Paraná                                    1 papers
+552. Federal Institute for Risk Assessmen                            1 papers
+553. City University of New York–Queen College                       1 papers
+554. Marquette University                                            1 papers
+555. University of Texas at Dallas                                   1 papers
+556. University of Maryland Baltimore County                         1 papers
+557. Monterrey Institute of Technology                               1 papers
+558. National Marine Mammal Laboratory                               1 papers
+559. Pongo Foundation                                                1 papers
+560. Hubbs SeaWorld Research Institute                               1 papers
+561. Tecnológico de Monterrey Estado de México                       1 papers
+562. University of South Africa                                      1 papers
+563. The University of Finance and Management in Warsaw              1 papers
+564. University Institute of France                                  1 papers
+565. International Laboratory for Brain, Music and Sound Research    1 papers
+566. CNRS-UMR5229                                                    1 papers
+567. Beijing Forestry University                                     1 papers
+568. Twitter                                                         1 papers
+569. Akvelon Inc.                                                    1 papers
+570. Max Planck Institute for Human Cognitive Sciences               1 papers
+571. Institut des Sciences Cognitives Marc Jeannerod                 1 papers
+572. National University of Jujuy                                    1 papers
+573. National University of Tucuman                                  1 papers
+574. Nova Lima                                                       1 papers
+575. Xishuangbanna Tropical Botanical Garden                         1 papers
+576. Yunnan University                                               1 papers
+577. Trinity College                                                 1 papers
+578. University of Windsor                                           1 papers
+579. University of Northern Colorado                                 1 papers
+580. Freie Universitat                                               1 papers
+581. Hunter College, CUNY                                            1 papers
+582. City College of New York, CUNY                                  1 papers
+583. New Jersey Institute of Technology                              1 papers
+584. Shady Side Academy                                              1 papers
+585. Tampere University of Technology                                1 papers
+586. Marmara University                                              1 papers
+587. Bogazici University                                             1 papers
+588. Istanbul University-Cerrahpasa                                  1 papers
+589. Szent Istvan University                                         1 papers
+590. Chitkara University Institute of Engineering and Technology     1 papers
+591. Sharda School of Engineering & Technology                       1 papers
+592. Graphic Era Deemed to be University                             1 papers
+593. Kanazawa Gakuin University                                      1 papers
+594. Muroran Institute of Technology                                 1 papers
+595. University of Skovde                                            1 papers
+596. State University of Paraiba                                     1 papers
+597. University of Regensburg                                        1 papers
+598. RYMEC                                                           1 papers
+599. Central University of Karnataka                                 1 papers
+600. Johannes Kepler University Linz                                 1 papers
+601. University of Crete                                             1 papers
+602. AGH University of Science and Technology                        1 papers
+603. Fancom BV                                                       1 papers
+604. Katholieke Universiteit Leuven                                  1 papers
+605. Zhejiang Provincial Key Laboratory of Information Processing, Communication and Networking    1 papers
+606. State Key Laboratory of Fluid Power and Mechatronic Systems, Zhejiang University    1 papers
+607. The Engineering Research Center of Oceanic Sensing Technology and Equipment, Ministry of Education    1 papers
+608. Zhoushan Ocean Research Center                                  1 papers
+609. European Neuroscience Institute - A Joint Initiative of the University Medical Center Go ttingen and the Max-Planck-Society    1 papers
+610. International Max Planck Research School and Go ttingen Graduate School for Neurosciences, Biophysics, and Molecular Biosciences (GGNB) at the University of Go ttingen    1 papers
+611. Universidade Estadual da Paraiba                                1 papers
+612. DGA-TN                                                          1 papers
+613. Smithsonian Institution                                         1 papers
+614. Messerli Research Institute, University of Veterinary Medicine Vienna, Medical University of Vienna and University of Vienna    1 papers
+615. Institute for Applied Ethology and Animal Psychology (I.E.A.P./I.E.T.)    1 papers
+616. University of Aalen                                             1 papers
+617. University of Stuttgart                                         1 papers
+618. ByteDance Inc                                                   1 papers
+619. Technische Universitat Chemnitz                                 1 papers
+620. Chicago Zoological Society-Brookfield Zoo                       1 papers
+621. Universidade dos Acores                                         1 papers
+622. University of Pompeu Fabra                                      1 papers
+623. Ircam                                                           1 papers
+624. Key Laboratory of Science and Technology on Advanced Underwater Acoustic Signal Processing, Chinese Academy of Sciences    1 papers
+625. Institute of Acoustics, Chinese Academy of Sciences             1 papers
+626. School of Automation Engineering, University of Electronic Science and Technology of China    1 papers
+627. ByteDance AI Lab                                                1 papers
+628. Qingdao University of Science and Technology                    1 papers
+629. Shenzhen Institutes of Advanced Technology                      1 papers
+630. The Chinese University of Hong Kong                             1 papers
+631. Deepseek AI                                                     1 papers
+632. Warsaw University of Technology                                 1 papers
+633. Federal University of Amazonas                                  1 papers
+634. Jiangxi Academy of Science                                      1 papers
+635. LUXEMBOURG INSTITUTE OF SOCIO-ECONOMIC RESEARCH                 1 papers
+636. Tokyo Institute of Technology                                   1 papers
+637. Honda Research Institute Japan                                  1 papers
+638. Centre for Ecological Research                                  1 papers
+639. Wigner Research Centre for Physics                              1 papers
+640. The Barn Owl Foundation                                         1 papers
+641. Nanjing University Sci. & Technol.                              1 papers
+642. University of Bourgogne                                         1 papers
+643. South China Agricultural University                             1 papers
+644. Guangdong Academy of Agricultural Sciences                      1 papers
+645. University of Leon                                              1 papers
+646. University of Valladolid                                        1 papers
+647. University of Budapest                                          1 papers
+648. Sony Computer Science Laboratory                                1 papers
+649. Universidad Politecnica de Madrid                               1 papers
+650. University of Alfonso X El Sabio                                1 papers
+651. Universidad Popular Autonoma del Estado de Puebla               1 papers
+652. Mexican National Research Council                               1 papers
+653. Autonomous University of Tlaxcala                               1 papers
+654. Instituto Nacional de Astrofisica, Optica y Electronica         1 papers
+655. Centro Tlaxcala de Biologia de la Conducta, Universidad Autonoma de Tlaxcala    1 papers
+656. National Institute of Astrophysics, Optics and Electronics      1 papers
+657. Kalahari Meerkat Project                                        1 papers
+658. University of Lugano                                            1 papers
+659. National Geographic Society                                     1 papers
+660. University Pierre et Marie Curie Paris                          1 papers
+661. University Paris Diderot                                        1 papers
+662. Institut Pasteur                                                1 papers
+663. UMass Amherst                                                   1 papers
+664. iNaturalist                                                     1 papers
+665. Lawrence Berkeley National Laboratory                           1 papers
+666. Symbiosis International (Deemed University)                     1 papers
+667. Brandeis University                                             1 papers
+668. St Bartholomew's and the Royal London School of Medicine and Dentistry    1 papers
+669. Imperial College of Science, Technology and Medicine            1 papers
+670. Dstl                                                            1 papers
+671. Institute of Child Health                                       1 papers
+672. London School of Hygiene and Tropical Medicine                  1 papers
+673. The Sanger Centre                                               1 papers
+674. Oxford Radcliffe Hospital                                       1 papers
+675. Hampshire College                                               1 papers
+676. Inter-American Tropical Tuna Commission                         1 papers
+677. Pacific Science Enterprise Centre                               1 papers
+678. SMRU Consulting                                                 1 papers
+679. Folia Primatologica                                             1 papers
+680. Center for Robotics, MINES Paris                                1 papers
+681. IHI Tanzania                                                    1 papers
+682. SRI International                                               1 papers
+683. Mind Foundry Ltd                                                1 papers
+684. UCC                                                             1 papers
+685. Primate Research Institute                                      1 papers
+686. Victoria University                                             1 papers
+687. Konya Technical University                                      1 papers
+688. Ankara University                                               1 papers
+689. VTT Technical Research Centre of Finland                        1 papers
+690. Tampere University                                              1 papers
+691. NOAA Fisheries                                                  1 papers
+692. Biotopia Lab, Naturkundemuseum Bayern                           1 papers
+693. Instituto de Biologia, Universidad de Antioquia                 1 papers
+694. Polytechnic University of the Marches                           1 papers
+695. Christ University                                               1 papers
+696. Gandhigram Rural Institute                                      1 papers
+697. Veterinary College and Research Institute                       1 papers
+698. California Primate Research Center                              1 papers
+699. Kiel University                                                 1 papers
+700. Facebook AI                                                     1 papers
+701. OpenAI                                                          1 papers
+702. Institute of Cognitive Sciences and Technologies                1 papers
+703. CERCOPAN Nigeria                                                1 papers
+704. University of Kent                                              1 papers
+705. University of Nottingham                                        1 papers
+706. Federal University of Parana                                    1 papers
+707. HAS University of Applied Sciences                              1 papers
+708. Noldus Information Technology B.V.                              1 papers
+709. Agricultural Chamber of North Rhine-Westphalia                  1 papers
+710. IPB University                                                  1 papers
+711. Sichuan Agricultural University                                 1 papers
+712. Complexity Science Hub Vienna                                   1 papers
+713. ZuchtData EDV-Dienstleistungen GmbH                             1 papers
+714. University of Natural Resources and Life Sciences               1 papers
+715. Vetmeduni Vienna                                                1 papers
+716. Graz University of Technology                                   1 papers
+717. GSSS Institute of Engineering & Technology for Women            1 papers
+718. Holon Institute of Technology                                   1 papers
+719. Harbor Branch Oceanographic Institute                           1 papers
+720. BIOTOPIA Lab, Naturkundemuseum Bayern                           1 papers
+721. Department of Cognitive Science and Artificial Intelligence, Tilburg University    1 papers
+722. Ecole Centrale de Lyon                                          1 papers
+723. Grenoble Institute of Technology                                1 papers
+724. Instituto de Biologia                                           1 papers
+725. Polytechnic University of the Marche                            1 papers
+726. Disney's Animal Kingdoms                                        1 papers
+727. Semmelweis University                                           1 papers
+728. Pacific Marine Environmental Laboratory                         1 papers
+729. Jiangnan University                                             1 papers
+730. The Dolphin Institute                                           1 papers
+731. Third Institute Of Oceanography                                 1 papers
+732. The Reserve Management Office of Chinese White Dolphins and Amphioxus in Xiamen    1 papers
+733. Sassari University                                              1 papers
+734. Siena University                                                1 papers
+735. Cagliari University                                             1 papers
+736. UPC                                                             1 papers
+737. Friedrich-Alexander-Universitat                                 1 papers
+738. NATO STO-CMRE                                                   1 papers
+739. University of Magdalena                                         1 papers
+740. National Open and Distance University                           1 papers
+741. Max Planck Institute for Dynamics and Self-Organization         1 papers
+742. Georg August University                                         1 papers
+743. Miguel Hernandez University                                     1 papers
+744. U.S. Geological Survey                                          1 papers
+745. Greenpeace Germany                                              1 papers
+746. University of Stellenbosch                                      1 papers
+747. Asia e University                                               1 papers
+748. Universitas Trilogi                                             1 papers
+749. Sam Houston State University                                    1 papers
+750. Museo Nacional de Ciencias Naturales                            1 papers
+751. University of Castilla-La Mancha                                1 papers
+752. Gyeongsang National University                                  1 papers
+753. Estacion Biologica Quebrada Blanco                              1 papers
+754. Cornish College of the Arts                                     1 papers
+755. Philipps University of Marburg                                  1 papers
+756. Calvin College                                                  1 papers
+757. Scottish Oceans Institute                                       1 papers
+758. CSIC                                                            1 papers
+759. Universidade de Aveiro                                          1 papers
+760. Centre for Statistics in Ecology, the Environment, and Conservation, University of Cape Town    1 papers
+761. African Institute for Mathematical Sciences                     1 papers
+762. School of Biological Sciences, University of Utah               1 papers
+763. Living Collections, Zoological Society of London                1 papers
+764. Department of Life Sciences, University of Roehampton           1 papers
+765. Autonomous University of Madrid                                 1 papers
+766. Southeast Missouri State University                             1 papers
+767. NOAA Pacific Islands Fisheries Science Center                   1 papers
+768. Bio-Waves Inc.                                                  1 papers
+769. iUniversity                                                     1 papers
+770. International Foundation for Nature and Sustainability          1 papers
+771. University of Western Brittany                                  1 papers
+772. Anton Dohrn Zoological Station                                  1 papers
+773. University of South Alabama                                     1 papers
+774. University of Aarhus                                            1 papers
+775. UT Southwestern Medical Center                                  1 papers
+776. Ludwig Maximilians University                                   1 papers
+777. SanDiegoState University                                        1 papers
+778. National Institute for Mathematical and Biological Synthesis    1 papers
+779. Center for Anatomy and Functional Morphology, Icahn School of Medicine at Mount Sinai    1 papers
+780. Polytechnic School USP                                          1 papers
+781. Vancouver Aquarium Marine Science Centre                        1 papers
+782. Pontificia Universidade Catolica de Minas Gerais                1 papers
+783. Universidade Federal de Juiz de Fora                            1 papers
+784. Universidade do Estado do Rio de Janeiro                        1 papers
+785. Auset                                                           1 papers
+786. IndependentResearch                                             1 papers
+787. USDA Forest Service, Rocky Mountain Research Station            1 papers
+788. Biodiversity Conservation Center, Negros Forests and Ecological Foundation, Inc.    1 papers
+789. West Visayas State University                                   1 papers
+790. Ramrao Adik Institute of Technology                             1 papers
+791. Point Reyes Bird Observatory                                    1 papers
+792. Institute for Bird Populations                                  1 papers
+793. Forest Service                                                  1 papers
+794. Paris 13 University                                             1 papers
+795. Messerli Research Institute, University of Veterinary Medicine Vienna, Medical University Vienna, University of Vienna    1 papers
+796. Department of Environment and Conservation, Science Division    1 papers
+797. Vermont Cooperative Fish and Wildlife Research Unit             1 papers
+798. Salt Lake City Parks and Public Lands                           1 papers
+799. Tracy Aviary                                                    1 papers
+800. Seven Canyons Trust                                             1 papers
+801. Jordan River Commission                                         1 papers
+802. West Jordan                                                     1 papers
+803. Utah Division of Wildlife Resources                             1 papers
+804. Salt Lake County                                                1 papers
+805. Utah Division of Forestry, Fire, and State Lands                1 papers
+806. University of Groningen                                         1 papers
+807. Institute of Biology of Inland Waters, Russian Academy of Sciences    1 papers
+808. Politeknik Seberang Perai                                       1 papers
+809. Vasireddy Venkatadri Institute of Technology                    1 papers
+810. Universidade Federal da Paraiba                                 1 papers
+811. Kangwon National University                                     1 papers
+812. Shardabai Pawar Mahila Mahavidyalaya                            1 papers
+813. Department of Zoology, Shardabai Pawar Mahila Mahavidyalaya     1 papers
+814. Malegaon Sheti Farm, Agricultural Development Trust Baramati    1 papers
+815. Nihon University                                                1 papers
+816. Wesleyan University                                             1 papers
+817. Federal University of Rio de Janeiro                            1 papers
+818. Museum National, University of Rio de Janeiro                   1 papers
+819. Mizoram University                                              1 papers
+820. ION-Technik Kft                                                 1 papers
+821. HUN-REN Balaton Limnological Research Institute                 1 papers
+822. University of Miskolc                                           1 papers
+823. Sea Mammal Research Company (SEAMARCO)                          1 papers
+824. California Digital Library                                      1 papers
+825. Technical University Berlin                                     1 papers
+826. Whales Bermuda                                                  1 papers
+827. University of Highlands and Islands                             1 papers
+828. SeaSearch Research and Conservation                             1 papers
+829. TNO                                                             1 papers
+830. Southall Environmental Associates                               1 papers
+831. University of Vicosa                                            1 papers
+832. Pomona College                                                  1 papers
+833. California State University, Northridge                         1 papers
+834. University of Genova                                            1 papers
+835. Acquario di Genova                                              1 papers
+836. COSTA Edutainment S.p.A.                                        1 papers
+837. NAUTA scientific                                                1 papers
+838. INFN Sezione di Genova                                          1 papers
+839. Bristol Conservation and Science Foundation                     1 papers
+840. University of London                                            1 papers
+841. CNRS-Universite de Provence                                     1 papers
+842. Victoria University of Wellington                               1 papers
+843. Georg-August-Universitat Gotingen                               1 papers
+844. Independent Researcher                                          1 papers
+845. Department of Environment and Natural Resources                 1 papers
+846. Department of Biodiversity Conservation and Attractions         1 papers
+847. Woodvale Research Centre                                        1 papers
+848. Verum Group                                                     1 papers
+849. Proteus Wildlife Research Consultants                           1 papers
+850. Lincoln University                                              1 papers
+851. MPG Ranch                                                       1 papers
+852. Project Night Flight                                            1 papers
+853. Mysuru, India                                                   1 papers
+854. University of Mumbai                                            1 papers
+855. Macaulay Library, Cornell University                            1 papers
+856. University of Patras                                            1 papers
+857. Government Bangur College                                       1 papers
+858. Government Meera Girls College                                  1 papers
+859. University of Winnipeg                                          1 papers
+860. Pratt School of Engineering, Duke University                    1 papers
+861. Marine Scotland Science                                         1 papers
+862. Federal University of Mato Grosso                               1 papers
+863. Alicante University                                             1 papers
+864. National Institute for Science and Technology in Wetlands       1 papers
+865. Technical University of Varna                                   1 papers
+866. School of Information Engineering, Jimei University             1 papers
+867. School of Information Science and Engineering, Xiamen University    1 papers
+868. School of Science, Jimei University                             1 papers
+869. Marine Conservation Research                                    1 papers
+870. Centre for Whale Research (WA) Inc.                             1 papers
+871. MaxPlanckInstituteofAnimalBehavior                              1 papers
+872. AustralianNationalUniversity                                    1 papers
+873. MuseudeCie`nciesNaturalsdeBarcelona                             1 papers
+874. Fisheries and Oceans Canada, Bedford Institute of Oceanography    1 papers
+875. Marine Acoustics, Inc.                                          1 papers
+876. Stellwagen Bank National Marine Sanctuary, National Oceanic and Atmospheric Administration    1 papers
+877. South African Environmental Observation Network                 1 papers
+878. University of New Mexico                                        1 papers
+879. Xiamen University                                               1 papers
+880. IMT Mines Ales                                                  1 papers
+881. Migrateurs Rhone Mediterranee                                   1 papers
+882. Central South University of Forestry and Technology             1 papers
+883. Pole INPS                                                       1 papers
+884. Morningside College                                             1 papers
+885. Royal Netherlands Institute for Sea Research                    1 papers
+886. UMIT-Private University for Health Sciences Medical Informatics and Technology GmbH    1 papers
+887. New York University School of Medicine                          1 papers
+888. Fisheries Management Branch, Department of Environment, Forestry and Fisheries    1 papers
+889. Georgetown University                                           1 papers
+890. University of Wolverhampton                                     1 papers
+891. Museum for Natural History - Leibniz Institute for Evolution and Biodiversity Science    1 papers
+892. Fundacion Oceanografic de la Comunitat Valenciana               1 papers
+893. University of Waikato                                           1 papers
+894. Perth Zoo                                                       1 papers
+895. University of Rio Cuarto                                        1 papers
+896. CONICET                                                         1 papers
+897. Gerry E. Studds Stellwagen Bank National Marine Sanctuary       1 papers
+898. Oregon-Washington Coastal Area Office, West Coast Region, NOAA Fisheries    1 papers
+899. NOAA Office of National Marine Sanctuaries                      1 papers
+900. Office of Science and Technology, NOAA Fisheries                1 papers
+901. Thompson Rivers University                                      1 papers
+902. Cal Poly Humboldt                                               1 papers
+903. China Agricultural University                                   1 papers
+904. Centre de Recherche en PaleontologieParis, Museum National dHistoire Naturelle    1 papers
+905. Friedrich Schiller University Jena                              1 papers
+906. Leverhulme Trust                                                1 papers
+907. Fisheries and Oceans Canada, Cetacean Research Program, Pacific Biological Station    1 papers
+908. University Corporation for Atmospheric Research (UCAR|CPAESS)    1 papers
+909. Integrated Statistics, Inc.                                     1 papers
+910. Gwaii Haanas National Park Reserve, National Marine Conservation Area Reserve, and Haida Heritage Site    1 papers
+911. Prairie Region, Canadian Wildlife Service, Environment & Climate Change Canada    1 papers
+912. Pacific Northwest Research Station, U.S.D.A. Forest Service     1 papers
+913. University of Northern British Columbia                         1 papers
+914. Endemic Species Research Institute                              1 papers
+915. Biometrio.earth, Saarbrucken                                    1 papers
+916. Centre de Recherche sur la Biodiversite et lEnvironnement, Universite Paul Sabatier    1 papers
+917. Leibniz Institute for the Analysis of Biodiversity Change, Museum of Nature Hamburg    1 papers
+918. Forest Nature Conservation, Northwest German Forest Research Institute    1 papers
+919. Frederick University                                            1 papers
+920. Museum fur Naturkunde - Leibniz-Institut fur Evolutions- und Biodiversitatsforschung    1 papers
+921. Chances for Nature                                              1 papers
+922. Scotland's Rural College                                        1 papers
+923. School of Engineering, Westlake University                      1 papers
+924. Institute of Deep-sea Science and Engineering Chinese Academy of Sciences    1 papers
+925. Edinburgh Napier University                                     1 papers
+926. Yamagata University                                             1 papers
+927. Whitman College                                                 1 papers
+928. Laboratorio de Comportamento Animal, Universidade de Brasilia    1 papers
+929. Ocean Science Consulting Limited                                1 papers
+930. RSPB, Edinburgh                                                 1 papers
+931. National Museum of Natural Sciences, Spanish National Research Council    1 papers
+932. Museum National d'Histoire naturelle                            1 papers
+933. EFNO, ECODIV, INRAE                                             1 papers
+934. Leibnitz Institute for Zoo and Wildlife Research                1 papers
+935. Purdue University West Lafayette Indiana                        1 papers
+936. Centre dEcologie et des Sciences de la Conservation, Museum National d'Histoire Naturelle    1 papers
+937. Guangxi University                                              1 papers
+938. South Iceland Research Centre, University of Iceland            1 papers
+939. BirdLife South Africa                                           1 papers
+940. Federal University of Mato Grosso (UFMT)                        1 papers
+941. The Fish Listener                                               1 papers
+942. Mitrani Department of Desert Ecology, Jacob Blaustein Institutes for Desert Research, Ben-Gurion University of the Negev    1 papers
+943. Okinawa Institute of Science and Technology Graduate University    1 papers
+944. University of Rostock                                           1 papers
+945. University of Quebec at Rimouski                                1 papers
+946. Georg-August-University                                         1 papers
+947. Ludwig-Maximilians-University                                   1 papers
+948. Florida Museum of Natural History                               1 papers
+949. Wake Forest University                                          1 papers
+950. Milwaukee Public Museum                                         1 papers
+951. University of Rhode Island                                      1 papers
+952. Department of Biological Sciences, University of Alberta        1 papers
+953. Universitas Gadjah Mada                                         1 papers
+954. MaxPlanck Institute for Biological Cybernetics                  1 papers
+955. John G. Shedd Aquarium                                          1 papers
+956. Department of Neuropsychology, Max Planck Institute for Human Cognitive Sciences    1 papers
+957. Tai Chimpanzee Project, CSRS                                    1 papers
+958. Institut des Sciences Cognitives, CNRS                          1 papers
+959. Institut National de la Recherche Agriconomique                 1 papers
+960. California State University, Los Angeles                        1 papers
+961. Indiana University of Pennsylvania                              1 papers
+962. Worcester Polytechnic Institute                                 1 papers
+963. American Bird Conservancy                                       1 papers
+964. Instituto de Desenvolvimento Sustentavel Mamiraua               1 papers
+965. Universitat Politecnica de Catalunya - BarcelonaTech            1 papers
+966. Politecnico di Torino                                           1 papers
+967. Leibniz Institute for Primate Research                          1 papers
+968. Leibniz Science Campus, Primate Cognition                       1 papers
+969. Cytel                                                           1 papers
+970. Weyerhaeuser                                                    1 papers
+971. Duke University Marine Lab                                      1 papers
+972. Tel-Hai College                                                 1 papers
+973. Chester Zoo                                                     1 papers
+974. China Conservation and Research Centre for the Giant Panda      1 papers
+975. San Diego Zoo Global                                            1 papers
+976. Beijing Normal University                                       1 papers
+977. National Marine Fisheries Service                               1 papers
+978. Tohoku Gakuin University                                        1 papers
+979. Universite de Mahajanga                                         1 papers
+980. Centro Ballena Azul NGO                                         1 papers
+981. Instituto de Ciencias Marinas y Limnologicas, Universidad Austral de Chile    1 papers
+982. Sea Mammal Research Unit, Scottish Oceans Institute, School of Biology, University of St. Andrews    1 papers
+983. Applied Physics Laboratory, University of Washington            1 papers
+984. University of Munster                                           1 papers
+985. University of Otago                                             1 papers
+986. NOAA Fisheries Office of Science & Technology                   1 papers
+987. Southwest Fisheries Science Center NMFS/NOAA                    1 papers
+988. School of Biological Sciences, University of Aberdeen           1 papers
+989. CSIRO Computational Informatics, and Wealth from Oceans National Research Flagship    1 papers
+990. Australian Marine Mammal Centre, Australian Antarctic Division    1 papers
+991. Australian Orca Database, Melbourne, VIC                        1 papers
+992. University of Siegen                                            1 papers
+993. Federal University of Minas Gerais                              1 papers
+994. CEREMA DTer Est                                                 1 papers
+995. Scotland Oceans Institute                                       1 papers
+996. Norwegian Defence Research Establishment                        1 papers
+997. Netherlands Organisation for Applied Scientific Research        1 papers
+998. Universidade do Algarve                                         1 papers
+999. CNRS-EPHE-UPVD                                                  1 papers
+1000. Cleveland Museum of Natural History                             1 papers
+1001. Colorado Parks and Wildlife                                     1 papers
+1002. Spring Island Trust                                             1 papers
+1003. MOMBAK                                                          1 papers
+1004. Federal University of Tocantins                                 1 papers
+1005. Graz, Styria, Austria                                           1 papers
+1006. ZooConzoological consulting                                     1 papers
+1007. Sesoko Station, Tropical Biosphere Research Center, University of the Ryukyus    1 papers
+1008. University of Ilorin                                            1 papers
+1009. University of the Witwatersrand                                 1 papers
+1010. North-West University                                           1 papers
+1011. National Institute of Water and Atmospheric Research            1 papers
+1012. Fisheries and Oceans Canada, Institute of Ocean Sciences        1 papers
+1013. Chubu Gakuin University                                         1 papers
+1014. Japan Monkey Centre                                             1 papers
+1015. American Physical Society                                       1 papers
+1016. United States Geological Survey                                 1 papers
+1017. Okinawa Institute of Science & Technology Graduate University    1 papers
+1018. Ogasawara Club                                                  1 papers
+1019. Deep Blue Conservancy                                           1 papers
+1020. BALYENA.ORG, Barangay Pangdan                                   1 papers
+1021. Whale Trust                                                     1 papers
+1022. Universidad Autonoma de Baja California Sur                     1 papers
+1023. Lester E. Fisher Center for the Study and Conservation of Apes, Lincoln Park Zoo    1 papers
+1024. Department of Ecology and Evolutionary Biology, Princeton University    1 papers
+1025. Bernstein Center for Computational Neuroscience Berlin          1 papers
+1026. Arizona State University - Santa Fe Institute Center for Biosocial Complex Systems    1 papers
+1027. Department of Psychology, Manhattan College                     1 papers
+1028. Universidad Autonoma del Estado de Quintana Roo                 1 papers
+1029. Department of Psychology, Hunter College                        1 papers
+1030. ECOMAR                                                          1 papers
+1031. El Colegio de la Frontera Sur                                   1 papers
+1032. Consejo Nacional de Ciencia y Tecnologia                        1 papers
+1033. Facultad de Ingenieria de Sistemas Computacionales, Universidad Tecnologica de Panama    1 papers
+1034. Universidad Tecnologica de Panama                               1 papers
+1035. Instituto de Estudos Almirante Paulo Moreira                    1 papers
+1036. Universidade Federal Fluminense                                 1 papers
+1037. School of Technology, Beijing Forestry University               1 papers
+1038. School of Ecology and Nature Conservation, Beijing Forestry University    1 papers
+1039. Key Laboratory of National Forestry and Grassland Administration for Forestry Equipment and Automation, Beijing Forestry University    1 papers
+1040. Universidad Nacional Autonoma de Mexico                         1 papers
+1041. Institut Hospital del Mar dInvestigacions Mediques              1 papers
+1042. Massachusetts General Hospital                                  1 papers
+1043. Broad Institute                                                 1 papers
+1044. Frankfurt Zoo                                                   1 papers
+1045. Tsinghua University                                             1 papers
+1046. Universidad de Puerto Rico, Mayaguez                            1 papers
+1047. SINTEF Digital                                                  1 papers
+1048. Norwegian University of Science and Technology                  1 papers
+1049. Universite de La Reunion                                        1 papers
+1050. Leipzig Center for Early Child Development                      1 papers
+1051. University of Dublin, Trinity College                           1 papers
+1052. Centro FONDAP-de Investigacion en Dinamica de Ecosistemas Marinos de Altas Latitudes    1 papers
+1053. Biologging Solutions Inc.                                       1 papers
+1054. Ocean Policy Research Institute of the Sasakawa Peace Foundation    1 papers
+1055. Japan Fisheries Science and Technology Association              1 papers
+1056. Fisheries Technology Institute, Japan Fisheries Research and Education Agency    1 papers
+1057. Huygens-Kamerlingh Onnes Laboratorium, Universiteit Leiden      1 papers
+1058. Instituto de Fisica Corpuscular (CSIC Universitat de Valencia)    1 papers
+1059. Nikhef                                                          1 papers
+1060. Institut dInvestigacio per a la Gestio Integrada de les Zones Costaneres    1 papers
+1061. INFN - Sezione di Bari                                          1 papers
+1062. CERN                                                            1 papers
+1063. University Mohammed I                                           1 papers
+1064. INFN - Sezione di Genova                                        1 papers
+1065. Laboratoire dAstrophysique de Marseille                         1 papers
+1066. Geoazur, UCA                                                    1 papers
+1067. INFN - Laboratori Nazionale del Sud                             1 papers
+1068. Dipartimento di Fisica ed Astronomia dellUniversita             1 papers
+1069. Institute for Space Science                                     1 papers
+1070. INFN - Sezione di Bologna                                       1 papers
+1071. INFN - Sezione di Roma                                          1 papers
+1072. Universiteit van Amsterdam                                      1 papers
+1073. Universite de Haute Alsace                                      1 papers
+1074. Universite Paris Diderot                                        1 papers
+1075. The Neotia University                                           1 papers
+1076. Bangabasi Morning College                                       1 papers
+1077. University of Calcutta                                          1 papers
+1078. University of Applied Sciences and Arts of Southern Switzerland    1 papers
+1079. Indian Institute of Science Education and Research (IISER) Pune    1 papers
+1080. Indian Institute of Science Education and Research (IISER) Kolkata    1 papers
+1081. Indian Institute of Science Education and Research (IISER) Bhopal    1 papers
+1082. Urbino University                                               1 papers
+1083. Laboratoire d'Ecologie des Hydrosystemes Naturels et Anthropises    1 papers
+1084. LBBE: Biometrie et biologie evolutive                           1 papers
+1085. Ben-Gurion University of the Negev                              1 papers
+1086. Deenbandhu Chhotu Ram University of Science and Technology      1 papers
+1087. Institute for Marine Mammal Studies                             1 papers
+1088. RWTH Aachen University                                          1 papers
+1089. MOm/Hellenic Society for the Study and Protection of the Monk Seal    1 papers
+1090. Converse College                                                1 papers
+1091. Oklahoma State University                                       1 papers
+1092. Yunnan Academy of Agricultural Sciences                         1 papers
+1093. Hefei Institutes of Physical Science Chinese Academy of Sciences    1 papers
+1094. University of Tours                                             1 papers
+1095. Universite Gustave Eiffel                                       1 papers
+1096. Henan University of Urban Construction                          1 papers
+1097. Xiaoxing Yang's affiliated university                           1 papers
+1098. University of Limpopo                                           1 papers
+1099. Nelson Mandela Metropolitan University                          1 papers
+1100. Institut de Recherche pour le Developpement                     1 papers
+1101. Museum and Institute of Zoology                                 1 papers
+1102. Department of Psychology, New York University                   1 papers
+1103. Gettysburg College                                              1 papers
+1104. Nanjing Institute of Tourism and Hospitality                    1 papers
+1105. Southwest Minzu University                                      1 papers
+1106. Chengdu Medical College                                         1 papers
+1107. School of Geography Science, Nanjing Normal University          1 papers
+1108. Neuro Occupational Activity Centre Novo mesto                   1 papers
+1109. The Engineering & Technical College of Chengdu University of Technology    1 papers
+1110. Jiangsu Center of Collaborative Innovation in Geographical Information Resource Development and Application    1 papers
+1111. Parc Asterix                                                    1 papers
+1112. Ritsumeikan University                                          1 papers
+1113. NOAA, Southwest Fisheries Science Center                        1 papers
+1114. Colby College                                                   1 papers
+1115. Taronga Conservation Society Australia                          1 papers
+1116. Defence R&D Canada                                              1 papers
+1117. Northern Marianas College                                       1 papers
+1118. Division of Fish and Wildlife, Commonwealth of the Northern Mariana Islands    1 papers
+1119. University of Massachusetts Amherst                             1 papers
+1120. La Trobe University                                             1 papers
+1121. Monash University                                               1 papers
+1122. University of Gothenburg                                        1 papers
+1123. Graduate School of Fisheries and Environmental Sciences, Nagasaki University    1 papers
+1124. Shimonoseki Marine Science Museum                               1 papers
+1125. Kagoshima City Aquarium                                         1 papers
+1126. CNRS Nouragues Ecological Research Station                      1 papers
+1127. Moey Inc.                                                       1 papers
+1128. University Jean Monnet                                          1 papers
+1129. Xiamen University Tan Kah Kee College                           1 papers
+1130. University of Idaho                                             1 papers
+1131. Fujian Agriculture and Forestry University                      1 papers
+1132. Binghamton University                                           1 papers
+1133. NATOUnderseaResearchCentre                                      1 papers
+1134. Zoom Torino                                                     1 papers
+1135. Japan Agency for Marine-Earth Science and Technology            1 papers
+1136. Waseda University                                               1 papers
+1137. University of Rio de Janeiro                                    1 papers
+1138. Hungarian Academy of Sciences-Eotvos Lorand University          1 papers
+1139. Institute of Biology, Eotvos Lorand University                  1 papers
+1140. University of Dublin                                            1 papers
+1141. Laboratorio de Ornitologia - Museu de Ciencias e Tecnologia     1 papers
+1142. Pontifical Catholic University of Rio Grande do Sul             1 papers
+1143. Cerveau de l'Universite de Perpignan                            1 papers
+1144. Centre de Recherche Insulaire et Observatoire de lEnvironnement    1 papers
+1145. Alma College                                                    1 papers
+1146. NASA Ames Research Center                                       1 papers
+1147. Centre of Functional and Evolutionary Ecology                   1 papers
+1148. Museum National dHistoire naturelle                             1 papers
+1149. University of Normandie                                         1 papers
+1150. Universita degli Studi Firenze                                  1 papers
+1151. National Institute for Environmental Studies                    1 papers
+1152. Kyushu University                                               1 papers
+1153. University of Guelph                                            1 papers
+1154. Queens University                                               1 papers
+1155. Yale School of Medicine                                         1 papers
+1156. Haskins Laboratories                                            1 papers
+1157. University of Nebraska                                          1 papers
+1158. Tulane University                                               1 papers
+1159. Museu de Ciencies Naturals de Barcelona                         1 papers
+1160. National Museum of Natural Sciences                             1 papers
+1161. Cetalingua Project                                              1 papers
+1162. National Institute of Amazonian Research                        1 papers
+1163. Dolphin Discovery                                               1 papers
+1164. Federal Rural University of the Amazon                          1 papers
+1165. Rio de Janeiro State University                                 1 papers
+1166. Inter American University of Puerto Rico                        1 papers
+1167. Universidad de los Andes                                        1 papers
+1168. USDA Forest Service Southern Research Station                   1 papers
+1169. University of Zielona Gora                                      1 papers
+1170. Bennington College                                              1 papers
+1171. University of Louisiana Lafayette                               1 papers
+1172. Veterinary & Research Department, Sealcentre Pieterburen        1 papers
+1173. Language and Cognition Department, Max Planck Institute for Psycholinguistics    1 papers
+1174. Artificial Intelligence Laboratory, Vrije Universiteit Brussel    1 papers
+1175. Imec                                                            1 papers
+1176. VIB                                                             1 papers
+1177. Tecnologico de Monterrey                                        1 papers
+1178. School of Fundamental Sciences, Massey University               1 papers
+1179. Janelia Research Campus of the Howard Hughes Medical Institute    1 papers
+1180. Institute for Zoo and Wildlife Research                         1 papers
+1181. University of Erlangen                                          1 papers
+1182. Chengdu Research Institute, City University of Hong Kong        1 papers
+1183. Nanning Guangxi Veterinary Research Institute                   1 papers
+1184. Lancashire UK                                                   1 papers
+1185. Western EcoSystems Technology, Inc.                             1 papers
+1186. Western EcoSystems Technology, ULC                              1 papers
+1187. University of the Andes                                         1 papers
+1188. Pontificia Universidad Javeriana                                1 papers
+1189. Instituto Tecnologico y de Estudios Superiores de Monterrey     1 papers
+1190. Jawaharlal Nehru Centre for Advanced Scientific Research        1 papers
+1191. Stanley Center, Broad Institute                                 1 papers
+1192. University of California, San Francisco                         1 papers
+1193. University of Zurich and ETH Zurich                             1 papers
+1194. Canadian Institute for Advanced Research                        1 papers
+1195. Tohoku University Graduate School of Biomedical Engineering     1 papers
+1196. Kyoto University Graduate School of Medicine                    1 papers
+1197. Aichi Developmental Disability Center                           1 papers
+1198. Tohoku University Graduate School of Medicine                   1 papers
+1199. Landscape Recovery Foundation                                   1 papers
+1200. Bob Brown Foundation                                            1 papers
+1201. University Medical Center of the Johannes Gutenberg-University Mainz    1 papers
+1202. National Institute of Genetics                                  1 papers
+1203. WWF-Malaysia                                                    1 papers
+1204. Southeast Asia Rainforest Research Partnership                  1 papers
+1205. Rivier University                                               1 papers
+1206. Amsterdam Institute for Life and Environment, Vrije Universiteit Amsterdam    1 papers
+1207. CNRS, Universite de Toulouse Paul Sabatier                      1 papers
+1208. Museu de Cie`ncies Naturals de Barcelona                        1 papers
+1209. The Rocky Mountain Biological Laboratory                        1 papers
+1210. Francis Marion University                                       1 papers
+1211. Auckland War Memorial Museum                                    1 papers
+1212. Center for Whale Research                                       1 papers
+1213. Macaw Recovery Network                                          1 papers
+1214. Cogitamus laboratory                                            1 papers
+1215. Instituto de Neurobiologia, Universidad Nacional Autonoma de Mexico    1 papers
+1216. Middle East Technical University                                1 papers
+1217. College of Science and Engineering, Flinders University         1 papers
+1218. School of Natural and Computation Sciences, Massey University    1 papers
+1219. Slovak Academy of Sciences                                      1 papers
+1220. Institute of Informatics and Telecommunications, National Center of Scientific Research "Demokritos"    1 papers
+1221. National Technical University of Athens                         1 papers
+1222. Leibniz-Institute of Freshwater Ecology and Inland Fisheries    1 papers
+1223. Birdtour Asia Ltd                                               1 papers
+1224. Wachiska Audubon Society                                        1 papers
+1225. Department of Natural Resource Ecology and Management, Iowa State University    1 papers
+1226. Rosslyn L.L.C.                                                  1 papers
+1227. Leibniz ScienceCampus Primate Cognition                         1 papers
+1228. University of Lausanne                                          1 papers
+1229. University of KwaZulu-Natal                                     1 papers
+1230. Hainan Normal University                                        1 papers
+1231. Vrije Universiteit Amsterdam                                    1 papers
+1232. Laboratoire Cogitamus/ Cogitamus Laboratory                     1 papers
+1233. University of Porto                                             1 papers
+1234. University of Leeds                                             1 papers
+1235. Umea University                                                 1 papers
+1236. University of Minnesota Twin-Cities                             1 papers
+1237. State University of New York College of Environmental Science and Forestry    1 papers
+1238. INSERM                                                          1 papers
+1239. Max-Planck Institute for Psycholinguistics                      1 papers
+1240. University of Miguel Hernandez                                  1 papers
+1241. The Alan Turing Institute                                       1 papers
+1242. Department of Life Sciences, Imperial College London            1 papers
+1243. Combeauvert, France                                             1 papers
+1244. Nanobat Systems                                                 1 papers
+1245. University of the Sunshine Coast                                1 papers
+1246. Centre for Biodiversity and Environmental Research, University College London    1 papers
+1247. School of Electrical Engineering and Computer Science, Queensland University of Technology    1 papers
+1248. Centro de Investigaciones Tropicales, Universidad Veracruzana    1 papers
+1249. Swiss Federal Institute for Forest, Snow and Landscape Research WSL    1 papers
+1250. School of Informatics, University of Edinburgh                  1 papers
+1251. Poznan University of Life Sciences                              1 papers
+1252. Universite Paris-Science                                        1 papers
+1253. The University of Adelaide                                      1 papers
+1254. China Conservation and Research Center for the Giant Panda      1 papers
+1255. San Diego Zoos Institute for Conservation Research              1 papers
+1256. Rocky Mountain Biological Laboratory                            1 papers
+1257. Max-Planck-Society                                              1 papers
+1258. Masaryk University                                              1 papers
+1259. University of Essex                                             1 papers
+1260. University of Campinas                                          1 papers
+1261. Max Planck Institute for Neural and Environmental Rhythms       1 papers
+1262. Louisiana Department of Wildlife and Fisheries                  1 papers
+1263. Fundo Pecuario Masaguaral                                       1 papers
+1264. Hunter College, City University of New York                     1 papers
+1265. Medical University of Lodz                                      1 papers
+1266. University of Rzeszow                                           1 papers
+1267. East China Normal University                                    1 papers
+1268. Mammal Research Institute, University of Pretoria               1 papers
+1269. Field Museum of Natural History                                 1 papers
+1270. University of California San Francisco School of Medicine       1 papers
+1271. Mount Sinai School of Medicine                                  1 papers
+1272. Kennesaw University                                             1 papers
+1273. Colgate University                                              1 papers
+1274. University of Colorado                                          1 papers
+1275. University of Barcelona                                         1 papers
+1276. Dian Fossey Gorilla Fund International                          1 papers
+1277. MTA-ELTE Comparative Ethology Research Group                    1 papers
+1278. Instituto di Scienze e Tecnologia della Cognizione, Consiglio Nazionale delle Ricerche    1 papers
+1279. Centro Ateneo Museo di Storia Naturale, University of Pisa      1 papers
+1280. Indianapolis Zoo                                                1 papers
+1281. Moscow Zoo                                                      1 papers
+1282. Department of Forest Entomology, Forestry and Forest Products Research Institute    1 papers
+1283. Institute of Biology, University of Southern Denmark            1 papers
+1284. Breeding and Entomology Pest Management Division, NARO Institute of Fruit Tree Science    1 papers
+1285. Donders Institute for Brain, Cognition and Behaviour            1 papers
+1286. University of Potsdam                                           1 papers
+1287. Bielefeld University                                            1 papers
+1288. Virginia Commonwealth University                                1 papers
+1289. National Museum of Nature and Science                           1 papers
+1290. Istituto Superiore di Sanita                                    1 papers
+1291. Redenlab                                                        1 papers
+1292. Usher institute of Population Health Sciences and informatics, Medical School, University of Edinburgh    1 papers
+1293. Vavilov Institute for the History of Science and Technology of Russian Academy of Sciences    1 papers
+1294. Sber AI                                                         1 papers
+1295. Mathematical Robotics Science Division, Sirius University       1 papers
+1296. HSE University                                                  1 papers
+1297. ISP RAS Research Center for Trusted Artificial Intelligence     1 papers
+1298. Universite dAntananarivo                                        1 papers
+1299. CSIRO Agriculture and Food                                      1 papers
+1300. CSIRO Land and Water                                            1 papers
+1301. Institute for Basic Science                                     1 papers
+1302. Korea Advanced Institute of Science & Technology                1 papers
+1303. University of Science and Technology                            1 papers
+1304. Vietnam National University of Forestry                         1 papers
+1305. Bac Giang Agro-Forestry University                              1 papers
+1306. Hong Kong University of Science and Technology                  1 papers
+1307. Hong Kong Bird Watching Society                                 1 papers
+1308. Musashi University                                              1 papers
+1309. National Primate Research Center of Thailand                    1 papers
+1310. Chulalongkorn University                                        1 papers
+1311. Research Center for Biology, Indonesian Institute of Sciences    1 papers
+1312. Johannes-Gutenberg University of Mainz                          1 papers
+1313. Charite - Universitatsmedizin Berlin                            1 papers
+1314. Royal Zoological Society of Antwerp                             1 papers
+1315. Memorial University of Newfoundland                             1 papers
+1316. Western University                                              1 papers
+1317. National Museums of Kenya                                       1 papers
+1318. Dedan Kimathi University of Technology                          1 papers
+1319. Sophia University                                               1 papers
+1320. Musashino University                                            1 papers
+1321. EAWAG Centre for Ecology, Evolution and Biogeochemistry         1 papers
+1322. University of Basel                                             1 papers
+1323. Pacific Northwest Research Station, USDA Forest Service         1 papers
+1324. Smultea Sciences                                                1 papers
+1325. University of Manitoba                                          1 papers
+1326. University of Puerto Rico                                       1 papers
+1327. Anhui University                                                1 papers
+1328. Nanjing University of Aeronautics and Astronautics              1 papers
+1329. Center de Primatologie                                          1 papers
+1330. EPHE                                                            1 papers
+1331. IZW                                                             1 papers
+1332. Station dEcologie Theorique et Experimentale                    1 papers
+1333. Museum national dHistoire naturelle                             1 papers
+1334. UPS                                                             1 papers
+1335. INPT                                                            1 papers
+1336. Laboratoire Ecologie Fonctionnelle et Environnement             1 papers
+1337. BIOGECO                                                         1 papers
+1338. Universite de Toulouse                                          1 papers
+1339. University of Bordeaux                                          1 papers
+1340. Dynafor, INRAE-INPT                                             1 papers
+1341. LTSER Zone Atelier Pyrenees Garonne                             1 papers
+1342. Scuola Internazionale Superiore di Studi Avanzati               1 papers
+1343. Santa Fe Institute                                              1 papers
+1344. Fundacao Edmund Mach                                            1 papers
+1345. University of Florence                                          1 papers
+1346. National Chung Hsing University                                 1 papers
+1347. National Taiwan Normal University                               1 papers
+1348. Digital Environment Research Institute, Queen Mary University of London    1 papers
+1349. Edge Hill University                                            1 papers
+1350. Barts Health NHS Trust                                          1 papers
+1351. Florida State University                                        1 papers
+1352. Clemson University                                              1 papers
+1353. German Academic Exchange Service                                1 papers
+1354. Aristotle University of Thessaloniki                            1 papers
+1355. Carl Von Ossietzky University Oldenburg                         1 papers
+1356. Groningen Institute of Evolutionary Life Sciences, University of Groningen    1 papers
+1357. Helmholtz Institute for Functional Marine Biodiversity, Carl Von Ossietzky University Oldenburg    1 papers
+1358. Servicio de Biodiversidad, Gobierno de Canarias                 1 papers
+1359. Museo di Storia Naturale di Grosseto                            1 papers
+1360. Deakin University                                               1 papers
+1361. Burke Museum of Natural History and Culture, University of Washington    1 papers
+1362. InternationalComputerScienceInstitute                           1 papers
+1363. FormBio                                                         1 papers
+1364. ColossalBiosciences                                             1 papers
+1365. Alaska Fisheries Science Center                                 1 papers
+1366. Chemnitz University of Technology                               1 papers
+1367. Statoil Norway                                                  1 papers
+1368. Scottish Oceans Institute, University of St. Andrews            1 papers
+1369. INRAE, Institut Agro                                            1 papers
+1370. Bureau ETRE                                                     1 papers
+1371. University of Tasmania                                          1 papers
+1372. MathWorks                                                       1 papers
+1373. University of Zagreb                                            1 papers
+1374. University of Padova                                            1 papers
+1375. Imperial College                                                1 papers
+1376. University of Messina                                           1 papers
+1377. University of Catania                                           1 papers
+1378. NOAA Stellwagen Bank National Marine Sanctuary                  1 papers
+1379. University of Massachusetts Boston                              1 papers
+1380. The Scottish Association for Marine Science                     1 papers
+1381. New Jersey Department of Environmental Protection               1 papers
+1382. NOAA Alaska Fisheries Science Center                            1 papers
+1383. Maine Department of Marine Resources                            1 papers
+1384. Nicholas School of the Environment, Duke University Marine Laboratory    1 papers
+1385. University of Washington, Applied Physics Laboratory            1 papers
+1386. Naval Facilities Engineering Command Atlantic                   1 papers
+1387. La Vallee des Singes                                            1 papers
+1388. Universidade Federal de Vicosa                                  1 papers
+1389. Universidade Federal de Minas Gerais                            1 papers
+1390. Georg August University Gttingen                                1 papers
+1391. Hamburg University of Applied Sciences                          1 papers
+1392. University at Buffalo, the State University of New York         1 papers
+1393. University of the Incarnate Word                                1 papers
+1394. Dauphin Island Sea Laboratory                                   1 papers
+1395. University of Quebec en Outaouais                               1 papers
+1396. Raincoast Conservation Foundation                               1 papers
+1397. Parks Canada                                                    1 papers
+1398. GroupedeRechercheetdEducationsurlesMammiferesMarins             1 papers
+1399. Universite du Quebec a Montreal                                 1 papers
+1400. Mines Paris, Paris Sciences et Lettres University               1 papers
+1401. University of California, Riverside                             1 papers
+1402. University of Buffalo, The State University of New York         1 papers
+1403. California State University, San Bernardino                     1 papers
+1404. Wild Bird Trust                                                 1 papers
+1405. Museum of Nature and Human Activities                           1 papers
+1406. Max Planck Institute for Biological Intelligence                1 papers
+1407. Faculty of Science, Hokkaido University                         1 papers
+1408. SCO - Societe Caledonienne de Ornithologie                      1 papers
+1409. LPO Auvergne-Rhone-Alpes                                        1 papers
+1410. University of Reunion                                           1 papers
+1411. University of New Caledonia                                     1 papers
+1412. Institut Agronomique neo-Caledonien                             1 papers
+1413. P.F. Olsen Ltd                                                  1 papers
+1414. E.B. Firth Charitable Trust                                     1 papers
+1415. Kaingaroa Timberlands                                           1 papers
+1416. O.T.P.P. New Zealand Forest Investments Ltd                     1 papers
+1417. J.S. Watson Trust                                               1 papers
+1418. Environment Waikato                                             1 papers
+1419. Blakely Pacific Limited                                         1 papers
+1420. Pan Pacific                                                     1 papers
+1421. Valder Award                                                    1 papers
+1422. Carter Holt Harvey Forests                                      1 papers
+1423. Example University                                              1 papers
+1424. Embrapa Recursos Geneticos e Biotecnologia                      1 papers
+1425. Paci%c3%a2c Orca Society/OrcaLab                                1 papers
+1426. Sacred Heart University                                         1 papers
+1427. SeaWorld San Antonio                                            1 papers
+1428. University of Andes                                             1 papers
+1429. University of Icelands Research Center in Husavik               1 papers
+1430. Bunin Tech Polytechnic School                                   1 papers
+1431. University of Sassari                                           1 papers
+1432. Stellwagen Bank National Marine Sanctuary                       1 papers
+1433. The Whale Center of New England                                 1 papers
+1434. National Marine Sanctuary Foundation                            1 papers
+1435. College of Animal Science and Technology, Jilin Agricultural University    1 papers
+1436. College of Life Science, Jilin Agricultural University          1 papers
+1437. Cascadia Research Collective                                    1 papers
+1438. Northwest Fisheries Science Center, National Marine Fisheries Service, National Oceanic and Atmospheric Administration    1 papers
+1439. Lynker Technologies                                             1 papers
+1440. University of Washington, Friday Harbor Laboratories            1 papers
+1441. U.S. Army Garrison                                              1 papers
+1442. Institut Halieutique et des Sciences Marines                    1 papers
+1443. Division of Marine Science and Conservation, Duke University Marine Laboratory    1 papers
+1444. Environment Society of Oman                                     1 papers
+1445. Megaptera Marine Conservation                                   1 papers
+1446. Five Oceans Environmental Services LLC                          1 papers
+1447. African Aquatic Conservation Fund                               1 papers
+1448. Evolution and Ecology Research Centre, University of New South Wales    1 papers
+1449. Center for Coastal Studies                                      1 papers
+1450. Mahidol University                                              1 papers
+1451. YerkesNationalPrimateResearchCenter                             1 papers
+1452. ThinkElephantsInternational                                     1 papers
+1453. Conservation International                                      1 papers
+1454. E Miller Consulting                                             1 papers
+1455. University of Cumbria                                           1 papers
+1456. Italian National Research Council                               1 papers
+1457. University of Louvain-la-Neuve                                  1 papers
+1458. Instituto de Herpetologia                                       1 papers
+1459. Vellore Institute of Technology                                 1 papers
+1460. Max-Planck-Institute for Ornithology                            1 papers
+1461. NOAA NMFS Southeast Fisheries Science Center                    1 papers
+1462. Tethys Research Institute                                       1 papers
+1463. Nagoya University                                               1 papers
+1464. University of Malaya                                            1 papers
+1465. FT SST ERO, Equinor ASA                                         1 papers
+1466. Institute of Oceanography and Fisheries                         1 papers
+1467. Museum National dHistoire Naturelle                             1 papers
+1468. National Council of Scientific and Technological Development    1 papers
+1469. Appin Scientific Ltd                                            1 papers
+1470. Chelonia Ltd                                                    1 papers
+1471. Ocean Science Consulting Ltd                                    1 papers
+1472. Heriot-Watt University                                          1 papers
+1473. Loughborough University                                         1 papers
+1474. N/A                                                             1 papers
+1475. INP Phelma Minatec                                              1 papers
+1476. Springfield University                                          1 papers
+1477. Chelonia Limited                                                1 papers
+1478. Schmalhausen Institute of Zoology of National Academy of Sciences of Ukraine    1 papers
+1479. Sea Mammal Research Unit, Scottish Oceans Institute, University of St Andrews    1 papers
+1480. Coonamessett Farm Foundation, Inc.                              1 papers
+1481. University of South Carolina                                    1 papers
+1482. University Carlos III de Madrid                                 1 papers
+1483. University of Alaska Southeast                                  1 papers
+1484. University at Buffalo, State University of New York             1 papers
+1485. Universidade Federal de Pernambuco                              1 papers
+1486. Universidade de Brasilia                                        1 papers
+1487. Inria Centre, University of Bordeaux                            1 papers
+1488. University of South Carolina Beaufort                           1 papers
+1489. Arctic University of Norway                                     1 papers
+1490. Ocean Science Analytics                                         1 papers
+1491. Fram Centre High North Research Centre for Climate and Environment    1 papers
+1492. Bioacoustician                                                  1 papers
+1493. Hubbs-SeaWorld Research Institute                               1 papers
+1494. SeaWorld Orlando                                                1 papers
+1495. University of Coimbra                                           1 papers
+1496. Coimbra Institute for Biomedical Imaging and Translational Research    1 papers
+1497. University of Caen                                              1 papers
+1498. Norwegian Polar Institute                                       1 papers
+1499. NOAA/NMFS Alaska Fisheries Science Center                       1 papers
+1500. UiT The Arctic University of Norway                             1 papers
+1501. Louisiana State University                                      1 papers
+1502. Institute of Science and Technology Austria                     1 papers
+1503. Sechenov Institute of Evolutionary Physiology and Biochemistry    1 papers
+1504. Grant MacEwan University                                        1 papers
+1505. MPG Ranch Missoula                                              1 papers
+1506. La Rochelle University                                          1 papers
+1507. Australian Institute of Marine Science                          1 papers
+1508. University of San Diego                                         1 papers
+1509. Michigan State University                                       1 papers
+1510. Universidade Federal do Acre                                    1 papers
+1511. VA Loma Linda Healthcare System                                 1 papers
+1512. Universidade Federal de Santa Maria                             1 papers
+1513. Museo Nacional de Ciencias Naturales-CSIC                       1 papers
+1514. Universidad Autonoma de Madrid                                  1 papers
+1515. Fondazione Edmund Mach                                          1 papers
+1516. Universidade Federal do Rio Grande do Sul                       1 papers
+1517. Grinnell College                                                1 papers
+1518. Duke University Medical Center                                  1 papers
+1519. Reed College                                                    1 papers
+1520. Museu Paraense Emilio Goeldi                                    1 papers
+1521. Universite Lyon                                                 1 papers
+1522. Centre of Evolutionary and Functional Ecology                   1 papers
+1523. Museum fur Naturkunde Berlin                                    1 papers
+1524. Karl-Franzens-University                                        1 papers
+1525. Bulgaria Academy of Sciences                                    1 papers
+1526. ShanghaiTech University                                         1 papers
+1527. University of Los Andes                                         1 papers
+1528. California State Polytechnic University                         1 papers
+1529. Bogor Agricultural University                                   1 papers
+1530. California Department of Fish and Wildlife                      1 papers
+1531. Pontificia Universidad Catolica de Chile                        1 papers
+1532. Birla Institute of Technology and Science                       1 papers
+1533. Museum of Natural History - Leibniz Institute for Evolution and Biodiversity Science    1 papers
+1534. Tuscia University                                               1 papers
+1535. Universidade Federal de Educacao, Ciencia e Tecnologia Farroupilha    1 papers
+1536. Universidade Federal do Para                                    1 papers
+1537. Universidade Federal de Lavras                                  1 papers
+1538. Rovereto Civic Museum Foundation                                1 papers
+1539. Miami University                                                1 papers
+1540. Susquehanna University                                          1 papers
+1541. Ulster University                                               1 papers
+1542. Joan & Sanford I. Weill Medical College of Cornell University    1 papers
+1543. Baylor University                                               1 papers
+1544. St. Olaf College                                                1 papers
+1545. University of Texas Southwestern Medical Center                 1 papers
+1546. Pontificia Universidad Javeriana Seccional Cali                 1 papers
+1547. Museu de Diversidade Biologica (MDBio), Universidade estadual de campinas    1 papers
+1548. Universidade federal de Mato Grosso do Sul                      1 papers
+1549. centro de investigacion en Biodiversidad y cambio Global (ciBc), Universidad Autonoma de Madrid    1 papers
+1550. Departamento de ecologia, Universidad Autonoma de Madrid        1 papers
+1551. Laboratorio de Historia natural de Anfibios Brasileiros (LaHnAB), Universidade estadual de campinas    1 papers
+1552. Departamento de ecologia e Zoologia, Universidade federal de Santa catarina    1 papers
+1553. instituto de Pesquisa da Biodiversidade (iPBio), Reserva Betary    1 papers
+1554. Laboratorio de Herpetologia e comportamento Animal, Universidade Federal de Goias    1 papers
+1555. Instituto de Investigacion de Recursos Biologicos Alexander von Humboldt    1 papers
+1556. Washington University in St. Louis                              1 papers
+1557. Field Projects International                                    1 papers
+1558. Chengdu Institute of Biology                                    1 papers
+1559. University of the Chinese Academy of Sciences                   1 papers
+1560. Childrens Healthcare of Atlanta                                 1 papers
+1561. Pontifical Catholic University of Maule                         1 papers
+1562. University of Toronto Mississauga                               1 papers
+1563. Bishop's University                                             1 papers
+1564. University of Bologna                                           1 papers
+1565. University of Reading                                           1 papers
+1566. KU Leuven Medical School                                        1 papers
+1567. Museum and Institute of Zoology, Polish Academy of Sciences     1 papers
+1568. National Institute of Biological Resources                      1 papers
+1569. Jeju National University                                        1 papers
+1570. DGIST                                                           1 papers
+1571. CNRS, Universite de Rennes, Universite de Normandie             1 papers
+1572. University of Brescia                                           1 papers
+1573. Polish Academy of Sciences                                      1 papers
+1574. NOVA University of Lisbon                                       1 papers
+1575. Science Park 140, Netherlands eScience Center                   1 papers
+1576. Laboratory of Molecular and Behavioral Neuroscience, Institute for Neuroscience, Department of Health Sciences and Technology, ETH Zurich    1 papers
+1577. Neuroscience Center Zurich, ETH Zurich and University of Zurich    1 papers
+1578. Laboratory for Neuro- and Psychophysiology, Department of Neurosciences, KU Leuven    1 papers
+1579. Institute of Neuroinformatics ETH Zurich and University of Zurich    1 papers
+1580. College of William and Mary                                     1 papers
+1581. Lingang Laboratory                                              1 papers
+1582. Institute of Neuroscience, Key Laboratory of Primate Neurobiology, CAS Center for Excellence in Brain Science and Intelligence Technology, Chinese Academy of Sciences    1 papers
+1583. Shanghai Center for Brain Science and Brain-Inspired Technology    1 papers
+1584. University of Quebec at Chicoutimi                              1 papers
+1585. Landcare Research                                               1 papers
+1586. Auckland Council                                                1 papers
+1587. Chico Mendes Institute for Biodiversity Conservation            1 papers
+1588. North Dakota State University                                   1 papers
+1589. Whale Acoustic Reconnaissance Project                           1 papers
+1590. Julius Kuehn Institute                                          1 papers
+1591. Christian-Albrechts-Universitat zu Kiel                         1 papers
+1592. Midwestern University                                           1 papers
+1593. Royal Holloway University of London                             1 papers
+1594. University Paris-Sciences-Lettres                               1 papers
+1595. University of the Western Cape                                  1 papers
+1596. Kent State University                                           1 papers
+1597. University of the Azores                                        1 papers
+1598. Qilu University of Technology                                   1 papers
+1599. Ocean University of China                                       1 papers
+1600. WhaleAcoustics                                                  1 papers
+1601. Alaska Whale Foundation                                         1 papers
+1602. Cooperative Institute for Marine Resources Studies, Oregon State University and NOAA Pacific Marine Environmental Laboratory    1 papers
+1603. AIP Publishing                                                  1 papers

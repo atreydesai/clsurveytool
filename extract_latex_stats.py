@@ -3,6 +3,7 @@ import json
 import os
 import re
 from collections import defaultdict, Counter
+from itertools import combinations
 import unicodedata
 
 # Configuration
@@ -58,6 +59,106 @@ FEATURE_MAP_LATEX = {
     "Tradition and Cultural Transmission": "Trad. & CT",
     "Learnability": "Learn."
 }
+
+# --- Normalization Functions ---
+
+def normalize_country(country):
+    """Normalize country names to handle variations."""
+    if not country:
+        return ""
+    
+    c = country.strip()
+    c_lower = c.lower()
+    
+    # USA variations
+    if c_lower in ['usa', 'united states', 'united states of america', 'the united states', 
+                   'the united states of america', 'u.s.a.', 'u.s.', 'us']:
+        return "United States"
+    # UK variations
+    elif c_lower in ['uk', 'united kingdom', 'england', 'scotland', 'wales', 
+                     'northern ireland', 'great britain', 'the united kingdom', 'u.k.']:
+        return "United Kingdom"
+    # China variations
+    elif c_lower in ['china', 'prc', "people's republic of china"]:
+        return "China"
+    # Russia variations
+    elif c_lower in ['russia', 'russian federation']:
+        return "Russia"
+    # Korea variations
+    elif c_lower in ['south korea', 'republic of korea', 'korea']:
+        return "South Korea"
+    # Netherlands variations
+    elif c_lower in ['netherlands', 'the netherlands']:
+        return "Netherlands"
+    # Czech variations
+    elif c_lower in ['czech republic', 'czechia']:
+        return "Czech Republic"
+    # Brunei variations
+    elif c_lower in ['brunei', 'brunei darussalam']:
+        return "Brunei"
+    
+    # Return original if no normalization needed
+    return c
+
+def normalize_university(university):
+    """Normalize university names to handle variations (abbreviated version for top institutions)."""
+    if not university:
+        return ""
+    
+    u = university.strip()
+    u_lower = u.lower()
+    u_clean = u_lower.replace(',', '').replace('.', '').replace('-', ' ').replace('  ', ' ').strip()
+    
+    # St Andrews
+    if 'st andrews' in u_clean or 'st. andrews' in u_clean or 'saint andrews' in u_clean:
+        if 'scottish oceans' not in u_clean and 'sea mammal' not in u_clean:
+            return "University of St Andrews"
+    # Zurich
+    if ('zurich' in u_clean or 'zürich' in u_clean) and 'eth' not in u_clean and 'university' in u_clean:
+        return "University of Zurich"
+    # Cambridge
+    if 'cambridge' in u_clean and 'university' in u_clean:
+        return "University of Cambridge"
+    # Oxford
+    if 'oxford' in u_clean and 'university' in u_clean:
+        return "University of Oxford"
+    # MIT
+    if u_clean in ['mit', 'mit csail'] or 'massachusetts institute of technology' in u_clean:
+        return "MIT"
+    # UC San Diego
+    if 'university of california' in u_clean or 'uc ' in u_clean:
+        if 'san diego' in u_clean or 'ucsd' in u_clean:
+            return "UC San Diego"
+        elif 'los angeles' in u_clean or 'ucla' in u_clean:
+            return "UCLA"
+        elif 'berkeley' in u_clean:
+            return "UC Berkeley"
+        elif 'davis' in u_clean:
+            return "UC Davis"
+    # Rockefeller
+    if 'rockefeller' in u_clean:
+        return "Rockefeller U."
+    # Max Planck
+    if 'max planck' in u_clean:
+        if 'animal behav' in u_clean:
+            return "MPI Animal Behavior"
+        elif 'evolutionary anthropology' in u_clean:
+            return "MPI Evol. Anthro."
+        elif 'psycholinguistics' in u_clean:
+            return "MPI Psycholinguistics"
+        return "Max Planck Institute"
+    # Cornell
+    if 'cornell' in u_clean and 'ornithology' not in u_clean:
+        return "Cornell University"
+    # German Primate Center
+    if 'german primate center' in u_clean or 'deutsches primatenzentrum' in u_clean:
+        return "German Primate Ctr."
+    # CNRS
+    if u_clean == 'cnrs' or 'centre national de la recherche' in u_clean:
+        return "CNRS"
+    
+    # Return original if no specific normalization
+    return u
 
 # --- Helpers ---
 
@@ -155,44 +256,18 @@ def generate_papers_by_period_stats(entries):
     return " ".join(coords)
 
 def generate_country_stats(entries):
-    # Extract countries from affiliations
-    # Need normalization? User prompt implies specific countries: 
-    # Hungary, Italy, Côte d'Ivoire...
-    # We will trust the data but maybe map some variations if we see them.
-    
+    """Generate top 15 countries by number of papers (with normalization)."""
     cnt = Counter()
     for e in entries:
-        # Avoid double counting country per paper? 
-        # "Papers by Country" -> usually means distinct papers involving that country.
-        # If a paper has 2 authors from UK, counts as 1 for UK.
-        # If a paper has 1 UK and 1 US, counts as 1 UK and 1 US.
-        
-        
+        # Count each country once per paper
         countries_in_paper = set()
         for aff in e.get('affiliations', []):
             c = aff.get('country', '').strip()
             if c:
-                # Normalize country names
-                c_lower = c.lower()
-                
-                # USA variations
-                if c_lower in ['usa', 'united states', 'united states of america', 'the united states', 'the united states of america', 'u.s.a.', 'u.s.']:
-                    c = "US"
-                # UK variations
-                elif c_lower in ['uk', 'united kingdom', 'england', 'scotland', 'wales', 'northern ireland', 'great britain', 'the united kingdom']:
-                    c = "UK"
-                # Common other normalizations if needed
-                elif c_lower in ['china', 'prc', 'people\'s republic of china']:
-                    c = "China"
-                elif c_lower in ['russia', 'russian federation']:
-                    c = "Russia"
-                
-                
-                # Ensure US/UK are uppercase
-                if c_lower == 'us': c = "US"
-                if c_lower == 'uk': c = "UK"
-                
-                countries_in_paper.add(c)
+                # Use normalization function
+                normalized = normalize_country(c)
+                if normalized:
+                    countries_in_paper.add(normalized)
         
         for c in countries_in_paper:
             cnt[c] += 1
@@ -206,8 +281,6 @@ def generate_country_stats(entries):
     coords = []
     labels = []
     for i, (country, count) in enumerate(top15, 1):
-        # Escape special latex chars? e.g. Côte d'Ivoire handles utf8 fine in modern latex usually
-        # But let's check output.
         coords.append(f"({count},{i})")
         labels.append(country)
         
@@ -347,6 +420,156 @@ def generate_category_timeline(entries):
     return plots
 
 
+def generate_university_stats(entries):
+    """Generate top 15 universities by number of papers (with normalization)."""
+    cnt = Counter()
+    for e in entries:
+        # Count each university once per paper
+        universities_in_paper = set()
+        for aff in e.get('affiliations', []):
+            u = aff.get('university', '').strip()
+            if u:
+                # Use normalization function
+                normalized = normalize_university(u)
+                if normalized:
+                    universities_in_paper.add(normalized)
+        
+        for u in universities_in_paper:
+            cnt[u] += 1
+            
+    # Top 15
+    top15 = cnt.most_common(15)
+    # Sort for horizontal bar chart (ascending count)
+    top15.sort(key=lambda x: x[1])
+    
+    # Coords: (count, index) for xbar
+    coords = []
+    labels = []
+    for i, (university, count) in enumerate(top15, 1):
+        coords.append(f"({count},{i})")
+        labels.append(university)
+        
+    return labels, coords
+
+
+def build_collaboration_network(entries, entity_type='university'):
+    """
+    Build collaboration network for universities or countries.
+    Returns edge data for network visualization.
+    entity_type: 'university' or 'country'
+    """
+    # Track collaborations (edges between entities on same paper)
+    edge_weights = Counter()
+    node_papers = Counter()
+    
+    for e in entries:
+        affiliations = e.get('affiliations', [])
+        if not affiliations:
+            continue
+        
+        # Get unique entities in this paper
+        entities_in_paper = set()
+        for aff in affiliations:
+            if entity_type == 'university':
+                entity = aff.get('university', '').strip()
+                if entity:
+                    normalized = normalize_university(entity)
+                    if normalized:
+                        entities_in_paper.add(normalized)
+            else:  # country
+                entity = aff.get('country', '').strip()
+                if entity:
+                    normalized = normalize_country(entity)
+                    if normalized:
+                        entities_in_paper.add(normalized)
+        
+        # Count papers per entity
+        for entity in entities_in_paper:
+            node_papers[entity] += 1
+        
+        # Create edges for all pairs (collaborations)
+        if len(entities_in_paper) > 1:
+            for e1, e2 in combinations(sorted(entities_in_paper), 2):
+                edge_weights[(e1, e2)] += 1
+    
+    # Get top N entities by paper count
+    top_entities = [entity for entity, count in node_papers.most_common(15)]
+    
+    # Filter edges to only include top entities
+    filtered_edges = {}
+    for (e1, e2), weight in edge_weights.items():
+        if e1 in top_entities and e2 in top_entities:
+            filtered_edges[(e1, e2)] = weight
+    
+    # Build node positions using simple force-directed layout simulation
+    # Place nodes in a circle initially, then adjust based on connections
+    import math
+    n = len(top_entities)
+    positions = {}
+    
+    # Initial circular layout
+    for i, entity in enumerate(top_entities):
+        angle = 2 * math.pi * i / n
+        positions[entity] = {
+            'x': 5 * math.cos(angle),
+            'y': 5 * math.sin(angle)
+        }
+    
+    # Simple force-directed adjustment (a few iterations)
+    for iteration in range(50):
+        forces = {entity: {'x': 0, 'y': 0} for entity in top_entities}
+        
+        # Repulsive forces between all nodes
+        for i, e1 in enumerate(top_entities):
+            for e2 in top_entities[i+1:]:
+                dx = positions[e2]['x'] - positions[e1]['x']
+                dy = positions[e2]['y'] - positions[e1]['y']
+                dist = math.sqrt(dx*dx + dy*dy) + 0.01
+                
+                # Repulsion
+                force = 0.5 / (dist * dist)
+                forces[e1]['x'] -= force * dx / dist
+                forces[e1]['y'] -= force * dy / dist
+                forces[e2]['x'] += force * dx / dist
+                forces[e2]['y'] += force * dy / dist
+        
+        # Attractive forces for connected nodes
+        for (e1, e2), weight in filtered_edges.items():
+            dx = positions[e2]['x'] - positions[e1]['x']
+            dy = positions[e2]['y'] - positions[e1]['y']
+            dist = math.sqrt(dx*dx + dy*dy) + 0.01
+            
+            # Attraction proportional to weight
+            force = 0.01 * dist * math.log(1 + weight)
+            forces[e1]['x'] += force * dx / dist
+            forces[e1]['y'] += force * dy / dist
+            forces[e2]['x'] -= force * dx / dist
+            forces[e2]['y'] -= force * dy / dist
+        
+        # Apply forces with damping
+        damping = 0.5
+        for entity in top_entities:
+            positions[entity]['x'] += damping * forces[entity]['x']
+            positions[entity]['y'] += damping * forces[entity]['y']
+    
+    # Normalize positions to fit in (-5, 5) range
+    all_x = [pos['x'] for pos in positions.values()]
+    all_y = [pos['y'] for pos in positions.values()]
+    max_coord = max(max(abs(x) for x in all_x), max(abs(y) for y in all_y))
+    if max_coord > 0:
+        scale = 5.0 / max_coord
+        for entity in positions:
+            positions[entity]['x'] *= scale
+            positions[entity]['y'] *= scale
+    
+    return {
+        'nodes': [(entity, positions[entity], node_papers[entity]) 
+                  for entity in top_entities],
+        'edges': [((e1, e2), weight) for (e1, e2), weight in filtered_edges.items()],
+        'positions': positions
+    }
+
+
 def print_section_header(title):
     print(f"\n{'='*20} {title} {'='*20}")
 
@@ -371,6 +594,14 @@ def run(name, sources):
     print("coordinates {")
     print("    " + " ".join(ccoords))
     print("};")
+    
+    # 3b. Universities
+    print("\n--- Papers by University (Top 15) ---")
+    ulabs, ucoords = generate_university_stats(entries)
+    print(f"yticklabels={{{', '.join(ulabs)}}}")
+    print("coordinates {")
+    print("    " + " ".join(ucoords))
+    print("};")
 
     # 4. Species
     print("\n--- Top 15 Species ---")
@@ -390,6 +621,30 @@ def run(name, sources):
         print("\\addplot ... coordinates {")
         print("    " + coords)
         print("};")
+    
+    # 6. University Collaboration Network
+    print("\n--- University Collaboration Network (Top 15) ---")
+    uni_network = build_collaboration_network(entries, entity_type='university')
+    print(f"% Nodes: {len(uni_network['nodes'])}, Edges: {len(uni_network['edges'])}")
+    print("\n% Node positions (x,y) and sizes (papers):")
+    for entity, pos, papers in uni_network['nodes']:
+        print(f"% {entity}: ({pos['x']:.2f}, {pos['y']:.2f}), {papers} papers")
+    
+    print("\n% Collaboration edges (weight = number of joint papers):")
+    for (e1, e2), weight in sorted(uni_network['edges'], key=lambda x: x[1], reverse=True):
+        print(f"\\draw[line width={weight}pt] ({e1}) -- ({e2}); % {weight} collaborations")
+    
+    # 7. Country Collaboration Network
+    print("\n--- Country Collaboration Network (Top 15) ---")
+    country_network = build_collaboration_network(entries, entity_type='country')
+    print(f"% Nodes: {len(country_network['nodes'])}, Edges: {len(country_network['edges'])}")
+    print("\n% Node positions (x,y) and sizes (papers):")
+    for entity, pos, papers in country_network['nodes']:
+        print(f"% {entity}: ({pos['x']:.2f}, {pos['y']:.2f}), {papers} papers")
+    
+    print("\n% Collaboration edges (weight = number of joint papers):")
+    for (e1, e2), weight in sorted(country_network['edges'], key=lambda x: x[1], reverse=True):
+        print(f"\\draw[line width={weight*0.2}pt] ({e1}) -- ({e2}); % {weight} collaborations")
 
 if __name__ == "__main__":
     run("HUMAN + SUBSET", ['human', 'subset'])
