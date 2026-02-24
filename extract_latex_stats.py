@@ -201,7 +201,7 @@ def load_data(sources):
     return unique_entries
 
 def get_year(entry):
-    year_str = str(entry.get('year', '')).strip()
+    year_str = str(entry.get('year', '') or entry.get('publication_year', '') or '').strip()
     try:
         # Handle "2023" or "2023-01-01"
         y = int(year_str.split('-')[0]) if year_str else None
@@ -211,20 +211,199 @@ def get_year(entry):
     except ValueError:
         return None
 
+
+# Generic/vague species names to exclude from top-N species charts.
+# We want specific animals, not broad taxonomic groups.
+EXCLUDED_SPECIES = {
+    'birds', 'bird', 'songbirds', 'songbird', 'passerine', 'passerine birds',
+    'passerines', 'waterfowl', 'seabirds', 'seabird', 'shorebirds',
+    'fish', 'fishes',
+    'bats', 'bat',
+    'insects', 'insect',
+    'mammals', 'mammal', 'marine mammals', 'marine mammal', 'marine animals',
+    'cetaceans', 'cetacean', 'odontocetes', 'odontocete', 'mysticetes',
+    'baleen whales', 'toothed whales', 'whales', 'whale',
+    'dolphins', 'dolphin',
+    'primates', 'primate',
+    'frogs', 'frog',
+    'amphibians', 'amphibian',
+    'reptiles', 'reptile',
+    'rodents', 'rodent',
+    'anurans', 'anuran',
+    'arthropods', 'arthropod',
+    'invertebrates', 'invertebrate',
+    'animals', 'animal',
+    'non-human primates',
+}
+
+# Explicit merges for species name variants (maps variant -> canonical).
+# Applied AFTER stripping scientific names and plurals.
+SPECIES_NAME_MERGES = {
+    'Harbor Porpoise': 'Harbour Porpoise',
+    'Orca': 'Killer Whale',
+    'Killer Whales': 'Killer Whale',
+    'Humpback Whales': 'Humpback Whale',
+    'Sperm Whales': 'Sperm Whale',
+    'Fin Whales': 'Fin Whale',
+    'Blue Whales': 'Blue Whale',
+    'Beaked Whales': 'Beaked Whale',
+    'Beluga Whales': 'Beluga Whale',
+    'Right Whales': 'Right Whale',
+    'Minke Whales': 'Minke Whale',
+    'Bottlenose Dolphins': 'Bottlenose Dolphin',
+    'Chimpanzees': 'Chimpanzee',
+    'Zebra Finches': 'Zebra Finch',
+    'Bengalese Finches': 'Bengalese Finch',
+    'Marmosets': 'Marmoset',
+    'Bonobos': 'Bonobo',
+    'Orangutans': 'Orangutan',
+    'Gorillas': 'Gorilla',
+    'Macaques': 'Macaque',
+    'Mice': 'Mouse',
+    'Rats': 'Rat',
+    'Dogs': 'Dog',
+    'Cats': 'Cat',
+    'Elephants': 'Elephant',
+    'Wolves': 'Wolf',
+    'Gibbons': 'Gibbon',
+    'Parrots': 'Parrot',
+    'Canaries': 'Canary',
+    'Ravens': 'Raven',
+    'Crows': 'Crow',
+    'Common Starling': 'European Starling',
+    'Starlings': 'European Starling',
+    'Starling': 'European Starling',
+    'Big Brown Bats': 'Big Brown Bat',
+}
+
+
+def normalize_species_name(name):
+    """Normalize a species name: strip scientific names in parentheses,
+    apply title case, merge known variants, and check exclusion list.
+
+    Returns the normalized name, or None if the species should be excluded.
+    """
+    if not name:
+        return None
+
+    # Strip scientific names in parentheses, e.g. "Bottlenose Dolphin (Tursiops Truncatus)"
+    n = re.sub(r'\s*\(.*?\)\s*', '', name).strip()
+    if not n:
+        return None
+
+    n = n.title()
+
+    # Check exclusion list
+    if n.lower() in EXCLUDED_SPECIES:
+        return None
+
+    # Apply explicit merges
+    n = SPECIES_NAME_MERGES.get(n, n)
+
+    return n
+
+
+def get_species_and_categories(entry):
+    """Extract species names and categories from an entry.
+
+    Handles two formats:
+    - human/subset: ``specialized_species`` (list of strings) + ``species_categories`` (list of strings)
+    - fullset: ``species`` (list of dicts with ``name`` and ``category`` keys)
+
+    Returns:
+        species_with_cats: list of (normalized_species_name, category_or_None) tuples
+        paper_cats: list of category strings for the whole paper
+    """
+    species_with_cats = []
+    paper_cats = []
+    seen = set()
+
+    # Try fullset format: species is list of dicts with per-species categories
+    species_list = entry.get('species', [])
+    if species_list and isinstance(species_list, list) and len(species_list) > 0 and isinstance(species_list[0], dict):
+        for sp in species_list:
+            raw_name = (sp.get('name') or '').strip()
+            cat = (sp.get('category') or '').strip()
+            # Some fullset categories are compound like "Marine Mammal, Fish" — take first
+            if ',' in cat:
+                cat = cat.split(',')[0].strip()
+            # Always collect categories (for timeline), even if species name is generic
+            if cat:
+                paper_cats.append(cat)
+            norm = normalize_species_name(raw_name)
+            if norm and norm not in seen:
+                seen.add(norm)
+                species_with_cats.append((norm, cat))
+        return species_with_cats, list(set(paper_cats))
+
+    # Fall back to human/subset format
+    specialized = entry.get('specialized_species', [])
+    categories = entry.get('species_categories', [])
+
+    for sp in specialized:
+        norm = normalize_species_name((sp or '').strip())
+        if norm and norm not in seen:
+            seen.add(norm)
+            species_with_cats.append((norm, None))
+
+    return species_with_cats, categories or []
+
+# Map fullset feature names (which are split/abbreviated) to the 12 canonical
+# linguistic features used in human/subset.
+FULLSET_FEATURE_MAP = {
+    'Vocal Auditory Channel': 'Vocal Auditory Channel and Turn-taking',
+    'Turn-taking': 'Vocal Auditory Channel and Turn-taking',
+    'Displacement': 'Reference and Displacement',
+    'Reference': 'Reference and Displacement',
+    'Syntax': 'Discreteness and Syntax',
+    'Discreteness': 'Discreteness and Syntax',
+    'Cultural Transmission': 'Tradition and Cultural Transmission',
+    'Vocal Learning': 'Learnability',
+    'Semanticity': 'Semanticity',
+    'Recursion': 'Recursion',
+    # These don't have a clean 1:1 mapping but are close enough
+    'Arbitrariness': 'Arbitrariness and Duality of Patterns',
+}
+
+# The set of valid canonical feature names
+VALID_LINGUISTIC_FEATURES = set(LINGUISTIC_FEATURES)
+
 # --- Report Generators ---
 
 def generate_linguistic_feature_stats(entries):
     counts = Counter()
     for e in entries:
-        for feat in e.get('linguistic_features', []):
-            counts[feat] += 1
-            
+        # Human/subset format: linguistic_features is a list of canonical strings
+        ling_feats = e.get('linguistic_features', [])
+        if ling_feats:
+            for feat in ling_feats:
+                if feat in VALID_LINGUISTIC_FEATURES:
+                    counts[feat] += 1
+        else:
+            # Fullset format: features is a list of dicts with 'feature' key
+            features = e.get('features', [])
+            if features:
+                # Deduplicate mapped features per paper
+                mapped = set()
+                for item in features:
+                    if isinstance(item, dict):
+                        raw = item.get('feature', '')
+                    else:
+                        raw = item
+                    # Strip any description after colon
+                    raw = raw.split(':')[0].strip()
+                    canonical = FULLSET_FEATURE_MAP.get(raw)
+                    if canonical:
+                        mapped.add(canonical)
+                for feat in mapped:
+                    counts[feat] += 1
+
     # Generate coordinates for LaTeX: (index, count)
     coords = []
     for i, feat in enumerate(FEATURE_ORDER, 1):
-        count = counts[feat] # Default 0
+        count = counts[feat]  # Default 0
         coords.append(f"({i},{count})")
-    
+
     return " ".join(coords)
 
 def generate_papers_by_period_stats(entries):
@@ -259,73 +438,51 @@ def generate_country_stats(entries):
     """Generate top 15 countries by number of papers (with normalization)."""
     cnt = Counter()
     for e in entries:
-        # Count each country once per paper
-        countries_in_paper = set()
-        for aff in e.get('affiliations', []):
-            c = aff.get('country', '').strip()
-            if c:
-                # Use normalization function
-                normalized = normalize_country(c)
-                if normalized:
-                    countries_in_paper.add(normalized)
-        
-        for c in countries_in_paper:
+        for c in get_countries(e):
             cnt[c] += 1
-            
+
     # Top 15
     top15 = cnt.most_common(15)
     # Sort for horizontal bar chart (ascending count)
     top15.sort(key=lambda x: x[1])
-    
+
     # Coords: (count, index) for xbar
     coords = []
     labels = []
     for i, (country, count) in enumerate(top15, 1):
         coords.append(f"({count},{i})")
         labels.append(country)
-        
+
     return labels, coords
 
 def generate_species_stats(entries):
-    # Top 15 "specialized_species"
-    # Again, per paper unique?
-    # "A paper discusses Zebra Finch and Babbler" -> +1 Zebra Finch, +1 Babbler.
-    
+    # Top 15 species by paper count.
+    # Uses get_species_and_categories() to handle both data formats.
+
     sp_cnt = Counter()
-    sp_cats = {} # Map species -> most common category
-    
+    sp_cats = {}  # Map species -> Counter of categories
+
     for e in entries:
-        # Unique species per paper
-        paper_species = set()
-        cats = e.get('species_categories', [])
-        
-        if not cats: continue # Can't categorize if no category
-        
-        # Taking raw strings
-        for sp in e.get('specialized_species', []):
-            sp_clean = sp.strip()
-            if sp_clean:
-                # Force Title Case for better merging (e.g. "whale" vs "Whale")
-                # Handle edge cases like "CB's" ideally, but standard title() is a good heuristic
-                # "CB's Monkey" -> "Cb'S Monkey" is annoying but better than duplicates.
-                # Let's use a helper that preserves some things if needed, but title() is simplest loop fix.
-                # Actually, let's just use title() for now.
-                sp_clean = sp_clean.title()
-                
-                paper_species.add(sp_clean)
-        
-        for sp in paper_species:
-            sp_cnt[sp] += 1
-            # Track category association
-            # If paper has multiple categories, it's ambiguous. 
-            # We'll just collect all seen categories and pick most frequent later.
-            if sp not in sp_cats: sp_cats[sp] = Counter()
-            for c in cats:
-                sp_cats[sp][c] += 1
+        species_with_cats, paper_cats = get_species_and_categories(e)
+
+        if not species_with_cats:
+            continue
+
+        for sp_name, sp_cat in species_with_cats:
+            sp_cnt[sp_name] += 1
+            if sp_name not in sp_cats:
+                sp_cats[sp_name] = Counter()
+            if sp_cat:
+                # Fullset: per-species category
+                sp_cats[sp_name][sp_cat] += 1
+            else:
+                # Human/subset: paper-level categories
+                for c in paper_cats:
+                    sp_cats[sp_name][c] += 1
 
     top15 = sp_cnt.most_common(15)
     top15.sort(key=lambda x: x[1])
-    
+
     # Resolve category for each top species
     final_cats = {}
     for sp, _ in top15:
@@ -333,122 +490,127 @@ def generate_species_stats(entries):
             final_cats[sp] = sp_cats[sp].most_common(1)[0][0]
         else:
             final_cats[sp] = "Other"
-            
-    # Map to User Latex Categories
-    # "Primate", "Bird", "Marine Mammal", "Terr. Mammal", "Amphibian", "Reptile", "Insect", "Fish"
-    # Categories in our dataset: "Terrestrial Mammal" -> "Terr. Mammal"
-    
+
     cat_map = {
         "Terrestrial Mammal": "Terr. Mammal",
         "Marine Mammal": "Marine Mammal",
         "Primate": "Primate",
-        "Bird": "Bird", 
+        "Bird": "Bird",
         "Amphibian": "Amphibian",
-        "Reptile": "Reptile", 
+        "Reptile": "Reptile",
         "Insect": "Insect",
         "Fish": "Fish"
     }
-    
-    # Prepare coords per category plot
-    # Logic: We have 15 bars. Each bar belongs to a specific category series. 
-    # We need to output coordinates for each category series.
-    # The y-coordinate is the index (1..15).
-    # "symbolic y coords" will be the list of species names.
-    
+
     cat_coords = defaultdict(list)
     ylabels = []
-    
+
     for i, (sp, count) in enumerate(top15, 1):
         c_raw = final_cats.get(sp, "Other")
         c_latex = cat_map.get(c_raw, "Other")
-        
-        # Add to the correct series
-        # Note: In the user's latex, they use (count, SpeciesName) with symbolic coords.
-        # "addplot ... coordinates {(4,Orangutan) ...}"
-        # So we use the name as Y, not index.
-        
         cat_coords[c_latex].append(f"({count},{sp})")
         ylabels.append(sp)
-        
+
     return ylabels, cat_coords
 
 def generate_category_timeline(entries):
     # Stacked bar: 5-year periods
     # Periods: 1 (81-85) ... 9 (21-25)
     # Range 1981-2025
-    
-    # Start year: 1981
-    # Period 1: 81-85
-    # Period 9: 21-25
-    
-    # Data: period_idx -> category -> count
+    # Uses get_species_and_categories() to handle both data formats.
+
     data = defaultdict(lambda: defaultdict(int))
-    
+
     for e in entries:
         year = get_year(e)
         if year:
             if year < 1981: continue
             if year > 2025: continue
-            
-            # Period index 1-based
-            # (year - 1981) // 5 + 1
+
             p_idx = (year - 1981) // 5 + 1
-            
-            # "Relative contribution of each category"
-            # Count each category mentioned in paper?
-            seen_cats = set()
-            for c in e.get('species_categories', []):
-                seen_cats.add(c)
-            
+
+            _, paper_cats = get_species_and_categories(e)
+            seen_cats = set(paper_cats)
+
             for c in seen_cats:
                 data[p_idx][c] += 1
-                
-    # Generate full plots for each category
-    # Categories: Bird, Primate, Terrestrial Mammal, Marine Mammal, Amphibian, Insect, Reptile
-    # Colors/Order from user latex
-    
+
     all_cats = ["Bird", "Primate", "Terrestrial Mammal", "Marine Mammal", "Amphibian", "Insect", "Reptile"]
-    
+
     plots = {}
     for cat in all_cats:
         coords = []
-        for p in range(1, 10): # 1 to 9
+        for p in range(1, 10):
             val = data[p][cat]
             coords.append(f"({p},{val})")
         plots[cat] = "\n    ".join(coords)
-        
+
     return plots
+
+
+def get_universities(entry):
+    """Extract normalized university names from an entry.
+
+    Handles two formats:
+    - human/subset: ``affiliations`` list of dicts with ``university`` key
+    - fullset: ``institutions`` list of strings
+    """
+    universities = set()
+
+    # Human/subset format
+    for aff in entry.get('affiliations', []):
+        u = aff.get('university', '').strip()
+        if u:
+            normalized = normalize_university(u)
+            if normalized:
+                universities.add(normalized)
+
+    # Fullset format
+    if not universities:
+        for inst in entry.get('institutions', []):
+            if isinstance(inst, str) and inst.strip():
+                normalized = normalize_university(inst.strip())
+                if normalized:
+                    universities.add(normalized)
+
+    return universities
+
+
+def get_countries(entry):
+    """Extract normalized country names from an entry.
+
+    Only human/subset have country data (in ``affiliations``).
+    Fullset has no country information.
+    """
+    countries = set()
+    for aff in entry.get('affiliations', []):
+        c = aff.get('country', '').strip()
+        if c:
+            normalized = normalize_country(c)
+            if normalized:
+                countries.add(normalized)
+    return countries
 
 
 def generate_university_stats(entries):
     """Generate top 15 universities by number of papers (with normalization)."""
     cnt = Counter()
     for e in entries:
-        # Count each university once per paper
-        universities_in_paper = set()
-        for aff in e.get('affiliations', []):
-            u = aff.get('university', '').strip()
-            if u:
-                # Use normalization function
-                normalized = normalize_university(u)
-                if normalized:
-                    universities_in_paper.add(normalized)
-        
-        for u in universities_in_paper:
+        for u in get_universities(e):
             cnt[u] += 1
-            
+
     # Top 15
     top15 = cnt.most_common(15)
     # Sort for horizontal bar chart (ascending count)
     top15.sort(key=lambda x: x[1])
-    
+
     # Coords: (count, index) for xbar
     coords = []
     labels = []
     for i, (university, count) in enumerate(top15, 1):
         coords.append(f"({count},{i})")
         labels.append(university)
-        
+
     return labels, coords
 
 
@@ -461,27 +623,16 @@ def build_collaboration_network(entries, entity_type='university'):
     # Track collaborations (edges between entities on same paper)
     edge_weights = Counter()
     node_papers = Counter()
-    
+
     for e in entries:
-        affiliations = e.get('affiliations', [])
-        if not affiliations:
+        # Get unique entities in this paper using unified helpers
+        if entity_type == 'university':
+            entities_in_paper = get_universities(e)
+        else:
+            entities_in_paper = get_countries(e)
+
+        if not entities_in_paper:
             continue
-        
-        # Get unique entities in this paper
-        entities_in_paper = set()
-        for aff in affiliations:
-            if entity_type == 'university':
-                entity = aff.get('university', '').strip()
-                if entity:
-                    normalized = normalize_university(entity)
-                    if normalized:
-                        entities_in_paper.add(normalized)
-            else:  # country
-                entity = aff.get('country', '').strip()
-                if entity:
-                    normalized = normalize_country(entity)
-                    if normalized:
-                        entities_in_paper.add(normalized)
         
         # Count papers per entity
         for entity in entities_in_paper:
@@ -622,29 +773,7 @@ def run(name, sources):
         print("    " + coords)
         print("};")
     
-    # 6. University Collaboration Network
-    print("\n--- University Collaboration Network (Top 15) ---")
-    uni_network = build_collaboration_network(entries, entity_type='university')
-    print(f"% Nodes: {len(uni_network['nodes'])}, Edges: {len(uni_network['edges'])}")
-    print("\n% Node positions (x,y) and sizes (papers):")
-    for entity, pos, papers in uni_network['nodes']:
-        print(f"% {entity}: ({pos['x']:.2f}, {pos['y']:.2f}), {papers} papers")
-    
-    print("\n% Collaboration edges (weight = number of joint papers):")
-    for (e1, e2), weight in sorted(uni_network['edges'], key=lambda x: x[1], reverse=True):
-        print(f"\\draw[line width={weight}pt] ({e1}) -- ({e2}); % {weight} collaborations")
-    
-    # 7. Country Collaboration Network
-    print("\n--- Country Collaboration Network (Top 15) ---")
-    country_network = build_collaboration_network(entries, entity_type='country')
-    print(f"% Nodes: {len(country_network['nodes'])}, Edges: {len(country_network['edges'])}")
-    print("\n% Node positions (x,y) and sizes (papers):")
-    for entity, pos, papers in country_network['nodes']:
-        print(f"% {entity}: ({pos['x']:.2f}, {pos['y']:.2f}), {papers} papers")
-    
-    print("\n% Collaboration edges (weight = number of joint papers):")
-    for (e1, e2), weight in sorted(country_network['edges'], key=lambda x: x[1], reverse=True):
-        print(f"\\draw[line width={weight*0.2}pt] ({e1}) -- ({e2}); % {weight} collaborations")
+    # Collaboration networks omitted from output (see generate_collaboration_networks.py)
 
 if __name__ == "__main__":
     run("HUMAN + SUBSET", ['human', 'subset'])
