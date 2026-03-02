@@ -172,7 +172,7 @@ def generate_wordclouds():
         'bioarxiv', 'arxiv', 'pdf', 'com', 'site', 'version', 'posted',
         'author', 'funded', 'granted', 'peer', 'review', 'nature',
         'information', 'biorxiv', 'xxxx','published','jstor','sticas',
-        'journal','para','california','andrews','license','copyright',
+        'journal','para','california','andrews','license','copyright','funder','holder','university','department','article','institute'
         
     ])
     
@@ -235,7 +235,6 @@ def generate_wordclouds():
     plt.figure(figsize=(20, 10))
     plt.imshow(wc_pre, interpolation='bilinear')
     plt.axis('off')
-    plt.title('Pre-LLM Era (≤2020)', fontsize=24, pad=20)
     plt.tight_layout(pad=0)
     
     # output_file = os.path.join(OUTPUT_DIR, 'wordcloud_pre_llm.png')
@@ -269,7 +268,6 @@ def generate_wordclouds():
     plt.figure(figsize=(20, 10))
     plt.imshow(wc_post, interpolation='bilinear')
     plt.axis('off')
-    plt.title('Post-LLM Era (>2020)', fontsize=24, pad=20)
     plt.tight_layout(pad=0)
     
     # output_file = os.path.join(OUTPUT_DIR, 'wordcloud_post_llm.png')
@@ -343,8 +341,6 @@ def generate_wordclouds():
         plt.figure(figsize=(20, 10))
         plt.imshow(wc_increased, interpolation='bilinear')
         plt.axis('off')
-        plt.title('Words with Increased Frequency (Post-LLM vs Pre-LLM)', 
-                  fontsize=24, pad=20)
         plt.tight_layout(pad=0)
         
         # output_file = os.path.join(OUTPUT_DIR, 'wordcloud_increased_frequency.png')
@@ -373,8 +369,6 @@ def generate_wordclouds():
         plt.figure(figsize=(20, 10))
         plt.imshow(wc_decreased, interpolation='bilinear')
         plt.axis('off')
-        plt.title('Words with Decreased Frequency (Post-LLM vs Pre-LLM)', 
-                  fontsize=24, pad=20)
         plt.tight_layout(pad=0)
         
         # output_file = os.path.join(OUTPUT_DIR, 'wordcloud_decreased_frequency.png')

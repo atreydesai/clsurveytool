@@ -398,13 +398,18 @@ def generate_linguistic_feature_stats(entries):
                 for feat in mapped:
                     counts[feat] += 1
 
-    # Generate coordinates for LaTeX: (index, count)
+    # Sort features from most to least frequent.
+    # Assign indices in reverse (most frequent = n at top, least = 1 at bottom)
+    # so the highest bar appears at the top of the horizontal bar chart.
+    sorted_features = sorted(FEATURE_ORDER, key=lambda f: counts[f], reverse=True)
+    n = len(sorted_features)
     coords = []
-    for i, feat in enumerate(FEATURE_ORDER, 1):
-        count = counts[feat]  # Default 0
-        coords.append(f"({i},{count})")
+    for i, feat in enumerate(sorted_features, 1):
+        count = counts[feat]
+        coords.append(f"({count},{n - i + 1})")
 
-    return " ".join(coords)
+    labels = [FEATURE_MAP_LATEX[f] for f in sorted_features]
+    return " ".join(coords), labels
 
 def generate_papers_by_period_stats(entries):
     # Bin logic: 5-year buckets starting 1971
@@ -426,12 +431,12 @@ def generate_papers_by_period_stats(entries):
             b_idx = (year - 1971) // 5
             buckets[b_idx + 1] += 1
             
-    # Generate coords for 1..11
+    # Generate coords for 1..11 — (count, index) for horizontal bar chart
     coords = []
     for i in range(1, 12):
         count = buckets[i]
-        coords.append(f"({i},{count})")
-        
+        coords.append(f"({count},{i})")
+
     return " ".join(coords)
 
 def generate_country_stats(entries):
@@ -731,7 +736,9 @@ def run(name, sources):
     
     # 1. Linguistic
     print("\n--- (a) Linguistic Features ---")
-    print(generate_linguistic_feature_stats(entries))
+    ling_coords, ling_labels = generate_linguistic_feature_stats(entries)
+    print(f"yticklabels={{{', '.join(ling_labels)}}}")
+    print(ling_coords)
     
     # 2. Papers Timeline
     print("\n--- (b) Papers by Period (1971-2025) ---")

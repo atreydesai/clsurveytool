@@ -228,8 +228,6 @@ def create_distribution_over_years_plot(stage_data, output_path, dataset_name, a
     subtitle = dataset_name
     if annotated_count is not None and total_count is not None:
         subtitle = f'{dataset_name} — {annotated_count}/{total_count} papers with stage annotations'
-    ax.set_title(f'Distribution of Computational Stages Over Years\n({subtitle})',
-                 fontsize=base_fontsize, fontweight='normal', pad=15)
     
     # Clean, TikZ-like legend
     ax.legend(loc='upper left', frameon=True, fontsize=base_fontsize, 
@@ -303,8 +301,6 @@ def create_papers_by_stage_plot(stage_data, output_path, dataset_name, annotated
     subtitle = dataset_name
     if annotated_count is not None and total_count is not None:
         subtitle = f'{dataset_name} — {annotated_count}/{total_count} papers with stage annotations'
-    ax.set_title(f'Number of Papers by Computational Stage\n({subtitle})',
-                 fontsize=base_fontsize, fontweight='normal', pad=15)
     
     # Add value labels on bars
     for i, (bar, count) in enumerate(zip(bars, counts)):

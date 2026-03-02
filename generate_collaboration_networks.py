@@ -88,12 +88,29 @@ def build_network_data(entries, entity_type='university', top_n=15):
 def create_network_visualization(entries, entity_type='university', title='Collaboration Network'):
     """Create a beautiful network visualization."""
     positions, edges, node_papers = build_network_data(entries, entity_type, top_n=15)
-    
+
     # Text helper for publication quality labels
     import textwrap
-    
-    # Increased figure size to help fit everything
-    fig, ax = plt.subplots(figsize=(26, 24))
+
+    # Compute bounding box of node positions to derive a natural aspect ratio
+    xs = [p['x'] for p in positions.values()]
+    ys = [p['y'] for p in positions.values()]
+    x_min, x_max = min(xs), max(xs)
+    y_min, y_max = min(ys), max(ys)
+    x_range = (x_max - x_min) or 1
+    y_range = (y_max - y_min) or 1
+
+    # Padding fraction to leave room for node circles and labels
+    pad_frac = 0.15
+    x_pad = x_range * pad_frac
+    y_pad = y_range * pad_frac
+
+    # Figure width fixed; height derived from data aspect ratio
+    fig_width = 26
+    data_aspect = (y_range + 2 * y_pad) / (x_range + 2 * x_pad)
+    fig_height = max(fig_width * data_aspect, 10)
+
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     
     # Draw edges first (so they appear behind nodes)
     max_weight = max(edges.values()) if edges else 1
@@ -147,16 +164,14 @@ def create_network_visualization(entries, entity_type='university', title='Colla
         ax.text(x, y, label, fontsize=font_size, ha='center', va='center', 
                fontweight='bold', zorder=3, color='black')
     
-    # Remove title as requested
-    ax.axis('equal')
+    # Set explicit limits matching the data bounding box + padding
+    ax.set_xlim(x_min - x_pad, x_max + x_pad)
+    ax.set_ylim(y_min - y_pad, y_max + y_pad)
     ax.axis('off')
-    
-    # Add EXTRA margins to ensure full circles are visible and nothing is cut off
-    ax.margins(0.3)
-    
+
     # NO LEGEND as requested
-    
-    plt.tight_layout()
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
 
 
